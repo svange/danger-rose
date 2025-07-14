@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(poetry run:*)",
+      "Bash(python tests/test_sprite_cutting.py)",
+      "Bash(python tests/test_attack_animation.py)",
+      "Bash(python tests:*)",
+      "Bash(mv:*)",
+      "Bash(true)"
+    ],
+    "deny": []
+  }
+}

@@ -78,18 +78,5 @@
     "GAME_DEBUG": "false",
     "SHOW_FPS": "false",
     "KID_MODE": "false"
-  },
-  "subAgents": {
-    "autoTrigger": {
-      "sprite": ["sprite", "animation", "frame", "asset"],
-      "performance": ["fps", "lag", "slow", "optimize"],
-      "kid": ["explain", "simple", "understand", "help me"]
-    }
-  },
-  "gameSettings": {
-    "coverageThreshold": 75,
-    "testMarkers": ["fast", "visual", "integration"],
-    "defaultScene": "title_screen",
-    "defaultCharacter": "danger"
   }
 }

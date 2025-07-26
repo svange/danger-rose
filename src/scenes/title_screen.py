@@ -2,6 +2,14 @@ import pygame
 from src.utils.sprite_loader import load_image
 from src.utils.attack_character import AttackCharacter
 from src.utils.asset_paths import get_living_room_bg, get_danger_sprite, get_rose_sprite
+from src.config.constants import (
+    SPRITE_DISPLAY_SIZE,
+    COLOR_BLUE,
+    COLOR_WHITE,
+    BUTTON_WIDTH,
+    BUTTON_HEIGHT,
+    SCENE_SETTINGS,
+)
 
 
 class CharacterButton:
@@ -17,7 +25,7 @@ class CharacterButton:
 
         # Create attack-only animated character
         self.animated_character = AttackCharacter(
-            character_name, sprite_path, (128, 128)
+            character_name, sprite_path, (SPRITE_DISPLAY_SIZE, SPRITE_DISPLAY_SIZE)
         )
 
         # Font for character name
@@ -106,10 +114,17 @@ class TitleScreen:
 
         # Start button (appears after character selection)
         self.start_button_rect = pygame.Rect(
-            screen_width // 2 - 100, screen_height - 150, 200, 60
+            screen_width // 2 - 100, screen_height - 150, BUTTON_WIDTH, BUTTON_HEIGHT
         )
         self.start_font = pygame.font.Font(None, 48)
-        self.start_surface = self.start_font.render("Start Game", True, (255, 255, 255))
+        self.start_surface = self.start_font.render("Start Game", True, COLOR_WHITE)
+
+        # Settings button
+        self.settings_button_rect = pygame.Rect(
+            screen_width - 250, 50, BUTTON_WIDTH, BUTTON_HEIGHT
+        )
+        self.settings_font = pygame.font.Font(None, 36)
+        self.settings_surface = self.settings_font.render("Settings", True, COLOR_WHITE)
 
     def handle_event(self, event):
         if self.danger_button.handle_event(event):
@@ -125,9 +140,15 @@ class TitleScreen:
             return None
 
         # Start button (only clickable if character selected)
-        if event.type == pygame.MOUSEBUTTONDOWN and self.selected_character:
-            if self.start_button_rect.collidepoint(event.pos):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if self.selected_character and self.start_button_rect.collidepoint(
+                event.pos
+            ):
                 return "start_game"
+
+            # Settings button
+            if self.settings_button_rect.collidepoint(event.pos):
+                return SCENE_SETTINGS
 
         return None
 
@@ -153,6 +174,19 @@ class TitleScreen:
         # Draw character buttons
         self.danger_button.draw(screen)
         self.rose_button.draw(screen)
+
+        # Draw settings button
+        mouse_pos = pygame.mouse.get_pos()
+        settings_hovered = self.settings_button_rect.collidepoint(mouse_pos)
+        settings_color = (80, 120, 200) if settings_hovered else COLOR_BLUE
+
+        pygame.draw.rect(screen, settings_color, self.settings_button_rect)
+        pygame.draw.rect(screen, COLOR_WHITE, self.settings_button_rect, 2)
+
+        settings_text_rect = self.settings_surface.get_rect(
+            center=self.settings_button_rect.center
+        )
+        screen.blit(self.settings_surface, settings_text_rect)
 
         # Draw start button if character selected
         if self.selected_character:

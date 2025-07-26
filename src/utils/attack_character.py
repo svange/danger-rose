@@ -1,13 +1,22 @@
 import pygame
 import time
 from typing import List
+from src.config.constants import (
+    SPRITE_DISPLAY_SIZE,
+    SPRITE_FRAME_WIDTH,
+    SPRITE_FRAME_HEIGHT,
+    ANIMATION_ATTACK_DURATION,
+)
 
 
 class AttackCharacter:
     """Simplified character animation that only shows the attack animation."""
 
     def __init__(
-        self, character_name: str, sprite_path: str, scale: tuple = (128, 128)
+        self,
+        character_name: str,
+        sprite_path: str,
+        scale: tuple = (SPRITE_DISPLAY_SIZE, SPRITE_DISPLAY_SIZE),
     ):
         self.character_name = character_name
         self.scale = scale
@@ -15,7 +24,9 @@ class AttackCharacter:
 
         # Animation state
         self.current_frame = 0
-        self.animation_speed = 0.3  # seconds per frame (slightly slower for attack)
+        self.animation_speed = (
+            ANIMATION_ATTACK_DURATION / 1000.0
+        )  # Convert ms to seconds
         self.last_frame_time = time.time()
 
     def _load_attack_frames(self, sprite_path: str) -> List[pygame.Surface]:
@@ -32,8 +43,8 @@ class AttackCharacter:
                 sheet = sheet.convert()
 
             # Calculate frame dimensions for 3x4 grid (3 rows, 4 columns)
-            frame_width = 256  # 1024 / 4 columns
-            frame_height = 341  # 1024 / 3 rows
+            frame_width = SPRITE_FRAME_WIDTH
+            frame_height = SPRITE_FRAME_HEIGHT
 
             # Row 2 is the attack animation (0-indexed, bottom row)
             attack_row = 2

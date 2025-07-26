@@ -6,6 +6,7 @@ Tests character animation system with multiple animation states.
 from unittest.mock import Mock, patch
 
 from src.utils.animated_character import AnimatedCharacter
+from src.config.constants import ANIMATION_DEFAULT_DURATION
 
 
 class TestAnimatedCharacterInitialization:
@@ -47,7 +48,9 @@ class TestAnimatedCharacterInitialization:
         character = AnimatedCharacter("test", "test.png")
 
         # Assert
-        assert character.animation_speed == 0.2  # seconds per frame
+        assert (
+            character.animation_speed == ANIMATION_DEFAULT_DURATION / 1000.0
+        )  # Convert ms to seconds
         assert character.last_frame_time == 1.5
         assert character.animation_cycle == ["walking", "jumping", "attacking"]
         assert character.current_cycle_index == 0

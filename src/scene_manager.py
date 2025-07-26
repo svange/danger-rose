@@ -1,4 +1,6 @@
-from scenes.title_screen import TitleScreen
+from src.scenes.title_screen import TitleScreen
+from src.scenes.settings import SettingsScene
+from src.config.constants import SCENE_TITLE, SCENE_SETTINGS
 
 
 class SceneManager:
@@ -10,8 +12,9 @@ class SceneManager:
         self.game_data = {"selected_character": None}
 
         # Initialize scenes
-        self.scenes["title"] = TitleScreen(screen_width, screen_height)
-        self.current_scene = self.scenes["title"]
+        self.scenes[SCENE_TITLE] = TitleScreen(screen_width, screen_height)
+        self.scenes[SCENE_SETTINGS] = SettingsScene(screen_width, screen_height)
+        self.current_scene = self.scenes[SCENE_TITLE]
 
     def handle_event(self, event):
         if self.current_scene:
@@ -27,6 +30,9 @@ class SceneManager:
                     f"Starting game with character: {self.game_data['selected_character']}"
                 )
                 # TODO: Transition to hub scene when it's created
+            elif result:
+                # Handle other scene transitions
+                self.switch_scene(result)
 
     def update(self):
         if self.current_scene:

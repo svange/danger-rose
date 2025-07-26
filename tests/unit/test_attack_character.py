@@ -7,6 +7,7 @@ from unittest.mock import Mock, patch
 import pygame
 
 from src.utils.attack_character import AttackCharacter
+from src.config.constants import ANIMATION_ATTACK_DURATION
 
 
 class TestAttackCharacterInitialization:
@@ -41,7 +42,7 @@ class TestAttackCharacterInitialization:
         assert character.character_name == "test_char"
         assert character.scale == (128, 128)
         assert character.current_frame == 0
-        assert character.animation_speed == 0.3
+        assert character.animation_speed == ANIMATION_ATTACK_DURATION / 1000.0
         assert len(character.attack_frames) == 3  # 3 attack frames
 
     @patch("src.utils.attack_character.pygame.Surface")
@@ -210,8 +211,10 @@ class TestAnimationUpdate:
         character.last_frame_time = 0.0
         character.current_frame = 0
 
-        # Set time to NOT trigger frame advance (only 0.1 seconds later)
-        mock_time.return_value = 0.1
+        # Set time to NOT trigger frame advance (less than animation_speed)
+        mock_time.return_value = (
+            ANIMATION_ATTACK_DURATION / 1000.0 / 2
+        )  # Half the animation speed
 
         # Act
         character.update()

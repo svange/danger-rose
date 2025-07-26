@@ -1,6 +1,7 @@
 from src.scenes.title_screen import TitleScreen
 from src.scenes.settings import SettingsScene
-from src.config.constants import SCENE_TITLE, SCENE_SETTINGS
+from src.scenes.hub import HubWorld
+from src.config.constants import SCENE_TITLE, SCENE_SETTINGS, SCENE_HUB_WORLD
 
 
 class SceneManager:
@@ -14,6 +15,7 @@ class SceneManager:
         # Initialize scenes
         self.scenes[SCENE_TITLE] = TitleScreen(screen_width, screen_height)
         self.scenes[SCENE_SETTINGS] = SettingsScene(screen_width, screen_height)
+        self.scenes[SCENE_HUB_WORLD] = HubWorld(self)
         self.current_scene = self.scenes[SCENE_TITLE]
 
     def handle_event(self, event):
@@ -25,11 +27,11 @@ class SceneManager:
                 self.game_data["selected_character"] = (
                     self.current_scene.selected_character
                 )
-                # For now, just log that we would transition to hub
-                print(
-                    f"Starting game with character: {self.game_data['selected_character']}"
-                )
-                # TODO: Transition to hub scene when it's created
+                # Transition to hub world
+                self.switch_scene(SCENE_HUB_WORLD)
+            elif result in ["ski", "pool", "vegas"]:
+                # Temporary: Just print message for minigames
+                print(f"Would transition to {result} minigame (not implemented yet)")
             elif result:
                 # Handle other scene transitions
                 self.switch_scene(result)
@@ -44,4 +46,21 @@ class SceneManager:
 
     def switch_scene(self, scene_name: str):
         if scene_name in self.scenes:
+            previous_scene_name = None
+            data = {}
+
+            # Call on_exit for the current scene if it has the method
+            if self.current_scene:
+                for name, scene in self.scenes.items():
+                    if scene == self.current_scene:
+                        previous_scene_name = name
+                        break
+                if hasattr(self.current_scene, "on_exit"):
+                    data = self.current_scene.on_exit()
+
+            # Switch to the new scene
             self.current_scene = self.scenes[scene_name]
+
+            # Call on_enter for the new scene if it has the method
+            if hasattr(self.current_scene, "on_enter"):
+                self.current_scene.on_enter(previous_scene_name, data)

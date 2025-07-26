@@ -7,7 +7,9 @@
       "Bash(python tests/test_attack_animation.py)",
       "Bash(python tests:*)",
       "Bash(mv:*)",
-      "Bash(true)"
+      "Bash(true)",
+      "Bash(gh issue create:*)",
+      "Bash(gh label:*)"
     ],
     "deny": []
   }

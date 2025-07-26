@@ -1,11 +1,15 @@
 import pygame
 import time
 from .sprite_loader import load_character_animations
+from src.config.constants import SPRITE_DISPLAY_SIZE, ANIMATION_DEFAULT_DURATION
 
 
 class AnimatedCharacter:
     def __init__(
-        self, character_name: str, sprite_path: str, scale: tuple = (128, 128)
+        self,
+        character_name: str,
+        sprite_path: str,
+        scale: tuple = (SPRITE_DISPLAY_SIZE, SPRITE_DISPLAY_SIZE),
     ):
         self.character_name = character_name
         self.scale = scale
@@ -14,7 +18,9 @@ class AnimatedCharacter:
         # Animation state
         self.current_animation = "walking"
         self.current_frame = 0
-        self.animation_speed = 0.2  # seconds per frame
+        self.animation_speed = (
+            ANIMATION_DEFAULT_DURATION / 1000.0
+        )  # Convert ms to seconds
         self.last_frame_time = time.time()
 
         # Animation cycling

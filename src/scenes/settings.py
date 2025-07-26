@@ -108,11 +108,11 @@ class SettingsScene:
 
         return None
 
-    def update(self, dt: float) -> None:
+    def update(self, dt: float = 0.0) -> None:
         """Update scene state.
 
         Args:
-            dt: Time delta in seconds.
+            dt: Time delta in seconds (optional, defaults to 0.0).
         """
         # Settings scene doesn't need animation updates
         pass

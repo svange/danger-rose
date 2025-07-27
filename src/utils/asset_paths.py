@@ -40,6 +40,11 @@ def get_icon_path(icon_name: str) -> str:
     return get_image_path(f"icons/{icon_name}")
 
 
+def get_item_path(item_name: str) -> str:
+    """Get path to an item image."""
+    return get_image_path(f"items/{item_name}")
+
+
 def get_music_path(music_name: str) -> str:
     """Get path to a music file."""
     return get_audio_path(f"music/{music_name}")

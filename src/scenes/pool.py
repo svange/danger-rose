@@ -1,0 +1,711 @@
+import pygame
+import time
+import math
+import random
+from typing import List
+from src.utils.asset_paths import get_character_sprite_path
+from src.utils.attack_character import AttackCharacter
+from src.config.constants import (
+    SPRITE_DISPLAY_SIZE,
+    COLOR_WHITE,
+    COLOR_BLACK,
+    COLOR_BLUE,
+    COLOR_GREEN,
+    COLOR_RED,
+    SCENE_HUB_WORLD,
+    GRAVITY,
+)
+
+
+class PoolPlayer:
+    """Player character for the pool minigame."""
+
+    def __init__(self, x: int, y: int, character_name: str):
+        self.x = x
+        self.y = y
+        self.character_name = character_name
+
+        # Create animated character
+        sprite_path = get_character_sprite_path(character_name.lower())
+        self.sprite = AttackCharacter(
+            character_name, sprite_path, (SPRITE_DISPLAY_SIZE, SPRITE_DISPLAY_SIZE)
+        )
+
+        # Collision rect
+        self.rect = pygame.Rect(x - 32, y - 32, 64, 64)
+
+    def update(self, dt: float):
+        # Update animation
+        self.sprite.update()
+
+        # Update rect position
+        self.rect.centerx = self.x
+        self.rect.centery = self.y
+
+    def draw(self, screen):
+        sprite = self.sprite.get_current_sprite()
+        sprite_rect = sprite.get_rect(center=(self.x, self.y))
+        screen.blit(sprite, sprite_rect)
+
+
+class Target:
+    """Target object that can be hit by water balloons."""
+
+    def __init__(self, x: int, y: int, size: int = 40):
+        self.x = x
+        self.y = y
+        self.size = size
+        self.radius = size // 2
+        self.hit = False
+        self.hit_time = 0
+        self.color = COLOR_RED
+        self.point_value = 10
+
+        # Collision rect
+        self.rect = pygame.Rect(x - self.radius, y - self.radius, size, size)
+
+    def update(self, dt: float):
+        """Update target state."""
+        if self.hit:
+            # Fade out effect when hit
+            self.hit_time += dt
+            if self.hit_time > 0.5:  # Reset after half second
+                self.hit = False
+                self.hit_time = 0
+
+    def draw(self, screen):
+        """Draw the target."""
+        if self.hit:
+            # Flash effect when hit
+            alpha = max(0, 255 - int(self.hit_time * 500))
+            color = (*COLOR_GREEN, alpha)
+        else:
+            color = self.color
+
+        # Draw target rings
+        pygame.draw.circle(screen, color, (self.x, self.y), self.radius)
+        pygame.draw.circle(screen, COLOR_WHITE, (self.x, self.y), self.radius - 5, 2)
+        pygame.draw.circle(screen, color, (self.x, self.y), self.radius // 2)
+        pygame.draw.circle(screen, COLOR_WHITE, (self.x, self.y), 5)
+
+    def check_collision(self, balloon: "WaterBalloon") -> bool:
+        """Check if balloon hits this target."""
+        if self.hit:
+            return False
+
+        distance = math.sqrt((balloon.x - self.x) ** 2 + (balloon.y - self.y) ** 2)
+        if distance < self.radius + balloon.radius:
+            self.hit = True
+            return True
+        return False
+
+
+class WaterBalloon:
+    """Water balloon projectile with physics."""
+
+    def __init__(
+        self,
+        start_x: float,
+        start_y: float,
+        target_x: float,
+        target_y: float,
+        launch_speed: float = 800,
+    ):
+        self.x = float(start_x)
+        self.y = float(start_y)
+        self.start_x = start_x
+        self.start_y = start_y
+
+        # Calculate launch angle and velocity
+        dx = target_x - start_x
+        dy = target_y - start_y
+        distance = math.sqrt(dx**2 + dy**2)
+
+        if distance > 0:
+            # Normalize direction
+            self.vx = (dx / distance) * launch_speed
+            self.vy = (dy / distance) * launch_speed
+
+            # Add upward arc to make it more realistic
+            self.vy -= 300  # Initial upward velocity
+        else:
+            self.vx = 0
+            self.vy = -launch_speed
+
+        # Visual properties
+        self.radius = 8
+        self.color = COLOR_BLUE
+        self.trail = []  # For trail effect
+        self.max_trail_length = 10
+
+        # Physics properties
+        self.gravity = GRAVITY * 0.5  # Reduced gravity for better arc
+        self.active = True
+
+        # Collision rect
+        self.rect = pygame.Rect(
+            self.x - self.radius, self.y - self.radius, self.radius * 2, self.radius * 2
+        )
+
+    def update(self, dt: float):
+        """Update projectile physics."""
+        if not self.active:
+            return
+
+        # Store trail position
+        if len(self.trail) < self.max_trail_length:
+            self.trail.append((self.x, self.y))
+        else:
+            self.trail.pop(0)
+            self.trail.append((self.x, self.y))
+
+        # Update position
+        self.x += self.vx * dt
+        self.y += self.vy * dt
+
+        # Apply gravity
+        self.vy += self.gravity * dt
+
+        # Update collision rect
+        self.rect.centerx = int(self.x)
+        self.rect.centery = int(self.y)
+
+        # Deactivate if off screen or hits water
+        if self.y > 600 or self.x < -50 or self.x > 1350:
+            self.active = False
+
+    def draw(self, screen):
+        """Draw the water balloon with trail effect."""
+        if not self.active:
+            return
+
+        # Draw trail
+        for i, (tx, ty) in enumerate(self.trail):
+            alpha = int(255 * (i / len(self.trail)) * 0.3)
+            trail_radius = int(self.radius * (i / len(self.trail)))
+            if trail_radius > 0:
+                # Create transparent surface for trail
+                trail_surf = pygame.Surface(
+                    (trail_radius * 2, trail_radius * 2), pygame.SRCALPHA
+                )
+                pygame.draw.circle(
+                    trail_surf,
+                    (*self.color, alpha),
+                    (trail_radius, trail_radius),
+                    trail_radius,
+                )
+                screen.blit(trail_surf, (tx - trail_radius, ty - trail_radius))
+
+        # Draw main balloon
+        pygame.draw.circle(screen, self.color, (int(self.x), int(self.y)), self.radius)
+        pygame.draw.circle(screen, COLOR_WHITE, (int(self.x - 2), int(self.y - 2)), 3)
+
+
+class SplashEffect:
+    """Visual splash effect when balloon hits something."""
+
+    def __init__(self, x: float, y: float):
+        self.x = x
+        self.y = y
+        self.time = 0
+        self.max_time = 0.5
+        self.active = True
+        self.particles = []
+
+        # Create splash particles
+        for i in range(12):
+            angle = (math.pi * 2 * i) / 12
+            speed = 100 + random.random() * 50
+            self.particles.append(
+                {
+                    "x": x,
+                    "y": y,
+                    "vx": math.cos(angle) * speed,
+                    "vy": math.sin(angle) * speed - 50,
+                    "size": 3 + random.random() * 3,
+                }
+            )
+
+    def update(self, dt: float):
+        """Update splash animation."""
+        self.time += dt
+        if self.time >= self.max_time:
+            self.active = False
+            return
+
+        # Update particles
+        for particle in self.particles:
+            particle["x"] += particle["vx"] * dt
+            particle["y"] += particle["vy"] * dt
+            particle["vy"] += 300 * dt  # Gravity
+            particle["size"] *= 0.95  # Shrink
+
+    def draw(self, screen):
+        """Draw splash effect."""
+        if not self.active:
+            return
+
+        for particle in self.particles:
+            if particle["size"] > 0.5:
+                color = (100, 150, 255)
+                size = int(particle["size"])
+                pygame.draw.circle(
+                    screen, color, (int(particle["x"]), int(particle["y"])), size
+                )
+
+
+class PoolGame:
+    """Pool/water balloon minigame scene."""
+
+    # Game states
+    STATE_READY = "ready"
+    STATE_PLAYING = "playing"
+    STATE_GAME_OVER = "game_over"
+
+    def __init__(self, scene_manager):
+        self.scene_manager = scene_manager
+        self.screen_width = scene_manager.screen_width
+        self.screen_height = scene_manager.screen_height
+
+        # Game state
+        self.state = self.STATE_READY
+        self.game_duration = 60.0  # 60 seconds
+        self.time_remaining = self.game_duration
+        self.start_time = None
+        self.score = 0
+
+        # Initialize player
+        character_name = scene_manager.game_data.get("selected_character") or "Danger"
+        self.player = PoolPlayer(
+            self.screen_width // 2, self.screen_height - 100, character_name
+        )
+
+        # Projectiles
+        self.projectiles: List[WaterBalloon] = []
+
+        # Targets
+        self.targets: List[Target] = []
+
+        # Effects
+        self.splash_effects: List[SplashEffect] = []
+
+        # Mouse aiming
+        self.mouse_x = 0
+        self.mouse_y = 0
+        self.show_aim_line = False
+
+        # Reload/cooldown system
+        self.reload_time = 0.5  # Half second between shots
+        self.time_since_last_shot = 0
+        self.can_shoot = True
+        self.ammo_capacity = 5
+        self.current_ammo = self.ammo_capacity
+        self.reload_duration = 2.0  # 2 seconds to reload all ammo
+        self.is_reloading = False
+        self.reload_progress = 0
+
+        # UI fonts
+        self.font = pygame.font.Font(None, 36)
+        self.big_font = pygame.font.Font(None, 72)
+        self.huge_font = pygame.font.Font(None, 96)
+
+        # Pool visual elements
+        self.create_pool_visual()
+
+    def create_pool_visual(self):
+        """Create visual elements for the pool scene."""
+        # Pool area dimensions
+        self.pool_rect = pygame.Rect(
+            100, 100, self.screen_width - 200, self.screen_height - 250
+        )
+
+        # Water surface effect
+        self.water_offset = 0
+
+        # Create initial targets
+        self.create_targets()
+
+    def create_targets(self):
+        """Create target layout."""
+        self.targets.clear()
+
+        # Create a grid of targets
+        rows = 3
+        cols = 5
+        start_x = 300
+        start_y = 150
+        spacing_x = 150
+        spacing_y = 100
+
+        for row in range(rows):
+            for col in range(cols):
+                x = start_x + col * spacing_x
+                y = start_y + row * spacing_y
+                target = Target(x, y)
+                self.targets.append(target)
+
+    def handle_event(self, event):
+        if event.type == pygame.KEYDOWN:
+            if self.state == self.STATE_READY:
+                if event.key == pygame.K_SPACE:
+                    self.start_game()
+                elif event.key == pygame.K_ESCAPE:
+                    return SCENE_HUB_WORLD
+
+            elif self.state == self.STATE_PLAYING:
+                if event.key == pygame.K_ESCAPE:
+                    return SCENE_HUB_WORLD
+                elif event.key == pygame.K_r:
+                    # Manual reload
+                    if self.current_ammo < self.ammo_capacity and not self.is_reloading:
+                        self.start_reload()
+
+            elif self.state == self.STATE_GAME_OVER:
+                if event.key == pygame.K_SPACE:
+                    self.reset_game()
+                elif event.key == pygame.K_ESCAPE:
+                    return SCENE_HUB_WORLD
+
+        elif event.type == pygame.MOUSEMOTION:
+            self.mouse_x, self.mouse_y = event.pos
+            if self.state == self.STATE_PLAYING:
+                self.show_aim_line = True
+
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            if self.state == self.STATE_PLAYING and event.button == 1:  # Left click
+                self.shoot_balloon()
+
+        return None
+
+    def start_game(self):
+        """Start the game timer and transition to playing state."""
+        self.state = self.STATE_PLAYING
+        self.start_time = time.time()
+        self.time_remaining = self.game_duration
+        self.score = 0
+
+    def reset_game(self):
+        """Reset the game to ready state."""
+        self.state = self.STATE_READY
+        self.time_remaining = self.game_duration
+        self.score = 0
+        self.player.x = self.screen_width // 2
+        self.projectiles.clear()
+        self.splash_effects.clear()
+        self.create_targets()  # Reset targets
+        self.current_ammo = self.ammo_capacity
+        self.is_reloading = False
+        self.can_shoot = True
+
+    def shoot_balloon(self):
+        """Shoot a water balloon towards the mouse position."""
+        # Check if we can shoot
+        if not self.can_shoot or self.is_reloading or self.current_ammo <= 0:
+            return
+
+        # Create new balloon from player position to mouse position
+        balloon = WaterBalloon(
+            self.player.x,
+            self.player.y - 20,  # Start slightly above player
+            self.mouse_x,
+            self.mouse_y,
+        )
+        self.projectiles.append(balloon)
+
+        # Update ammo and cooldown
+        self.current_ammo -= 1
+        self.can_shoot = False
+        self.time_since_last_shot = 0
+
+        # Start reloading if out of ammo
+        if self.current_ammo <= 0:
+            self.start_reload()
+
+    def start_reload(self):
+        """Start the reload process."""
+        self.is_reloading = True
+        self.reload_progress = 0
+        self.can_shoot = False
+
+    def update(self, dt: float):
+        if self.state == self.STATE_PLAYING:
+            # Update timer
+            if self.start_time:
+                elapsed = time.time() - self.start_time
+                self.time_remaining = max(0, self.game_duration - elapsed)
+
+                # Check for game over
+                if self.time_remaining <= 0:
+                    self.state = self.STATE_GAME_OVER
+
+            # Update player
+            self.player.update(dt)
+
+            # Update reload/cooldown
+            if self.is_reloading:
+                self.reload_progress += dt
+                if self.reload_progress >= self.reload_duration:
+                    # Reload complete
+                    self.is_reloading = False
+                    self.current_ammo = self.ammo_capacity
+                    self.can_shoot = True
+                    self.reload_progress = 0
+            elif not self.can_shoot:
+                # Update shot cooldown
+                self.time_since_last_shot += dt
+                if self.time_since_last_shot >= self.reload_time:
+                    self.can_shoot = True
+
+            # Update projectiles
+            for balloon in self.projectiles[
+                :
+            ]:  # Copy list to allow removal during iteration
+                old_active = balloon.active
+                balloon.update(dt)
+
+                if not balloon.active:
+                    # Create splash if balloon just became inactive (hit water)
+                    if old_active and balloon.y > 500:
+                        splash = SplashEffect(balloon.x, balloon.y)
+                        self.splash_effects.append(splash)
+                    self.projectiles.remove(balloon)
+                else:
+                    # Check collisions with targets
+                    for target in self.targets:
+                        if target.check_collision(balloon):
+                            self.score += target.point_value
+                            balloon.active = False
+                            # Create splash effect
+                            splash = SplashEffect(balloon.x, balloon.y)
+                            self.splash_effects.append(splash)
+                            break
+
+            # Update targets
+            for target in self.targets:
+                target.update(dt)
+
+            # Update splash effects
+            for splash in self.splash_effects[:]:
+                splash.update(dt)
+                if not splash.active:
+                    self.splash_effects.remove(splash)
+
+        # Always update water animation
+        self.water_offset += 50 * dt
+        if self.water_offset > 20:
+            self.water_offset -= 20
+
+    def draw(self, screen):
+        # Clear screen with sky color
+        screen.fill((135, 206, 250))  # Light sky blue
+
+        # Draw pool area
+        self.draw_pool(screen)
+
+        # Draw targets
+        for target in self.targets:
+            target.draw(screen)
+
+        # Draw projectiles
+        for balloon in self.projectiles:
+            balloon.draw(screen)
+
+        # Draw splash effects
+        for splash in self.splash_effects:
+            splash.draw(screen)
+
+        # Draw aim line if playing
+        if self.state == self.STATE_PLAYING and self.show_aim_line:
+            self.draw_aim_line(screen)
+
+        # Draw player
+        self.player.draw(screen)
+
+        # Draw UI based on state
+        if self.state == self.STATE_READY:
+            self.draw_ready_screen(screen)
+        elif self.state == self.STATE_PLAYING:
+            self.draw_game_ui(screen)
+        elif self.state == self.STATE_GAME_OVER:
+            self.draw_game_over_screen(screen)
+
+    def draw_pool(self, screen):
+        """Draw the pool area with water effect."""
+        # Pool edge
+        pygame.draw.rect(screen, (200, 200, 200), self.pool_rect, 5)
+
+        # Water
+        water_surface = pygame.Surface((self.pool_rect.width, self.pool_rect.height))
+        water_surface.set_alpha(100)
+        water_surface.fill(COLOR_BLUE)
+
+        # Simple water wave effect
+        for x in range(0, self.pool_rect.width, 40):
+            wave_y = int(math.sin((x + self.water_offset) * 0.05) * 5)
+            pygame.draw.line(
+                water_surface,
+                (100, 150, 255),
+                (x, wave_y + 10),
+                (x + 20, wave_y + 10),
+                2,
+            )
+
+        screen.blit(water_surface, self.pool_rect)
+
+    def draw_aim_line(self, screen):
+        """Draw aiming line from player to mouse."""
+        # Calculate angle and distance
+        dx = self.mouse_x - self.player.x
+        dy = self.mouse_y - self.player.y
+        distance = math.sqrt(dx**2 + dy**2)
+
+        if distance > 0:
+            # Draw dotted line
+            steps = int(distance / 20)
+            for i in range(0, steps, 2):
+                t = i / steps
+                x = self.player.x + dx * t
+                y = self.player.y + dy * t
+                pygame.draw.circle(screen, COLOR_WHITE, (int(x), int(y)), 3)
+                pygame.draw.circle(screen, COLOR_BLACK, (int(x), int(y)), 3, 1)
+
+    def draw_ready_screen(self, screen):
+        """Draw the ready state UI."""
+        # Title
+        title_text = self.huge_font.render("POOL GAME", True, COLOR_BLACK)
+        title_rect = title_text.get_rect(center=(self.screen_width // 2, 200))
+        screen.blit(title_text, title_rect)
+
+        # Instructions
+        instructions = [
+            "Shoot water balloons at targets!",
+            "",
+            "Use mouse to aim",
+            "Click to shoot",
+            "Press R to reload (5 shots)",
+            "",
+            "Press SPACE to start",
+            "Press ESC to return to hub",
+        ]
+
+        y = 350
+        for instruction in instructions:
+            text = self.font.render(instruction, True, COLOR_BLACK)
+            text_rect = text.get_rect(center=(self.screen_width // 2, y))
+            screen.blit(text, text_rect)
+            y += 40
+
+    def draw_game_ui(self, screen):
+        """Draw the playing state UI."""
+        # Timer
+        timer_text = f"Time: {int(self.time_remaining)}"
+        timer_surface = self.big_font.render(timer_text, True, COLOR_BLACK)
+        timer_rect = timer_surface.get_rect(center=(self.screen_width // 2, 50))
+
+        # Timer background
+        bg_rect = timer_rect.inflate(20, 10)
+        pygame.draw.rect(screen, COLOR_WHITE, bg_rect)
+        pygame.draw.rect(screen, COLOR_BLACK, bg_rect, 3)
+
+        screen.blit(timer_surface, timer_rect)
+
+        # Score
+        score_text = f"Score: {self.score}"
+        score_surface = self.font.render(score_text, True, COLOR_BLACK)
+        score_rect = score_surface.get_rect(topleft=(10, 10))
+        screen.blit(score_surface, score_rect)
+
+        # Controls reminder
+        controls = self.font.render("ESC: Return to Hub", True, COLOR_BLACK)
+        controls_rect = controls.get_rect(topright=(self.screen_width - 10, 10))
+        screen.blit(controls, controls_rect)
+
+        # Ammo display
+        ammo_y = self.screen_height - 50
+        ammo_x = self.screen_width // 2 - 100
+
+        if self.is_reloading:
+            # Show reload progress bar
+            reload_text = self.font.render("RELOADING...", True, COLOR_RED)
+            reload_rect = reload_text.get_rect(
+                center=(self.screen_width // 2, ammo_y - 30)
+            )
+            screen.blit(reload_text, reload_rect)
+
+            # Progress bar
+            bar_width = 200
+            bar_height = 20
+            bar_x = self.screen_width // 2 - bar_width // 2
+            bar_y = ammo_y - 10
+
+            # Background
+            pygame.draw.rect(
+                screen, COLOR_BLACK, (bar_x, bar_y, bar_width, bar_height), 2
+            )
+
+            # Progress
+            progress_width = int(
+                bar_width * (self.reload_progress / self.reload_duration)
+            )
+            pygame.draw.rect(
+                screen, COLOR_GREEN, (bar_x, bar_y, progress_width, bar_height)
+            )
+        else:
+            # Show ammo count
+            for i in range(self.ammo_capacity):
+                balloon_x = ammo_x + i * 40
+                if i < self.current_ammo:
+                    pygame.draw.circle(screen, COLOR_BLUE, (balloon_x, ammo_y), 15)
+                    pygame.draw.circle(
+                        screen, COLOR_WHITE, (balloon_x - 3, ammo_y - 3), 5
+                    )
+                else:
+                    pygame.draw.circle(
+                        screen, (200, 200, 200), (balloon_x, ammo_y), 15, 2
+                    )
+
+            # Reload hint
+            if self.current_ammo < self.ammo_capacity:
+                hint = self.font.render("Press R to reload", True, COLOR_BLACK)
+                hint_rect = hint.get_rect(center=(self.screen_width // 2, ammo_y + 30))
+                screen.blit(hint, hint_rect)
+
+    def draw_game_over_screen(self, screen):
+        """Draw the game over state UI."""
+        # Overlay
+        overlay = pygame.Surface((self.screen_width, self.screen_height))
+        overlay.set_alpha(180)
+        overlay.fill(COLOR_BLACK)
+        screen.blit(overlay, (0, 0))
+
+        # Game over text
+        game_over_text = self.huge_font.render("TIME'S UP!", True, COLOR_WHITE)
+        game_over_rect = game_over_text.get_rect(center=(self.screen_width // 2, 250))
+        screen.blit(game_over_text, game_over_rect)
+
+        # Score
+        score_text = self.big_font.render(
+            f"Final Score: {self.score}", True, COLOR_GREEN
+        )
+        score_rect = score_text.get_rect(center=(self.screen_width // 2, 350))
+        screen.blit(score_text, score_rect)
+
+        # Options
+        options = ["Press SPACE to play again", "Press ESC to return to hub"]
+
+        y = 450
+        for option in options:
+            text = self.font.render(option, True, COLOR_WHITE)
+            text_rect = text.get_rect(center=(self.screen_width // 2, y))
+            screen.blit(text, text_rect)
+            y += 40
+
+    def on_enter(self, previous_scene, data):
+        """Called when entering this scene."""
+        # Reset to ready state when entering
+        self.reset_game()
+        self.create_targets()  # Ensure we have fresh targets
+
+    def on_exit(self):
+        """Called when leaving this scene."""
+        return {}

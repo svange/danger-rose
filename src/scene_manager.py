@@ -3,7 +3,15 @@ from src.scenes.settings import SettingsScene
 from src.scenes.hub import HubWorld
 from src.scenes.vegas import VegasGame
 from src.scenes.ski import SkiGame
-from src.config.constants import SCENE_TITLE, SCENE_SETTINGS, SCENE_HUB_WORLD, SCENE_VEGAS_GAME, SCENE_SKI_GAME
+from src.scenes.pool import PoolGame
+from src.config.constants import (
+    SCENE_TITLE,
+    SCENE_SETTINGS,
+    SCENE_HUB_WORLD,
+    SCENE_VEGAS_GAME,
+    SCENE_SKI_GAME,
+    SCENE_POOL_GAME,
+)
 from src.managers.sound_manager import SoundManager
 from src.utils.asset_paths import get_music_path
 
@@ -15,18 +23,23 @@ class SceneManager:
         self.current_scene = None
         self.scenes = {}
         self.game_data = {"selected_character": None}
-        
+
         # Initialize sound manager
         self.sound_manager = SoundManager()
 
         # Initialize scenes
-        self.scenes[SCENE_TITLE] = TitleScreen(screen_width, screen_height, self.sound_manager)
-        self.scenes[SCENE_SETTINGS] = SettingsScene(screen_width, screen_height, self.sound_manager)
+        self.scenes[SCENE_TITLE] = TitleScreen(
+            screen_width, screen_height, self.sound_manager
+        )
+        self.scenes[SCENE_SETTINGS] = SettingsScene(
+            screen_width, screen_height, self.sound_manager
+        )
         self.scenes[SCENE_HUB_WORLD] = HubWorld(self)
         self.scenes[SCENE_VEGAS_GAME] = VegasGame(self)
         self.scenes[SCENE_SKI_GAME] = SkiGame(self)
+        self.scenes[SCENE_POOL_GAME] = PoolGame(self)
         self.current_scene = self.scenes[SCENE_TITLE]
-        
+
         # Start title music
         self.sound_manager.play_music(get_music_path("title_theme.wav"), fade_ms=1000)
 
@@ -46,8 +59,7 @@ class SceneManager:
             elif result == "ski":
                 self.switch_scene(SCENE_SKI_GAME)
             elif result == "pool":
-                # Temporary: Just print message for pool minigame
-                print(f"Would transition to {result} minigame (not implemented yet)")
+                self.switch_scene(SCENE_POOL_GAME)
             elif result:
                 # Handle other scene transitions
                 self.switch_scene(result)
@@ -80,10 +92,10 @@ class SceneManager:
             # Call on_enter for the new scene if it has the method
             if hasattr(self.current_scene, "on_enter"):
                 self.current_scene.on_enter(previous_scene_name, data)
-                
+
             # Handle music transitions
             self._handle_music_transition(scene_name)
-    
+
     def _handle_music_transition(self, scene_name: str):
         """Handle music transitions between scenes."""
         music_map = {
@@ -91,9 +103,9 @@ class SceneManager:
             SCENE_HUB_WORLD: "hub_theme.wav",
             SCENE_SKI_GAME: "ski_theme.wav",
             SCENE_VEGAS_GAME: "vegas_theme.wav",
-            # Pool game music will be added when implemented
+            SCENE_POOL_GAME: "pool_theme.wav",
         }
-        
+
         if scene_name in music_map:
             music_file = get_music_path(music_map[scene_name])
             self.sound_manager.crossfade_music(music_file, duration_ms=1000)

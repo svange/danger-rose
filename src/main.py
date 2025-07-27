@@ -41,7 +41,7 @@ def game():
     while True:
         # Calculate delta time
         dt = clock.tick(FPS) / 1000.0  # Convert milliseconds to seconds
-        
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()

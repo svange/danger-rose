@@ -34,13 +34,11 @@ class HubWorld:
         self.selected_character = self.scene_manager.game_data.get(
             "selected_character", "danger"
         )
-        
+
         # Create player entity
         # Start player in center of room
         self.player = Player(
-            SCREEN_WIDTH // 2,
-            SCREEN_HEIGHT // 2,
-            self.selected_character
+            SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, self.selected_character
         )
 
     def _setup_boundaries(self):
@@ -59,7 +57,7 @@ class HubWorld:
             Door(400, 100, 100, 150, "pool", "Pool Game", (50, 200, 100)),
             Door(600, 100, 100, 150, "vegas", "Vegas Game", (200, 50, 200)),
         ]
-        
+
         # Track which door is highlighted
         self.highlighted_door = None
 
@@ -71,7 +69,7 @@ class HubWorld:
         """Handle input events."""
         # Let player handle movement events
         self.player.handle_event(event)
-        
+
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 return "settings"
@@ -89,7 +87,7 @@ class HubWorld:
         """Update the hub world state."""
         # Update player with collision boundaries
         self.player.update(dt, self.boundaries)
-        
+
         # Check door proximity for highlighting
         self.highlighted_door = None
         for door in self.doors:
@@ -107,14 +105,14 @@ class HubWorld:
         title_text = self.font.render("Hub World", True, (255, 255, 255))
         title_rect = title_text.get_rect(center=(SCREEN_WIDTH // 2, 50))
         screen.blit(title_text, title_rect)
-        
+
         # Draw doors
         for door in self.doors:
             door.draw(screen, self.small_font)
 
         # Draw player
         self.player.draw(screen)
-        
+
         # Draw selected character info
         if self.selected_character:
             char_text = self.small_font.render(
@@ -136,19 +134,16 @@ class HubWorld:
             screen.blit(inst_text, inst_rect)
             y_offset += 25
 
-
     def on_enter(self, previous_scene: Optional[str], data: Dict[str, Any]) -> None:
         """Called when entering the hub world."""
         # Update selected character if coming from character select
         if previous_scene == "character_select" and data.get("selected_character"):
             self.selected_character = data["selected_character"]
             self.scene_manager.game_data["selected_character"] = self.selected_character
-            
+
             # Recreate player with new character
             self.player = Player(
-                SCREEN_WIDTH // 2,
-                SCREEN_HEIGHT // 2,
-                self.selected_character
+                SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, self.selected_character
             )
 
     def on_exit(self) -> Dict[str, Any]:

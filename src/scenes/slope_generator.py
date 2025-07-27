@@ -26,12 +26,22 @@ class ObstaclePool:
         self.active_obstacles: List[Obstacle] = []
         self.inactive_obstacles: List[Obstacle] = []
         
+        # Sprites will be loaded on first use
+        self.tree_sprite = None
+        self.rock_sprite = None
+        self.sprites_loaded = False
+        
+    def _ensure_sprites_loaded(self):
+        """Load sprites if not already loaded."""
+        if self.sprites_loaded:
+            return
+            
         # Load obstacle sprites
         self.tree_sprite = load_image(get_tileset_path("ski/tree.png"), (64, 96))
         self.rock_sprite = load_image(get_tileset_path("ski/rock.png"), (48, 48))
         
         # Pre-create obstacles
-        for _ in range(max_obstacles):
+        for _ in range(self.max_obstacles):
             # Create trees and rocks
             if random.random() < 0.6:
                 obstacle = Obstacle(
@@ -46,9 +56,13 @@ class ObstaclePool:
                     rect=pygame.Rect(0, 0, 40, 40)
                 )
             self.inactive_obstacles.append(obstacle)
+            
+        self.sprites_loaded = True
     
     def spawn_obstacle(self, x: float, y: float, obstacle_type: Optional[str] = None) -> Optional[Obstacle]:
         """Spawn an obstacle from the pool."""
+        self._ensure_sprites_loaded()
+        
         if not self.inactive_obstacles:
             return None
         
@@ -187,7 +201,7 @@ class SlopeGenerator:
             self.obstacle_pool.spawn_obstacle(x, y, obstacle_type)
         
         self.chunks.append(chunk)
-        self.next_chunk_y -= self.chunk_height
+        self.next_chunk_y += self.chunk_height
     
     def update(self, scroll_speed: float, dt: float, elapsed_time: float):
         """Update slope generation and difficulty."""

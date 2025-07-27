@@ -1,7 +1,9 @@
 import pygame
 import time
+import random
 from src.utils.asset_paths import get_character_sprite_path
 from src.utils.attack_character import AttackCharacter
+from src.scenes.slope_generator import SlopeGenerator
 from src.config.constants import (
     SPRITE_DISPLAY_SIZE,
     COLOR_WHITE,
@@ -92,23 +94,24 @@ class SkiGame:
         self.big_font = pygame.font.Font(None, 72)
         self.huge_font = pygame.font.Font(None, 96)
 
-        # Create slope pattern for visual effect
-        self.create_slope_visual()
+        # Create slope generator
+        self.slope_generator = SlopeGenerator(self.screen_width, self.screen_height)
+        
+        # Create simple snow texture for background
+        self.create_snow_texture()
 
-    def create_slope_visual(self):
-        """Create a simple visual pattern for the slope."""
-        self.slope_surface = pygame.Surface((self.screen_width, self.screen_height * 2))
-        self.slope_surface.fill(COLOR_WHITE)
+    def create_snow_texture(self):
+        """Create a simple snow texture for the background."""
+        self.snow_surface = pygame.Surface((self.screen_width, self.screen_height * 2))
+        self.snow_surface.fill(COLOR_WHITE)
 
-        # Add some simple slope markers
-        for y in range(0, self.screen_height * 2, 100):
-            pygame.draw.line(
-                self.slope_surface,
-                (200, 200, 255),
-                (self.screen_width // 2 - 50, y),
-                (self.screen_width // 2 + 50, y),
-                3,
-            )
+        # Add some snow texture details
+        for _ in range(200):
+            x = random.randint(0, self.screen_width)
+            y = random.randint(0, self.screen_height * 2)
+            radius = random.randint(1, 3)
+            color = (240, 240, 255) if random.random() > 0.5 else (230, 230, 250)
+            pygame.draw.circle(self.snow_surface, color, (x, y), radius)
 
     def handle_event(self, event):
         if event.type == pygame.KEYDOWN:
@@ -144,10 +147,12 @@ class SkiGame:
         self.time_remaining = self.game_duration
         self.scroll_offset = 0
         self.player.x = self.screen_width // 2
+        self.slope_generator.reset()
 
     def update(self, dt: float):
         if self.state == self.STATE_PLAYING:
             # Update timer
+            elapsed = 0
             if self.start_time:
                 elapsed = time.time() - self.start_time
                 self.time_remaining = max(0, self.game_duration - elapsed)
@@ -167,6 +172,9 @@ class SkiGame:
             self.scroll_offset += self.scroll_speed * dt
             if self.scroll_offset >= self.screen_height:
                 self.scroll_offset -= self.screen_height
+            
+            # Update slope generator
+            self.slope_generator.update(self.scroll_speed, dt, elapsed)
 
     def draw(self, screen):
         # Clear screen with sky color
@@ -188,10 +196,13 @@ class SkiGame:
 
     def draw_slope(self, screen):
         """Draw the scrolling slope effect."""
-        # Draw two copies for seamless scrolling
+        # Draw snow texture background
         y_offset = int(self.scroll_offset)
-        screen.blit(self.slope_surface, (0, y_offset - self.screen_height))
-        screen.blit(self.slope_surface, (0, y_offset - self.screen_height * 2))
+        screen.blit(self.snow_surface, (0, y_offset - self.screen_height))
+        screen.blit(self.snow_surface, (0, y_offset - self.screen_height * 2))
+        
+        # Draw obstacles
+        self.slope_generator.draw(screen)
 
     def draw_ready_screen(self, screen):
         """Draw the ready state UI."""

@@ -4,6 +4,7 @@ import pygame
 from typing import Optional, Dict, Any
 from src.utils.asset_paths import get_living_room_bg
 from src.config.constants import SCREEN_WIDTH, SCREEN_HEIGHT
+from src.entities.player import Player
 
 
 class HubWorld:
@@ -32,6 +33,14 @@ class HubWorld:
         self.selected_character = self.scene_manager.game_data.get(
             "selected_character", "danger"
         )
+        
+        # Create player entity
+        # Start player in center of room
+        self.player = Player(
+            SCREEN_WIDTH // 2,
+            SCREEN_HEIGHT // 2,
+            self.selected_character
+        )
 
     def _setup_boundaries(self):
         """Set up room boundaries and collision areas."""
@@ -56,6 +65,9 @@ class HubWorld:
 
     def handle_event(self, event) -> Optional[str]:
         """Handle input events."""
+        # Let player handle movement events
+        self.player.handle_event(event)
+        
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 return "settings"
@@ -71,8 +83,8 @@ class HubWorld:
 
     def update(self, dt: float) -> None:
         """Update the hub world state."""
-        # Future: Update character position, animations, etc.
-        pass
+        # Update player with collision boundaries
+        self.player.update(dt, self.boundaries)
 
     def draw(self, screen: pygame.Surface) -> None:
         """Draw the hub world."""
@@ -84,6 +96,9 @@ class HubWorld:
         title_rect = title_text.get_rect(center=(SCREEN_WIDTH // 2, 50))
         screen.blit(title_text, title_rect)
 
+        # Draw player
+        self.player.draw(screen)
+        
         # Draw selected character info
         if self.selected_character:
             char_text = self.small_font.render(
@@ -94,12 +109,13 @@ class HubWorld:
 
         # Draw temporary instructions
         instructions = [
+            "Arrow keys or WASD - Move",
             "Press 1 - Ski Game",
             "Press 2 - Pool Game",
             "Press 3 - Vegas Game",
             "Press ESC - Settings",
         ]
-        y_offset = SCREEN_HEIGHT - 120
+        y_offset = SCREEN_HEIGHT - 140
         for instruction in instructions:
             inst_text = self.small_font.render(instruction, True, (255, 255, 255))
             inst_rect = inst_text.get_rect(center=(SCREEN_WIDTH // 2, y_offset))
@@ -120,6 +136,13 @@ class HubWorld:
         if previous_scene == "character_select" and data.get("selected_character"):
             self.selected_character = data["selected_character"]
             self.scene_manager.game_data["selected_character"] = self.selected_character
+            
+            # Recreate player with new character
+            self.player = Player(
+                SCREEN_WIDTH // 2,
+                SCREEN_HEIGHT // 2,
+                self.selected_character
+            )
 
     def on_exit(self) -> Dict[str, Any]:
         """Called when leaving the hub world."""

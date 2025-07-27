@@ -5,8 +5,10 @@ Constants are organized by category for easy access and maintenance.
 """
 
 # Screen Configuration
-SCREEN_WIDTH = 1920
-SCREEN_HEIGHT = 1080
+# SCREEN_WIDTH = 1920
+# SCREEN_HEIGHT = 1080
+SCREEN_WIDTH = 1280
+SCREEN_HEIGHT = 720
 FPS = 60
 
 # Window Settings

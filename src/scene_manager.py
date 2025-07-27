@@ -36,9 +36,9 @@ class SceneManager:
                 # Handle other scene transitions
                 self.switch_scene(result)
 
-    def update(self):
+    def update(self, dt: float):
         if self.current_scene:
-            self.current_scene.update()
+            self.current_scene.update(dt)
 
     def draw(self, screen):
         if self.current_scene:

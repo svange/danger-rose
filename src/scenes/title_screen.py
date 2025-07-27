@@ -152,7 +152,7 @@ class TitleScreen:
 
         return None
 
-    def update(self):
+    def update(self, dt: float):
         mouse_pos = pygame.mouse.get_pos()
         self.danger_button.update(mouse_pos)
         self.rose_button.update(mouse_pos)

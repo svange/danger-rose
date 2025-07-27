@@ -6,6 +6,7 @@ from src.utils.attack_character import AttackCharacter
 from src.scenes.slope_generator import SlopeGenerator
 from src.managers.sound_manager import SoundManager
 from src.entities.snowflake import SnowflakeEffect
+from src.entities.dad_ai import DadAI
 from src.config.constants import (
     SPRITE_DISPLAY_SIZE,
     COLOR_WHITE,
@@ -132,6 +133,13 @@ class SkiGame:
         self.player = SkiPlayer(
             self.screen_width // 2, self.screen_height - 200, character_name
         )
+        
+        # Initialize Dad AI
+        self.dad = DadAI(
+            self.screen_width // 2 - 150,  # Start slightly to the left of player
+            self.screen_height - 200,
+            self.screen_width
+        )
 
         # Lives system
         self.lives = 3
@@ -218,6 +226,10 @@ class SkiGame:
         self.snowflakes_collected = 0
         self.active_effects.clear()
         self.slope_generator.reset()
+        
+        # Reset Dad position
+        self.dad.x = self.screen_width // 2 - 150
+        self.dad.is_celebrating = False
 
     def update(self, dt: float):
         if self.state == self.STATE_PLAYING:
@@ -230,6 +242,8 @@ class SkiGame:
                 # Check for game over
                 if self.time_remaining <= 0:
                     self.state = self.STATE_GAME_OVER
+                    # Make Dad celebrate
+                    self.dad.start_celebration()
 
             # Handle player input
             keys = pygame.key.get_pressed()
@@ -237,6 +251,10 @@ class SkiGame:
 
             # Update player
             self.player.update(dt)
+            
+            # Update Dad AI
+            obstacles = self.slope_generator.get_obstacles()
+            self.dad.update(dt, self.player.x, obstacles)
 
             # Check for collisions
             self.check_collisions()
@@ -311,6 +329,9 @@ class SkiGame:
 
         # Draw scrolling slope
         self.draw_slope(screen)
+        
+        # Draw Dad (behind player)
+        self.dad.draw(screen)
 
         # Draw player
         self.player.draw(screen)
@@ -347,6 +368,7 @@ class SkiGame:
         # Instructions
         instructions = [
             "Race down the mountain for 60 seconds!",
+            "Dad will follow you on his snowboard!",
             "",
             "Arrow Keys or A/D to move",
             "Press SPACE to start",

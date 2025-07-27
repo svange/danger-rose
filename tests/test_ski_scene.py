@@ -3,7 +3,7 @@
 import pytest
 import pygame
 import time
-from unittest.mock import Mock
+from unittest.mock import Mock, MagicMock
 from src.scenes.ski import SkiGame, SkiPlayer
 from src.scene_manager import SceneManager
 from src.config.constants import SCENE_HUB_WORLD
@@ -35,9 +35,14 @@ class TestSkiPlayer:
         assert player.y == 300
         assert player.character_name == "Danger"
         assert player.speed == 5
-        # Rect is initialized at x,y not centered
-        assert player.rect.x == 400
-        assert player.rect.y == 300
+        # Rect is initialized smaller and centered
+        assert player.rect.centerx == 400
+        assert player.rect.centery == 300
+        assert player.rect.width == 48
+        assert player.rect.height == 48
+        # Check crash state
+        assert player.is_crashing == False
+        assert player.invincible == False
 
     def test_player_movement_left(self):
         """Test player moves left with arrow key."""
@@ -116,6 +121,64 @@ class TestSkiPlayer:
             player.handle_input(mock_keys, 800)
 
         assert player.x <= 768  # Should not exceed maximum (800 - 32)
+    
+    def test_player_crash(self):
+        """Test player crash mechanics."""
+        player = SkiPlayer(400, 300, "Danger")
+        
+        # First crash should succeed
+        assert player.crash() == True
+        assert player.is_crashing == True
+        assert player.crash_time == 0.5
+        
+        # Can't crash while already crashing
+        assert player.crash() == False
+        
+    def test_player_invincibility(self):
+        """Test player invincibility after crash."""
+        player = SkiPlayer(400, 300, "Danger")
+        
+        # Crash and update to finish crash animation
+        player.crash()
+        player.update(0.6)  # More than crash time
+        
+        # Should now be invincible
+        assert player.is_crashing == False
+        assert player.invincible == True
+        assert 1.0 <= player.invincible_time <= 2.0  # Time should be close to 2.0
+        
+        # Can't crash while invincible
+        assert player.crash() == False
+        
+        # Update past invincibility time
+        player.update(2.1)
+        assert player.invincible == False
+        
+        # Should be able to crash again
+        assert player.crash() == True
+    
+    def test_player_movement_blocked_when_crashing(self):
+        """Test player can't move while crashing."""
+        player = SkiPlayer(400, 300, "Danger")
+        
+        # Crash the player
+        player.crash()
+        
+        # Try to move
+        keys = {
+            pygame.K_LEFT: True,
+            pygame.K_RIGHT: False,
+            pygame.K_a: False,
+            pygame.K_d: False,
+        }
+        mock_keys = Mock()
+        mock_keys.__getitem__ = Mock(side_effect=lambda k: keys.get(k, False))
+        
+        initial_x = player.x
+        player.handle_input(mock_keys, 800)
+        
+        # Position should not change
+        assert player.x == initial_x
 
 
 class TestSkiGame:
@@ -129,6 +192,8 @@ class TestSkiGame:
         assert ski_game.start_time is None
         assert ski_game.player is not None
         assert ski_game.player.character_name == "Danger"
+        assert ski_game.lives == 3
+        assert ski_game.max_lives == 3
 
     def test_game_start(self, ski_game):
         """Test game transitions from ready to playing state."""
@@ -254,3 +319,83 @@ class TestSkiGame:
         ski_game.update(0.016)
 
         ski_game.player.update.assert_called_once()
+    
+    def test_collision_detection(self, ski_game):
+        """Test collision detection with obstacles."""
+        ski_game.start_game()
+        
+        # Create a mock obstacle
+        mock_obstacle = Mock()
+        mock_obstacle.rect = pygame.Rect(400, 300, 48, 48)
+        
+        # Mock the slope generator to return our obstacle
+        ski_game.slope_generator.get_obstacles = Mock(return_value=[mock_obstacle])
+        
+        # Position player to collide
+        ski_game.player.rect.center = (400, 300)
+        
+        # Mock the crash method
+        ski_game.player.crash = Mock(return_value=True)
+        
+        # Check collisions
+        ski_game.check_collisions()
+        
+        # Verify crash was called and life was lost
+        ski_game.player.crash.assert_called_once()
+        assert ski_game.lives == 2
+    
+    def test_game_over_on_lives_depleted(self, ski_game):
+        """Test game ends when all lives are lost."""
+        ski_game.start_game()
+        
+        # Create a mock obstacle
+        mock_obstacle = Mock()
+        mock_obstacle.rect = pygame.Rect(400, 300, 48, 48)
+        ski_game.slope_generator.get_obstacles = Mock(return_value=[mock_obstacle])
+        
+        # Position player to collide
+        ski_game.player.rect.center = (400, 300)
+        
+        # Mock crash to always succeed
+        ski_game.player.crash = Mock(return_value=True)
+        
+        # Lose all lives
+        for i in range(3):
+            ski_game.check_collisions()
+            ski_game.player.crash.reset_mock()
+        
+        assert ski_game.lives == 0
+        assert ski_game.state == SkiGame.STATE_GAME_OVER
+    
+    def test_no_collision_when_invincible(self, ski_game):
+        """Test player doesn't lose lives when invincible."""
+        ski_game.start_game()
+        
+        # Create a mock obstacle
+        mock_obstacle = Mock()
+        mock_obstacle.rect = pygame.Rect(400, 300, 48, 48)
+        ski_game.slope_generator.get_obstacles = Mock(return_value=[mock_obstacle])
+        
+        # Position player to collide
+        ski_game.player.rect.center = (400, 300)
+        
+        # Mock crash to fail (player is invincible)
+        ski_game.player.crash = Mock(return_value=False)
+        
+        initial_lives = ski_game.lives
+        ski_game.check_collisions()
+        
+        # Lives should not change
+        assert ski_game.lives == initial_lives
+        ski_game.player.crash.assert_called_once()
+    
+    def test_reset_restores_lives(self, ski_game):
+        """Test reset restores lives to full."""
+        ski_game.start_game()
+        ski_game.lives = 1  # Simulate lost lives
+        
+        ski_game.reset_game()
+        
+        assert ski_game.lives == ski_game.max_lives
+        assert ski_game.player.is_crashing == False
+        assert ski_game.player.invincible == False

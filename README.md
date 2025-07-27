@@ -271,7 +271,6 @@ We love contributions from our young developers! See [CONTRIBUTING.md](CONTRIBUT
 ### Special Thanks
 - Claude Code for AI-assisted development
 - The Pygame community for inspiration
-- Our beta testers (Grandma & Grandpa!)
 
 ## 📄 License
 

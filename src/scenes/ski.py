@@ -4,11 +4,13 @@ import random
 from src.utils.asset_paths import get_character_sprite_path
 from src.utils.attack_character import AttackCharacter
 from src.scenes.slope_generator import SlopeGenerator
+from src.managers.sound_manager import SoundManager
 from src.config.constants import (
     SPRITE_DISPLAY_SIZE,
     COLOR_WHITE,
     COLOR_BLACK,
     COLOR_GREEN,
+    COLOR_RED,
     SCENE_HUB_WORLD,
 )
 
@@ -29,10 +31,20 @@ class SkiPlayer:
             character_name, sprite_path, (SPRITE_DISPLAY_SIZE, SPRITE_DISPLAY_SIZE)
         )
 
-        # Collision rect
-        self.rect = pygame.Rect(x, y, 64, 64)
+        # Collision rect - smaller than sprite for more forgiving collisions
+        self.rect = pygame.Rect(x - 24, y - 24, 48, 48)
+        
+        # Crash state
+        self.is_crashing = False
+        self.crash_time = 0
+        self.invincible = False
+        self.invincible_time = 0
 
     def handle_input(self, keys, screen_width):
+        # Only allow movement if not crashing
+        if self.is_crashing:
+            return
+            
         # Horizontal movement
         dx = 0
         if keys[pygame.K_LEFT] or keys[pygame.K_a]:
@@ -51,11 +63,45 @@ class SkiPlayer:
         self.rect.centery = self.y
 
     def update(self, dt: float):
+        # Update crash state
+        if self.is_crashing:
+            self.crash_time -= dt
+            if self.crash_time <= 0:
+                self.is_crashing = False
+                self.invincible = True
+                self.invincible_time = 2.0  # 2 seconds of invincibility
+                
+        # Update invincibility
+        if self.invincible:
+            self.invincible_time -= dt
+            if self.invincible_time <= 0:
+                self.invincible = False
+        
         # Update animation
         self.sprite.update()
+    
+    def crash(self):
+        """Trigger crash state."""
+        if not self.invincible and not self.is_crashing:
+            self.is_crashing = True
+            self.crash_time = 0.5  # Crash animation duration
+            return True
+        return False
 
     def draw(self, screen):
         sprite = self.sprite.get_current_sprite()
+        
+        # Flash during invincibility
+        if self.invincible and int(self.invincible_time * 10) % 2 == 0:
+            # Make sprite semi-transparent
+            sprite = sprite.copy()
+            sprite.set_alpha(128)
+            
+        # Tint red during crash
+        if self.is_crashing:
+            sprite = sprite.copy()
+            sprite.fill((255, 100, 100), special_flags=pygame.BLEND_MULT)
+        
         sprite_rect = sprite.get_rect(center=(self.x, self.y))
         screen.blit(sprite, sprite_rect)
 
@@ -84,6 +130,10 @@ class SkiGame:
         self.player = SkiPlayer(
             self.screen_width // 2, self.screen_height - 200, character_name
         )
+        
+        # Lives system
+        self.lives = 3
+        self.max_lives = 3
 
         # Visual elements
         self.scroll_speed = 200  # Base scrolling speed
@@ -96,6 +146,9 @@ class SkiGame:
 
         # Create slope generator
         self.slope_generator = SlopeGenerator(self.screen_width, self.screen_height)
+        
+        # Sound manager
+        self.sound_manager = SoundManager()
         
         # Create simple snow texture for background
         self.create_snow_texture()
@@ -147,6 +200,10 @@ class SkiGame:
         self.time_remaining = self.game_duration
         self.scroll_offset = 0
         self.player.x = self.screen_width // 2
+        self.player.is_crashing = False
+        self.player.invincible = False
+        self.player.invincible_time = 0
+        self.lives = self.max_lives
         self.slope_generator.reset()
 
     def update(self, dt: float):
@@ -167,6 +224,9 @@ class SkiGame:
 
             # Update player
             self.player.update(dt)
+            
+            # Check for collisions
+            self.check_collisions()
 
             # Update scrolling
             self.scroll_offset += self.scroll_speed * dt
@@ -175,6 +235,27 @@ class SkiGame:
             
             # Update slope generator
             self.slope_generator.update(self.scroll_speed, dt, elapsed)
+    
+    def check_collisions(self):
+        """Check for collisions between player and obstacles."""
+        obstacles = self.slope_generator.get_obstacles()
+        
+        for obstacle in obstacles:
+            if self.player.rect.colliderect(obstacle.rect):
+                # Try to crash the player
+                if self.player.crash():
+                    self.lives -= 1
+                    
+                    # Play crash sound (if available)
+                    try:
+                        self.sound_manager.play_sfx("assets/sounds/crash.ogg")
+                    except:
+                        pass  # Sound file not available yet
+                    
+                    # Check for game over
+                    if self.lives <= 0:
+                        self.state = self.STATE_GAME_OVER
+                    break
 
     def draw(self, screen):
         # Clear screen with sky color
@@ -240,10 +321,51 @@ class SkiGame:
         pygame.draw.rect(screen, COLOR_BLACK, bg_rect, 3)
 
         screen.blit(timer_surface, timer_rect)
+        
+        # Lives display
+        self.draw_lives(screen)
 
         # Controls reminder
         controls = self.font.render("ESC: Return to Hub", True, COLOR_BLACK)
         screen.blit(controls, (10, 10))
+    
+    def draw_lives(self, screen):
+        """Draw the lives indicator."""
+        heart_size = 40
+        heart_spacing = 10
+        start_x = self.screen_width - (self.max_lives * (heart_size + heart_spacing))
+        y = 20
+        
+        for i in range(self.max_lives):
+            x = start_x + i * (heart_size + heart_spacing)
+            
+            # Draw heart shape
+            if i < self.lives:
+                color = COLOR_RED
+                fill = True
+            else:
+                color = COLOR_BLACK
+                fill = False
+                
+            # Simple heart using circles and polygon
+            if fill:
+                # Filled heart
+                pygame.draw.circle(screen, color, (x + heart_size // 4, y + heart_size // 4), heart_size // 4)
+                pygame.draw.circle(screen, color, (x + 3 * heart_size // 4, y + heart_size // 4), heart_size // 4)
+                pygame.draw.polygon(screen, color, [
+                    (x, y + heart_size // 3),
+                    (x + heart_size // 2, y + heart_size),
+                    (x + heart_size, y + heart_size // 3)
+                ])
+            else:
+                # Outline heart
+                pygame.draw.circle(screen, color, (x + heart_size // 4, y + heart_size // 4), heart_size // 4, 2)
+                pygame.draw.circle(screen, color, (x + 3 * heart_size // 4, y + heart_size // 4), heart_size // 4, 2)
+                pygame.draw.lines(screen, color, False, [
+                    (x, y + heart_size // 3),
+                    (x + heart_size // 2, y + heart_size),
+                    (x + heart_size, y + heart_size // 3)
+                ], 2)
 
     def draw_game_over_screen(self, screen):
         """Draw the game over state UI."""
@@ -253,13 +375,18 @@ class SkiGame:
         overlay.fill(COLOR_BLACK)
         screen.blit(overlay, (0, 0))
 
-        # Game over text
-        game_over_text = self.huge_font.render("TIME'S UP!", True, COLOR_WHITE)
+        # Game over text based on reason
+        if self.lives <= 0:
+            game_over_text = self.huge_font.render("CRASHED OUT!", True, COLOR_RED)
+            score_text = self.big_font.render("Try to avoid the obstacles!", True, COLOR_WHITE)
+        else:
+            game_over_text = self.huge_font.render("TIME'S UP!", True, COLOR_WHITE)
+            score_text = self.big_font.render("Great run!", True, COLOR_GREEN)
+            
         game_over_rect = game_over_text.get_rect(center=(self.screen_width // 2, 250))
         screen.blit(game_over_text, game_over_rect)
 
-        # Score placeholder
-        score_text = self.big_font.render("Great run!", True, COLOR_GREEN)
+        # Score/message
         score_rect = score_text.get_rect(center=(self.screen_width // 2, 350))
         screen.blit(score_text, score_rect)
 

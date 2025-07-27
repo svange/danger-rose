@@ -1,7 +1,7 @@
 import pygame
 from src.utils.sprite_loader import load_image
 from src.utils.attack_character import AttackCharacter
-from src.utils.asset_paths import get_living_room_bg, get_danger_sprite, get_rose_sprite
+from src.utils.asset_paths import get_living_room_bg, get_danger_sprite, get_rose_sprite, get_sfx_path
 from src.config.constants import (
     SPRITE_DISPLAY_SIZE,
     COLOR_BLUE,
@@ -80,10 +80,11 @@ class CharacterButton:
 
 
 class TitleScreen:
-    def __init__(self, screen_width: int, screen_height: int):
+    def __init__(self, screen_width: int, screen_height: int, sound_manager):
         self.screen_width = screen_width
         self.screen_height = screen_height
         self.selected_character = None
+        self.sound_manager = sound_manager
 
         # Load background
         self.background = load_image(
@@ -131,12 +132,14 @@ class TitleScreen:
             self.selected_character = "Danger"
             self.danger_button.selected = True
             self.rose_button.selected = False
+            self.sound_manager.play_sfx(get_sfx_path("menu_select.wav"))
             return None
 
         if self.rose_button.handle_event(event):
             self.selected_character = "Rose"
             self.rose_button.selected = True
             self.danger_button.selected = False
+            self.sound_manager.play_sfx(get_sfx_path("menu_select.wav"))
             return None
 
         # Start button (only clickable if character selected)
@@ -144,10 +147,12 @@ class TitleScreen:
             if self.selected_character and self.start_button_rect.collidepoint(
                 event.pos
             ):
+                self.sound_manager.play_sfx(get_sfx_path("menu_select.wav"))
                 return "start_game"
 
             # Settings button
             if self.settings_button_rect.collidepoint(event.pos):
+                self.sound_manager.play_sfx(get_sfx_path("menu_navigate.wav"))
                 return SCENE_SETTINGS
 
         return None

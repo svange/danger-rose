@@ -20,10 +20,11 @@ from src.config.game_config import get_config
 class SettingsScene:
     """Settings menu scene for configuring game options."""
 
-    def __init__(self, screen_width: int, screen_height: int):
+    def __init__(self, screen_width: int, screen_height: int, sound_manager):
         self.screen_width = screen_width
         self.screen_height = screen_height
         self.config = get_config()
+        self.sound_manager = sound_manager
 
         # UI elements
         self.font_title = pygame.font.Font(None, 72)

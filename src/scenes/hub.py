@@ -2,7 +2,7 @@
 
 import pygame
 from typing import Optional, Dict, Any
-from src.utils.asset_paths import get_living_room_bg
+from src.utils.asset_paths import get_living_room_bg, get_sfx_path
 from src.config.constants import SCREEN_WIDTH, SCREEN_HEIGHT
 from src.entities.player import Player
 from src.entities.door import Door
@@ -78,6 +78,9 @@ class HubWorld:
             elif event.key == pygame.K_e:
                 # Check if player is near any door
                 if self.highlighted_door:
+                    self.scene_manager.sound_manager.play_sfx(
+                        get_sfx_path("door_open.wav")
+                    )
                     return self.highlighted_door.target_scene
 
         return None

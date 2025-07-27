@@ -178,10 +178,10 @@ class TestUpdateAndDraw:
         manager.current_scene = mock_scene
 
         # Act
-        manager.update()
+        manager.update(0.016)  # 60 FPS delta time
 
         # Assert
-        mock_scene.update.assert_called_once()
+        mock_scene.update.assert_called_once_with(0.016)
 
     def test_draw_delegates_to_current_scene(self):
         """draw should call draw on the current scene with the screen."""
@@ -204,7 +204,7 @@ class TestUpdateAndDraw:
         manager.current_scene = None
 
         # Act & Assert (no exception)
-        manager.update()
+        manager.update(0.016)  # 60 FPS delta time
 
     def test_draw_handles_no_current_scene(self):
         """draw should not error when current_scene is None."""

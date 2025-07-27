@@ -85,11 +85,12 @@ class HubWorld:
         screen.blit(title_text, title_rect)
 
         # Draw selected character info
-        char_text = self.small_font.render(
-            f"Playing as: {self.selected_character.capitalize()}", True, (255, 255, 255)
-        )
-        char_rect = char_text.get_rect(topleft=(20, 20))
-        screen.blit(char_text, char_rect)
+        if self.selected_character:
+            char_text = self.small_font.render(
+                f"Playing as: {self.selected_character}", True, (255, 255, 255)
+            )
+            char_rect = char_text.get_rect(topleft=(20, 20))
+            screen.blit(char_text, char_rect)
 
         # Draw temporary instructions
         instructions = [

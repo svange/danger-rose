@@ -39,6 +39,9 @@ def game():
 
     # Main game loop
     while True:
+        # Calculate delta time
+        dt = clock.tick(FPS) / 1000.0  # Convert milliseconds to seconds
+        
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -48,7 +51,7 @@ def game():
             scene_manager.handle_event(event)
 
         # Update game state
-        scene_manager.update()
+        scene_manager.update(dt)
 
         # Draw everything
         screen.fill(COLOR_BLACK)  # Clear screen
@@ -62,7 +65,6 @@ def game():
             screen.blit(fps_text, (10, 10))
 
         pygame.display.flip()  # Update the display
-        clock.tick(FPS)
 
 
 if __name__ == "__main__":

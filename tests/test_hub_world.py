@@ -24,7 +24,7 @@ class TestHubWorld:
         # Initialize pygame display for sprite loading
         pygame.init()
         pygame.display.set_mode((800, 600))
-        
+
         with patch("pygame.font.Font"):
             with patch("pygame.image.load"):
                 with patch("pygame.transform.scale"):
@@ -59,10 +59,10 @@ class TestHubWorld:
         event = Mock()
         event.type = pygame.KEYDOWN
         event.key = pygame.K_LEFT
-        
+
         hub_world.handle_event(event)
         assert hub_world.player.move_left is True
-        
+
         # Test WASD movement
         event.key = pygame.K_d
         hub_world.handle_event(event)
@@ -109,14 +109,14 @@ class TestHubWorld:
         """Test update method exists and runs without error."""
         # Should not raise any exceptions
         hub_world.update(0.016)  # 60 FPS frame time
-        
+
     def test_player_update_with_collision(self, hub_world):
         """Test that player update is called with boundaries."""
         # Mock the player update method
         hub_world.player.update = Mock()
-        
+
         hub_world.update(0.016)
-        
+
         # Verify player.update was called with correct arguments
         hub_world.player.update.assert_called_once_with(0.016, hub_world.boundaries)
 
@@ -124,7 +124,7 @@ class TestHubWorld:
         """Test draw method renders without error."""
         mock_screen = Mock()
         mock_screen.blit = Mock()
-        
+
         # Mock player draw method
         hub_world.player.draw = Mock()
 
@@ -133,7 +133,7 @@ class TestHubWorld:
 
         # Check that background was drawn
         mock_screen.blit.assert_called()
-        
+
         # Check that player was drawn
         hub_world.player.draw.assert_called_once_with(mock_screen)
 
@@ -144,7 +144,7 @@ class TestHubWorld:
 
         assert hub_world.selected_character == "rose"
         assert mock_scene_manager.game_data["selected_character"] == "rose"
-        
+
         # Check that player was recreated with new character
         assert hub_world.player is not None
         assert hub_world.player.sprite.character_name == "rose"

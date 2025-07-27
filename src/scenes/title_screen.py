@@ -1,7 +1,12 @@
 import pygame
 from src.utils.sprite_loader import load_image
 from src.utils.attack_character import AttackCharacter
-from src.utils.asset_paths import get_living_room_bg, get_danger_sprite, get_rose_sprite, get_sfx_path
+from src.utils.asset_paths import (
+    get_living_room_bg,
+    get_danger_sprite,
+    get_rose_sprite,
+    get_sfx_path,
+)
 from src.config.constants import (
     SPRITE_DISPLAY_SIZE,
     COLOR_BLUE,

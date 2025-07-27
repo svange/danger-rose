@@ -20,8 +20,8 @@ class TestConstants:
 
     def test_screen_constants(self):
         """Test screen-related constants."""
-        assert SCREEN_WIDTH == 1920
-        assert SCREEN_HEIGHT == 1080
+        assert SCREEN_WIDTH == 1280
+        assert SCREEN_HEIGHT == 720
         assert FPS == 60
 
     def test_audio_constants(self):

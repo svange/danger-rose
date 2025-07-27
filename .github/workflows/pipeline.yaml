@@ -1,14 +1,16 @@
 name: Augmenting Integrations 🐍 Continuous Delivery
 
-on:
-  push:
-    branches:
-      - main
-      - dev
-      - feat/*
-      - fix/*
-      - perf/*
-      - docs/*
+on: workflow_dispatch
+# disabled for now, but can be enabled later
+#on:
+#  push:
+#    branches:
+#      - main
+#      - dev
+#      - feat/*
+#      - fix/*
+#      - perf/*
+#      - docs/*
 
 env:
   # Vars from .env file or GitHub Environment

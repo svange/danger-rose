@@ -21,6 +21,10 @@ class TestHubWorld:
     @pytest.fixture
     def hub_world(self, mock_scene_manager):
         """Create a HubWorld instance with mocked dependencies."""
+        # Initialize pygame display for sprite loading
+        pygame.init()
+        pygame.display.set_mode((800, 600))
+        
         with patch("pygame.font.Font"):
             with patch("pygame.image.load"):
                 with patch("pygame.transform.scale"):
@@ -31,6 +35,9 @@ class TestHubWorld:
         assert hub_world.scene_manager == mock_scene_manager
         assert hub_world.selected_character == "danger"
         assert hub_world.background is not None
+        assert hub_world.player is not None
+        assert hub_world.player.x == SCREEN_WIDTH // 2
+        assert hub_world.player.y == SCREEN_HEIGHT // 2
 
     def test_boundaries_setup(self, hub_world):
         """Test that room boundaries are properly set up."""
@@ -45,6 +52,21 @@ class TestHubWorld:
         # Check interactive areas
         assert hub_world.trophy_shelf_area is not None
         assert hub_world.couch_area is not None
+
+    def test_player_movement_events(self, hub_world):
+        """Test that movement events are passed to player."""
+        # Test arrow key movement
+        event = Mock()
+        event.type = pygame.KEYDOWN
+        event.key = pygame.K_LEFT
+        
+        hub_world.handle_event(event)
+        assert hub_world.player.move_left is True
+        
+        # Test WASD movement
+        event.key = pygame.K_d
+        hub_world.handle_event(event)
+        assert hub_world.player.move_right is True
 
     def test_handle_escape_key(self, hub_world):
         """Test escape key returns to settings."""
@@ -87,17 +109,33 @@ class TestHubWorld:
         """Test update method exists and runs without error."""
         # Should not raise any exceptions
         hub_world.update(0.016)  # 60 FPS frame time
+        
+    def test_player_update_with_collision(self, hub_world):
+        """Test that player update is called with boundaries."""
+        # Mock the player update method
+        hub_world.player.update = Mock()
+        
+        hub_world.update(0.016)
+        
+        # Verify player.update was called with correct arguments
+        hub_world.player.update.assert_called_once_with(0.016, hub_world.boundaries)
 
     def test_draw_method(self, hub_world):
         """Test draw method renders without error."""
         mock_screen = Mock()
         mock_screen.blit = Mock()
+        
+        # Mock player draw method
+        hub_world.player.draw = Mock()
 
         # Should not raise any exceptions
         hub_world.draw(mock_screen)
 
         # Check that background was drawn
         mock_screen.blit.assert_called()
+        
+        # Check that player was drawn
+        hub_world.player.draw.assert_called_once_with(mock_screen)
 
     def test_on_enter_from_character_select(self, hub_world, mock_scene_manager):
         """Test entering hub from character select updates character."""
@@ -106,6 +144,10 @@ class TestHubWorld:
 
         assert hub_world.selected_character == "rose"
         assert mock_scene_manager.game_data["selected_character"] == "rose"
+        
+        # Check that player was recreated with new character
+        assert hub_world.player is not None
+        assert hub_world.player.sprite.character_name == "rose"
 
     def test_on_enter_from_other_scene(self, hub_world):
         """Test entering hub from other scenes."""

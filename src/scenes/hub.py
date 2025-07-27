@@ -5,6 +5,7 @@ from typing import Optional, Dict, Any
 from src.utils.asset_paths import get_living_room_bg
 from src.config.constants import SCREEN_WIDTH, SCREEN_HEIGHT
 from src.entities.player import Player
+from src.entities.door import Door
 
 
 class HubWorld:
@@ -52,12 +53,15 @@ class HubWorld:
             pygame.Rect(SCREEN_WIDTH - 50, 0, 50, SCREEN_HEIGHT),  # Right wall
         ]
 
-        # Interactive areas (for future use)
-        self.door_areas = {
-            "ski": pygame.Rect(200, 100, 100, 150),  # Ski game door
-            "pool": pygame.Rect(400, 100, 100, 150),  # Pool game door
-            "vegas": pygame.Rect(600, 100, 100, 150),  # Vegas game door
-        }
+        # Create door objects
+        self.doors = [
+            Door(200, 100, 100, 150, "ski", "Ski Game", (100, 150, 255)),
+            Door(400, 100, 100, 150, "pool", "Pool Game", (50, 200, 100)),
+            Door(600, 100, 100, 150, "vegas", "Vegas Game", (200, 50, 200)),
+        ]
+        
+        # Track which door is highlighted
+        self.highlighted_door = None
 
         # Other interactive areas
         self.trophy_shelf_area = pygame.Rect(100, 200, 150, 100)  # Trophy shelf
@@ -71,13 +75,10 @@ class HubWorld:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 return "settings"
-            # Temporary navigation to test scenes (will be replaced by door interactions)
-            elif event.key == pygame.K_1:
-                return "ski"
-            elif event.key == pygame.K_2:
-                return "pool"
-            elif event.key == pygame.K_3:
-                return "vegas"
+            elif event.key == pygame.K_e:
+                # Check if player is near any door
+                if self.highlighted_door:
+                    return self.highlighted_door.target_scene
 
         return None
 
@@ -85,6 +86,14 @@ class HubWorld:
         """Update the hub world state."""
         # Update player with collision boundaries
         self.player.update(dt, self.boundaries)
+        
+        # Check door proximity for highlighting
+        self.highlighted_door = None
+        for door in self.doors:
+            door.is_highlighted = False
+            if door.check_player_proximity(self.player.rect):
+                door.is_highlighted = True
+                self.highlighted_door = door
 
     def draw(self, screen: pygame.Surface) -> None:
         """Draw the hub world."""
@@ -95,6 +104,10 @@ class HubWorld:
         title_text = self.font.render("Hub World", True, (255, 255, 255))
         title_rect = title_text.get_rect(center=(SCREEN_WIDTH // 2, 50))
         screen.blit(title_text, title_rect)
+        
+        # Draw doors
+        for door in self.doors:
+            door.draw(screen, self.small_font)
 
         # Draw player
         self.player.draw(screen)
@@ -107,13 +120,11 @@ class HubWorld:
             char_rect = char_text.get_rect(topleft=(20, 20))
             screen.blit(char_text, char_rect)
 
-        # Draw temporary instructions
+        # Draw instructions
         instructions = [
             "Arrow keys or WASD - Move",
-            "Press 1 - Ski Game",
-            "Press 2 - Pool Game",
-            "Press 3 - Vegas Game",
-            "Press ESC - Settings",
+            "E - Enter door",
+            "ESC - Settings",
         ]
         y_offset = SCREEN_HEIGHT - 140
         for instruction in instructions:
@@ -122,13 +133,6 @@ class HubWorld:
             screen.blit(inst_text, inst_rect)
             y_offset += 25
 
-        # Debug: Draw door areas (temporary visualization)
-        if hasattr(self.scene_manager, "debug_mode") and self.scene_manager.debug_mode:
-            for door_name, door_rect in self.door_areas.items():
-                pygame.draw.rect(screen, (0, 255, 0), door_rect, 2)
-                door_text = self.small_font.render(door_name, True, (0, 255, 0))
-                text_rect = door_text.get_rect(center=door_rect.center)
-                screen.blit(door_text, text_rect)
 
     def on_enter(self, previous_scene: Optional[str], data: Dict[str, Any]) -> None:
         """Called when entering the hub world."""

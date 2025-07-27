@@ -1,7 +1,8 @@
 from src.scenes.title_screen import TitleScreen
 from src.scenes.settings import SettingsScene
 from src.scenes.hub import HubWorld
-from src.config.constants import SCENE_TITLE, SCENE_SETTINGS, SCENE_HUB_WORLD
+from src.scenes.vegas import VegasGame
+from src.config.constants import SCENE_TITLE, SCENE_SETTINGS, SCENE_HUB_WORLD, SCENE_VEGAS_GAME
 
 
 class SceneManager:
@@ -16,6 +17,7 @@ class SceneManager:
         self.scenes[SCENE_TITLE] = TitleScreen(screen_width, screen_height)
         self.scenes[SCENE_SETTINGS] = SettingsScene(screen_width, screen_height)
         self.scenes[SCENE_HUB_WORLD] = HubWorld(self)
+        self.scenes[SCENE_VEGAS_GAME] = VegasGame(self)
         self.current_scene = self.scenes[SCENE_TITLE]
 
     def handle_event(self, event):
@@ -29,7 +31,9 @@ class SceneManager:
                 )
                 # Transition to hub world
                 self.switch_scene(SCENE_HUB_WORLD)
-            elif result in ["ski", "pool", "vegas"]:
+            elif result == "vegas":
+                self.switch_scene(SCENE_VEGAS_GAME)
+            elif result in ["ski", "pool"]:
                 # Temporary: Just print message for minigames
                 print(f"Would transition to {result} minigame (not implemented yet)")
             elif result:

@@ -64,3 +64,8 @@ def get_danger_sprite() -> str:
 def get_rose_sprite() -> str:
     """Get path to Rose's sprite sheet."""
     return get_character_sprite_path("rose")
+
+
+def get_vegas_bg() -> str:
+    """Get path to the Vegas background."""
+    return get_tileset_path("vegas_bg.png")

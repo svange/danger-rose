@@ -1,6 +1,7 @@
 """Tests for the SaveManager class."""
 
 import json
+import os
 import pytest
 from pathlib import Path
 from datetime import datetime
@@ -211,6 +212,9 @@ class TestSaveManager:
                 manager = SaveManager()
                 assert "DangerRose" in str(manager.save_directory)
 
+    @pytest.mark.skipif(
+        os.name == "nt", reason="Linux-specific test cannot run on Windows"
+    )
     def test_default_save_directory_linux(self, temp_save_dir):
         """Test default save directory selection on Linux."""
         with patch("os.name", "posix"):

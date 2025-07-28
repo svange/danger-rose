@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "mcp__ide__getDiagnostics"
+      "mcp__ide__getDiagnostics",
+      "mcp__github__search_issues",
+      "Bash(poetry add:*)",
+      "Bash(pyinstaller:*)"
     ],
     "deny": []
   }

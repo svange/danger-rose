@@ -130,7 +130,7 @@ jobs:
           - os: ubuntu-latest
             name: Linux
             artifact: DangerRose-Linux
-          - os: macos-latest
+          - os: macos-14
             name: macOS
             artifact: DangerRose-macOS
 

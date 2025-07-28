@@ -4,6 +4,7 @@ import sys
 import os
 from pathlib import Path
 from unittest.mock import patch
+from tests.mocks.mock_sound_manager import MockSoundManager
 
 # Add src to path so we can import our modules
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
@@ -53,3 +54,36 @@ def suppress_pygame_output():
 
     sys.stdout.close()
     sys.stdout = original_stdout
+
+
+@pytest.fixture
+def mock_sound_manager():
+    """Mock SoundManager for all tests that need it."""
+    # Create a mock sprite surface
+    mock_surface = pygame.Surface((128, 128))
+
+    # Patch at the source - where SoundManager is defined
+    with patch("src.managers.sound_manager.SoundManager", MockSoundManager):
+        # Also patch where it's imported
+        with patch("src.scene_manager.SoundManager", MockSoundManager):
+            with patch("src.scenes.ski.SoundManager", MockSoundManager):
+                # Mock sprite loading functions to avoid file dependencies
+                with patch(
+                    "src.utils.sprite_loader.load_image", return_value=mock_surface
+                ):
+                    with patch(
+                        "src.utils.sprite_loader.load_sprite_sheet",
+                        return_value=[mock_surface] * 4,
+                    ):
+                        with patch(
+                            "src.utils.sprite_loader.load_character_animations"
+                        ) as mock_animations:
+                            with patch("pygame.image.load", return_value=mock_surface):
+                                # Return animations dict with mock surfaces
+                                mock_animations.return_value = {
+                                    "walking": [mock_surface] * 4,
+                                    "jumping": [mock_surface] * 4,
+                                    "idle": [mock_surface] * 4,
+                                    "attacking": [mock_surface] * 4,
+                                }
+                                yield

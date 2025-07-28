@@ -8,12 +8,24 @@
   [![Python](https://img.shields.io/badge/Python-3.12%2B-blue.svg)](https://www.python.org/downloads/)
   [![Pygame](https://img.shields.io/badge/Pygame--CE-2.4%2B-green.svg)](https://pyga.me/)
   [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+  [![Downloads](https://img.shields.io/github/downloads/svange/danger-rose/total)](https://github.com/svange/danger-rose/releases)
   [![Issues](https://img.shields.io/github/issues/svange/danger-rose)](https://github.com/svange/danger-rose/issues)
 </div>
 
 ## 🌟 Overview
 
 **Danger Rose** is an educational game development project designed to teach kids programming through collaborative coding with AI assistance. Players control family members through a cozy apartment hub world and three exciting minigames, each offering unique gameplay experiences.
+
+<div align="center">
+  <h3>
+    <a href="https://github.com/svange/danger-rose/releases/latest">
+      🎮 Download Latest Release
+    </a>
+  </h3>
+  <p>
+    <strong>Available for Windows, macOS, and Linux!</strong>
+  </p>
+</div>
 
 ### 🎯 Key Features
 - **Family Characters**: Play as Danger (10), Rose (8), or unlock Dad
@@ -49,83 +61,111 @@
   </table>
 </div>
 
-## 🚀 Quick Start for Kids
+## 🚀 Quick Start - Just Want to Play?
 
-### 1️⃣ Install the Game
-```bash
-# Ask a parent to help you open a terminal!
-# Then type these magic commands:
+### 🎮 Download and Play (Easiest!)
 
-# Download the game
-git clone https://github.com/svange/danger-rose.git
-cd danger-rose
+1. **Go to [Releases](https://github.com/svange/danger-rose/releases)**
+2. **Download the installer for your system:**
+   - 🪟 **Windows**: `DangerRose-Setup-vX.X.X.exe` (Recommended)
+   - 🍎 **macOS**: `DangerRose-macOS.zip`
+   - 🐧 **Linux**: `DangerRose-Linux.zip`
+3. **Install and play!**
+   - Windows: Run the installer and follow the steps
+   - macOS/Linux: Extract the zip and run `DangerRose`
 
-# Install what the game needs
-poetry install
+### 🎯 First Time Playing?
+1. **Choose Your Character**: Use ← → arrows to pick Danger or Rose
+2. **Press SPACE** to start your adventure!
+3. **Explore**: Walk around with arrow keys
+4. **Play Minigames**: Stand by doors and press SPACE
 
-# Start playing!
-poetry run python src/main.py
-```
+## 👩‍💻 For Young Developers
 
-### 2️⃣ Choose Your Character
-- Press **←** and **→** arrows to pick Danger or Rose
-- Press **SPACE** to start your adventure!
+Want to modify the game or learn programming? Follow the development setup below!
 
-### 3️⃣ Explore and Play
-- Walk around the apartment with arrow keys
-- Stand by a door and press **SPACE** to play a minigame
-- Try to beat your high scores!
+## 👨‍👩‍👧‍👦 For Parents
+
+**Danger Rose** is designed as a learning tool for families:
+- **Safe & Offline**: No internet connection required, no ads, no in-app purchases
+- **Educational**: Teaches problem-solving, creativity, and basic programming concepts
+- **Open Source**: See exactly what your kids are playing, modify together
+- **Family-Friendly**: All content appropriate for ages 8+
 
 ## 📋 Table of Contents
 
-1. [Installation](#-installation)
+1. [Playing the Game](#-playing-the-game)
 2. [How to Play](#-how-to-play)
 3. [Game Modes](#-game-modes)
-4. [Technical Details](#-technical-details)
-5. [Development](#-development)
+4. [Development Setup](#-development-setup)
+5. [Technical Details](#-technical-details)
 6. [Contributing](#-contributing)
 7. [Credits](#-credits)
 8. [License](#-license)
 
-## 💻 Installation
+## 🎮 Playing the Game
 
 ### System Requirements
 - **OS**: Windows 10/11, macOS 10.14+, Linux (Ubuntu 20.04+)
-- **Python**: 3.12 or higher
 - **RAM**: 2GB minimum
-- **Storage**: 500MB free space
+- **Storage**: 200MB free space
 - **Display**: 1920x1080 recommended
 
-### Detailed Installation
+### Installation Options
 
-#### Windows
+#### Option 1: Download Release (Recommended for Players)
+1. Visit [Releases](https://github.com/svange/danger-rose/releases)
+2. Download the appropriate file:
+   - **Windows**: Use the installer (.exe) for easy setup
+   - **macOS/Linux**: Download the zip file
+3. Run and enjoy!
+
+#### Option 2: Play from Source (For Developers)
+If you want to modify the game, see [Development Setup](#-development-setup) below.
+
+## 🛠️ Development Setup
+
+### For Young Programmers & Contributors
+
+#### Prerequisites
+- **Python**: 3.12 or higher ([Download Python](https://python.org))
+- **Poetry**: Package manager ([Install Poetry](https://python-poetry.org/docs/))
+- **Git**: Version control ([Download Git](https://git-scm.com))
+
+#### Step-by-Step Setup
+
+##### Windows Development
 ```bash
 # 1. Install Python 3.12+ from python.org
-# 2. Install Poetry (Python package manager)
-curl -sSL https://install.python-poetry.org | python -
+# 2. Install Poetry (in PowerShell as Administrator)
+(Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | python -
 
-# 3. Clone and setup
+# 3. Clone the game code
 git clone https://github.com/svange/danger-rose.git
 cd danger-rose
+
+# 4. Install dependencies
 poetry install
 
-# 4. Run the game
+# 5. Run from source
 poetry run python src/main.py
 ```
 
-#### macOS/Linux
+##### macOS/Linux Development
 ```bash
-# Install dependencies
+# 1. Clone the repository
 git clone https://github.com/svange/danger-rose.git
 cd danger-rose
+
+# 2. Install Poetry (if not already installed)
+curl -sSL https://install.python-poetry.org | python3 -
+
+# 3. Install dependencies
 poetry install
 
-# Run the game
+# 4. Run from source
 poetry run python src/main.py
 ```
-
-### 🎮 Pre-built Releases
-Download ready-to-play versions from [Releases](https://github.com/svange/danger-rose/releases) (coming soon!)
 
 ## 🎮 How to Play
 
@@ -206,40 +246,50 @@ danger-rose/
 - **Memory Usage**: < 500MB
 - **Load Times**: < 2 seconds per scene
 
-## 🛠️ Development
+### Development Commands
 
-### Setting Up Development Environment
+#### Running Tests
 ```bash
-# Install development dependencies
-poetry install --with dev
-
-# Run tests
+# Run all tests
 poetry run pytest
 
-# Run with debug mode
-DEBUG=true poetry run python src/main.py
-
-# Build executable
-poetry run pyinstaller danger-rose.spec
-```
-
-### Code Structure
-- **Scene System**: Each game mode is a separate scene
-- **Entity-Component**: Characters use component-based design
-- **Asset Pipeline**: Automatic fallback for missing assets
-- **Save System**: JSON-based local storage
-
-### Running Tests
-```bash
-# All tests
-poetry run pytest
-
-# With coverage
+# Run with coverage report
 poetry run pytest --cov=src --cov-report=html
 
-# Visual tests
-poetry run pytest tests/ -k visual
+# Run specific test category
+poetry run pytest tests/unit -v
+poetry run pytest tests/visual -v
 ```
+
+#### Building & Debugging
+```bash
+# Run in debug mode (shows FPS, hitboxes)
+DEBUG=true poetry run python src/main.py
+
+# Build standalone executable
+poetry run pyinstaller danger-rose-onefile.spec
+
+# Create Windows installer (Windows only)
+poetry run python scripts/build_installer.py
+```
+
+#### Code Quality
+```bash
+# Format code
+poetry run ruff format src/ tests/
+
+# Check code style
+poetry run ruff check src/ tests/
+
+# Run pre-commit hooks
+poetry run pre-commit run --all-files
+```
+
+### Project Structure
+- **Scene System**: Each game mode is a self-contained scene
+- **Entity-Component**: Characters use component-based architecture
+- **Asset Pipeline**: Automatic placeholder generation for missing assets
+- **Save System**: JSON-based local storage with auto-save
 
 ## 🤝 Contributing
 

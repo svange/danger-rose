@@ -207,21 +207,42 @@ class TestSaveManager:
     def test_default_save_directory_windows(self, temp_save_dir):
         """Test default save directory selection on Windows."""
         with patch("os.name", "nt"):
-            with patch.dict("os.environ", {"APPDATA": str(temp_save_dir)}):
-                manager = SaveManager()
-                assert "DangerRose" in str(manager.save_directory)
+            with patch.dict("os.environ", {"APPDATA": str(temp_save_dir)}, clear=True):
+                with patch("pathlib.Path.home", return_value=temp_save_dir):
+                    manager = SaveManager()
+                    assert "DangerRose" in str(manager.save_directory)
+                    assert str(temp_save_dir) in str(manager.save_directory)
 
     def test_default_save_directory_linux(self, temp_save_dir):
         """Test default save directory selection on Linux."""
         with patch("os.name", "posix"):
             with patch("platform.system", return_value="Linux"):
-                with patch.dict("os.environ", {"XDG_CONFIG_HOME": str(temp_save_dir)}):
-                    with patch("src.utils.save_manager.Path") as mock_path:
-                        mock_path.return_value = temp_save_dir / "danger-rose"
-                        manager = SaveManager(
-                            save_directory=temp_save_dir / "danger-rose"
-                        )
+                with patch.dict(
+                    "os.environ", {"XDG_CONFIG_HOME": str(temp_save_dir)}, clear=True
+                ):
+                    with patch("pathlib.Path.home", return_value=temp_save_dir):
+                        manager = SaveManager()
                         assert "danger-rose" in str(manager.save_directory)
+                        assert str(temp_save_dir) in str(manager.save_directory)
+
+    def test_default_save_directory_macos(self, temp_save_dir):
+        """Test default save directory selection on macOS."""
+        with patch("os.name", "posix"):
+            with patch("platform.system", return_value="Darwin"):
+                with patch("pathlib.Path.home", return_value=temp_save_dir):
+                    manager = SaveManager()
+                    assert "DangerRose" in str(manager.save_directory)
+                    assert "Library" in str(manager.save_directory)
+                    assert "Application Support" in str(manager.save_directory)
+
+    def test_default_save_directory_fallback_on_error(self, temp_save_dir):
+        """Test fallback to temp directory when home directory fails."""
+        with patch(
+            "pathlib.Path.home", side_effect=RuntimeError("Cannot determine home")
+        ):
+            manager = SaveManager()
+            # Should use temp directory
+            assert "danger-rose" in str(manager.save_directory).lower()
 
     def test_datetime_serialization(self, save_manager):
         """Test that datetime values are properly serialized."""

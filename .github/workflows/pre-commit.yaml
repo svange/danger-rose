@@ -1,8 +1,7 @@
 name: Pre-commit checks
 on:
   pull_request:
-  push:
-    branches: [main, dev]
+    types: [opened, synchronize, reopened]
   workflow_call:
 
 permissions:

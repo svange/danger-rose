@@ -1,18 +1,14 @@
 name: Danger Rose Game CI/CD 🎮
 
 on:
-  push:
-    branches:
-      - main
-      - dev
-      - feat/*
-      - fix/*
-    tags:
-      - 'v*'
   pull_request:
     branches:
       - main
       - dev
+    types: [opened, synchronize, reopened]
+  push:
+    tags:
+      - 'v*'  # Still trigger on version tags for releases
   workflow_dispatch:
 
 env:
@@ -316,17 +312,16 @@ jobs:
   auto-merge:
     name: Auto-merge development branches
     runs-on: ubuntu-latest
-    # Only run after quality checks pass and on feature branches
+    # Only run after quality checks pass on PRs from feature branches
     needs: [quality-checks]
     if: |
       always() &&
       !cancelled() &&
       needs.quality-checks.result == 'success' &&
-      github.event_name == 'push' &&
-      github.ref != 'refs/heads/main' &&
-      github.ref != 'refs/heads/dev' &&
-      (startsWith(github.ref, 'refs/heads/feat/') ||
-       startsWith(github.ref, 'refs/heads/fix/'))
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.base.ref == 'main' &&
+      (startsWith(github.event.pull_request.head.ref, 'feat/') ||
+       startsWith(github.event.pull_request.head.ref, 'fix/'))
 
     permissions:
       contents: write
@@ -336,30 +331,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Auto-merge PR for current branch
+      - name: Auto-merge PR
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const branch = context.ref.replace('refs/heads/', '');
-            console.log(`Looking for PR for branch: ${branch}`);
-
-            // Find open PRs for this branch
-            const { data: prs } = await github.rest.pulls.list({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              head: `${context.repo.owner}:${branch}`,
-              state: 'open'
-            });
-
-            if (prs.length === 0) {
-              console.log(`No open PR found for branch: ${branch}`);
-              console.log('Create a PR to enable auto-merge on next push');
-              return;
-            }
-
-            const pr = prs[0];
-            console.log(`✅ Found PR #${pr.number}: ${pr.title}`);
+            const pr = context.payload.pull_request;
+            console.log(`Processing PR #${pr.number}: ${pr.title}`);
 
             // Wait for GitHub's internal state to stabilize
             console.log('Waiting 5 seconds for GitHub status to stabilize...');

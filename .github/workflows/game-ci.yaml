@@ -323,8 +323,8 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     outputs:
-      new-release-published: ${{ steps.semantic.outputs.new-release-published }}
-      new-release-version: ${{ steps.semantic.outputs.new-release-version }}
+      new-release-published: ${{ steps.semantic.outputs.new_release_published }}
+      new-release-version: ${{ steps.semantic.outputs.new_release_version }}
     permissions:
       contents: write
       issues: write
@@ -379,7 +379,7 @@ jobs:
     name: Build Windows Installer
     needs: semantic-release
     runs-on: windows-latest
-    if: needs.semantic-release.result == 'success'
+    if: needs.semantic-release.outputs.new-release-published == 'true'
     permissions:
       contents: write
 

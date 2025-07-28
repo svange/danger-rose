@@ -1,3 +1,10 @@
+## [1.0.3](https://github.com/svange/danger-rose/compare/v1.0.2...v1.0.3) (2025-07-28)
+
+
+### Bug Fixes
+
+* comment out SetupIconFile to fix Windows installer build ([#75](https://github.com/svange/danger-rose/issues/75)) ([e165e55](https://github.com/svange/danger-rose/commit/e165e55648b470a56c4705373dabcf5fee1b8d5d))
+
 ## [1.0.2](https://github.com/svange/danger-rose/compare/v1.0.1...v1.0.2) (2025-07-28)
 
 

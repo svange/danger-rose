@@ -76,7 +76,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        # TODO: Re-enable windows-latest once Poetry installation is fixed (see issue #54)
+        os: [ubuntu-latest, macos-latest]  # windows-latest temporarily disabled
 
     steps:
       - name: Checkout code
@@ -111,9 +112,10 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: windows-latest
-            name: Windows
-            artifact: DangerRose-Windows
+          # TODO: Re-enable Windows once Poetry installation is fixed (see issue #54)
+          # - os: windows-latest
+          #   name: Windows
+          #   artifact: DangerRose-Windows
           - os: ubuntu-latest
             name: Linux
             artifact: DangerRose-Linux

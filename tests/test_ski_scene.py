@@ -41,8 +41,8 @@ class TestSkiPlayer:
         assert player.rect.width == 48
         assert player.rect.height == 48
         # Check crash state
-        assert player.is_crashing == False
-        assert player.invincible == False
+        assert not player.is_crashing
+        assert not player.invincible
 
     def test_player_movement_left(self):
         """Test player moves left with arrow key."""
@@ -127,12 +127,12 @@ class TestSkiPlayer:
         player = SkiPlayer(400, 300, "Danger")
 
         # First crash should succeed
-        assert player.crash() == True
-        assert player.is_crashing == True
+        assert player.crash()
+        assert player.is_crashing
         assert player.crash_time == 0.5
 
         # Can't crash while already crashing
-        assert player.crash() == False
+        assert not player.crash()
 
     def test_player_invincibility(self):
         """Test player invincibility after crash."""
@@ -143,19 +143,19 @@ class TestSkiPlayer:
         player.update(0.6)  # More than crash time
 
         # Should now be invincible
-        assert player.is_crashing == False
-        assert player.invincible == True
+        assert not player.is_crashing
+        assert player.invincible
         assert 1.0 <= player.invincible_time <= 2.0  # Time should be close to 2.0
 
         # Can't crash while invincible
-        assert player.crash() == False
+        assert not player.crash()
 
         # Update past invincibility time
         player.update(2.1)
-        assert player.invincible == False
+        assert not player.invincible
 
         # Should be able to crash again
-        assert player.crash() == True
+        assert player.crash()
 
     def test_player_movement_blocked_when_crashing(self):
         """Test player can't move while crashing."""
@@ -397,5 +397,5 @@ class TestSkiGame:
         ski_game.reset_game()
 
         assert ski_game.lives == ski_game.max_lives
-        assert ski_game.player.is_crashing == False
-        assert ski_game.player.invincible == False
+        assert not ski_game.player.is_crashing
+        assert not ski_game.player.invincible

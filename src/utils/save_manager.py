@@ -63,18 +63,33 @@ class SaveManager:
 
     def _get_default_save_directory(self) -> Path:
         """Get the default save directory based on the OS."""
+        try:
+            home_path = Path.home()
+        except (RuntimeError, KeyError):
+            # Handle case where home directory cannot be determined (e.g., in CI)
+            logger.warning("Could not determine home directory, using temp directory")
+            import tempfile
+
+            return Path(tempfile.gettempdir()) / "danger-rose"
+
         if os.name == "nt":  # Windows
-            app_data = os.environ.get("APPDATA", Path.home() / "AppData" / "Roaming")
-            return Path(app_data) / "DangerRose"
+            app_data = os.environ.get("APPDATA")
+            if app_data:
+                return Path(app_data) / "DangerRose"
+            else:
+                return home_path / "AppData" / "Roaming" / "DangerRose"
         elif os.name == "posix":  # macOS and Linux
             if platform.system() == "Darwin":  # macOS
-                return Path.home() / "Library" / "Application Support" / "DangerRose"
+                return home_path / "Library" / "Application Support" / "DangerRose"
             else:  # Linux
-                config_home = os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config")
-                return Path(config_home) / "danger-rose"
+                config_home = os.environ.get("XDG_CONFIG_HOME")
+                if config_home:
+                    return Path(config_home) / "danger-rose"
+                else:
+                    return home_path / ".config" / "danger-rose"
         else:
             # Fallback to home directory
-            return Path.home() / ".danger-rose"
+            return home_path / ".danger-rose"
 
     def load(self) -> Dict[str, Any]:
         """Load save data from file.

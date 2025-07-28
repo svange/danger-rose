@@ -4,7 +4,7 @@ Tests focus on behavior verification with proper mocking and isolation.
 Follows AAA (Arrange-Act-Assert) pattern for clarity.
 """
 
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, ANY
 import pygame
 import pytest
 import os
@@ -68,8 +68,17 @@ class TestSceneManagerInitialization:
         assert manager.current_scene is not None
         assert manager.current_scene == manager.scenes["title"]
 
-    def test_init_creates_game_data_with_no_character(self):
+    @patch("src.scene_manager.SaveManager")
+    def test_init_creates_game_data_with_no_character(self, mock_save_manager_class):
         """SceneManager should initialize game_data with no selected character."""
+        # Arrange - Mock save manager to return no selected character
+        mock_save_instance = Mock()
+        mock_save_instance.load.return_value = {
+            "settings": {"master_volume": 1.0, "music_volume": 1.0, "sfx_volume": 1.0},
+            "player": {"selected_character": None},
+        }
+        mock_save_manager_class.return_value = mock_save_instance
+
         # Act
         manager = SceneManager(800, 600)
 
@@ -243,7 +252,7 @@ class TestSceneManagerIntegration:
         manager = SceneManager(1920, 1080)
 
         # Assert
-        mock_title_class.assert_called_once_with(1920, 1080)
+        mock_title_class.assert_called_once_with(1920, 1080, ANY)
         assert manager.scenes["title"] == mock_title_instance
         assert manager.current_scene == mock_title_instance
 

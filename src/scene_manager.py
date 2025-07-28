@@ -49,9 +49,9 @@ class SceneManager:
 
             # Handle scene transitions
             if result == "start_game":
-                self.game_data[
-                    "selected_character"
-                ] = self.current_scene.selected_character
+                self.game_data["selected_character"] = (
+                    self.current_scene.selected_character
+                )
                 # Transition to hub world
                 self.switch_scene(SCENE_HUB_WORLD)
             elif result == "vegas":

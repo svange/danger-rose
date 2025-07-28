@@ -326,3 +326,114 @@ print('All asset directories present')
             });
             
             console.log(`Created nightly tag: ${tagName}`);
+
+  auto-merge:
+    name: Auto-merge development branches
+    runs-on: ubuntu-latest
+    # Only run after quality checks pass and on feature branches
+    needs: [quality-checks]
+    if: |
+      always() &&
+      !cancelled() &&
+      needs.quality-checks.result == 'success' &&
+      github.event_name == 'push' &&
+      github.ref != 'refs/heads/main' &&
+      github.ref != 'refs/heads/dev' &&
+      (startsWith(github.ref, 'refs/heads/feat/') ||
+       startsWith(github.ref, 'refs/heads/fix/'))
+    
+    permissions:
+      contents: write
+      pull-requests: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Auto-merge PR for current branch
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const branch = context.ref.replace('refs/heads/', '');
+            console.log(`Looking for PR for branch: ${branch}`);
+            
+            // Find open PRs for this branch
+            const { data: prs } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              head: `${context.repo.owner}:${branch}`,
+              state: 'open'
+            });
+            
+            if (prs.length === 0) {
+              console.log(`No open PR found for branch: ${branch}`);
+              console.log('Create a PR to enable auto-merge on next push');
+              return;
+            }
+            
+            const pr = prs[0];
+            console.log(`✅ Found PR #${pr.number}: ${pr.title}`);
+            
+            // Wait for GitHub's internal state to stabilize
+            console.log('Waiting 5 seconds for GitHub status to stabilize...');
+            await new Promise(resolve => setTimeout(resolve, 5000));
+            
+            // Retry logic for auto-merge
+            let retries = 3;
+            let lastError;
+            
+            while (retries > 0) {
+              try {
+                // Enable auto-merge with squash
+                await github.graphql(`
+                  mutation($pullRequestId: ID!) {
+                    enablePullRequestAutoMerge(input: {
+                      pullRequestId: $pullRequestId,
+                      mergeMethod: SQUASH
+                    }) {
+                      pullRequest {
+                        autoMergeRequest {
+                          enabledAt
+                        }
+                      }
+                    }
+                  }
+                `, {
+                  pullRequestId: pr.node_id
+                });
+                
+                // Add comment
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: pr.number,
+                  body: '✅ **Auto-merge enabled** - All checks passed!\n\nThis PR will merge automatically when all required status checks pass.\n\n*Automated by game CI/CD pipeline* 🎮'
+                });
+                
+                console.log(`🔄 Auto-merge enabled for PR #${pr.number}`);
+                break;
+                
+              } catch (error) {
+                lastError = error;
+                retries--;
+                
+                if (error.message && error.message.includes('Pull request is in unstable status')) {
+                  if (retries > 0) {
+                    console.log(`PR still unstable, waiting 10 seconds before retry ${3 - retries}/3...`);
+                    await new Promise(resolve => setTimeout(resolve, 10000));
+                  }
+                } else {
+                  // Different error, don't retry
+                  throw error;
+                }
+              }
+            }
+            
+            if (retries === 0) {
+              console.error('Failed to enable auto-merge after 3 attempts');
+              console.error('This may happen if required status checks are still pending.');
+              console.error('The PR will need to be merged manually or auto-merge enabled manually.');
+              console.error(`Last error: ${lastError.message}`);
+              // Don't fail the job - this is a nice-to-have feature
+            }

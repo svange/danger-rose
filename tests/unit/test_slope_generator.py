@@ -145,6 +145,10 @@ class TestSlopeGenerator:
 
     def test_chunk_generation_and_removal(self, slope_generator):
         """Test chunks are generated and removed as needed."""
+        # Force initial chunk generation if needed
+        if len(slope_generator.chunks) == 0:
+            slope_generator._generate_initial_chunks()
+
         initial_chunks = len(slope_generator.chunks)
         assert initial_chunks > 0  # Should have initial chunks
 

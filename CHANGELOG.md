@@ -1,3 +1,10 @@
+## [1.0.2](https://github.com/svange/danger-rose/compare/v1.0.1...v1.0.2) (2025-07-28)
+
+
+### Bug Fixes
+
+* correct semantic-release output variable names to use underscores ([#74](https://github.com/svange/danger-rose/issues/74)) ([e8b4a19](https://github.com/svange/danger-rose/commit/e8b4a19f3897ecbc7e8b48b79fe63e8de01046f3))
+
 ## [1.0.1](https://github.com/svange/danger-rose/compare/v1.0.0...v1.0.1) (2025-07-28)
 
 

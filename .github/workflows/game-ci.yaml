@@ -371,6 +371,7 @@ jobs:
         with:
           extra_plugins: |
             @semantic-release/changelog
+            @semantic-release/git
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 

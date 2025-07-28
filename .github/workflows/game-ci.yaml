@@ -445,7 +445,7 @@ jobs:
           SolidCompression=yes
           OutputDir=installer_output
           OutputBaseFilename=DangerRose-Setup-${{ needs.semantic-release.outputs.new-release-version }}
-          SetupIconFile=assets\images\icon.ico
+          ; SetupIconFile=assets\images\icon.ico
           WizardStyle=modern
           ArchitecturesAllowed=x64
           ArchitecturesInstallIn64BitMode=x64

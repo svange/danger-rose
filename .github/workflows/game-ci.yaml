@@ -351,16 +351,16 @@ jobs:
         run: |
           mkdir -p release-assets
           cd builds
-          
+
           # Create zip archives for each platform
           if [ -d "DangerRose-Windows" ]; then
             zip -r ../release-assets/DangerRose-Windows-Portable.zip DangerRose-Windows/
           fi
-          
+
           if [ -d "DangerRose-Linux" ]; then
             zip -r ../release-assets/DangerRose-Linux.zip DangerRose-Linux/
           fi
-          
+
           if [ -d "DangerRose-macOS" ]; then
             zip -r ../release-assets/DangerRose-macOS.zip DangerRose-macOS/
           fi
@@ -482,7 +482,7 @@ jobs:
         run: |
           $version = "${{ needs.semantic-release.outputs.new-release-version }}"
           $installerPath = "installer_output/DangerRose-Setup-$version.exe"
-          
+
           # Use GitHub CLI to upload the installer to the existing release
           gh release upload "v$version" "$installerPath" --clobber
         env:

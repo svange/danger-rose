@@ -14,6 +14,10 @@ from src.config.constants import (
 )
 from src.managers.sound_manager import SoundManager
 from src.utils.asset_paths import get_music_path
+from src.utils.save_manager import SaveManager
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class SceneManager:
@@ -26,6 +30,10 @@ class SceneManager:
 
         # Initialize sound manager
         self.sound_manager = SoundManager()
+
+        # Initialize save manager and load save data
+        self.save_manager = SaveManager()
+        self._load_game_data()
 
         # Initialize scenes
         self.scenes[SCENE_TITLE] = TitleScreen(
@@ -86,6 +94,10 @@ class SceneManager:
                 if hasattr(self.current_scene, "on_exit"):
                     data = self.current_scene.on_exit()
 
+            # Auto-save when transitioning between gameplay scenes
+            if previous_scene_name not in [SCENE_TITLE, SCENE_SETTINGS]:
+                self._auto_save()
+
             # Switch to the new scene
             self.current_scene = self.scenes[scene_name]
 
@@ -109,3 +121,41 @@ class SceneManager:
         if scene_name in music_map:
             music_file = get_music_path(music_map[scene_name])
             self.sound_manager.crossfade_music(music_file, duration_ms=1000)
+
+    def _load_game_data(self):
+        """Load saved game data from disk."""
+        save_data = self.save_manager.load()
+
+        # Apply saved settings
+        self.sound_manager.set_master_volume(save_data["settings"]["master_volume"])
+        self.sound_manager.set_music_volume(save_data["settings"]["music_volume"])
+        self.sound_manager.set_sfx_volume(save_data["settings"]["sfx_volume"])
+
+        # Restore game data
+        self.game_data["selected_character"] = save_data["player"]["selected_character"]
+
+        logger.info("Game data loaded successfully")
+
+    def _auto_save(self):
+        """Automatically save game progress."""
+        try:
+            # Update save data with current game state
+            self.save_manager.set_selected_character(
+                self.game_data.get("selected_character")
+            )
+
+            # Save to disk
+            if self.save_manager.save():
+                logger.info("Auto-save completed")
+            else:
+                logger.warning("Auto-save failed")
+        except Exception as e:
+            logger.error(f"Error during auto-save: {e}")
+
+    def save_game(self):
+        """Manually save the game."""
+        self._auto_save()
+
+    def get_save_manager(self):
+        """Get the save manager instance for other components to use."""
+        return self.save_manager

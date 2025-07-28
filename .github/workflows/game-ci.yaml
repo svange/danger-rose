@@ -315,47 +315,176 @@ jobs:
           draft: false
           prerelease: false
 
-  deploy-nightly:
-    name: Deploy Nightly Build
+  semantic-release:
+    name: Semantic Release
     needs: build-executables
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    outputs:
+      new-release-published: ${{ steps.semantic.outputs.new-release-published }}
+      new-release-version: ${{ steps.semantic.outputs.new-release-version }}
     permissions:
       contents: write
+      issues: write
+      pull-requests: write
 
     steps:
-      - name: Download all builds
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Download all build artifacts
         uses: actions/download-artifact@v4
         with:
           path: builds/
 
-      - name: Create nightly tag
-        uses: actions/github-script@v7
+      - name: Create release assets
+        run: |
+          mkdir -p release-assets
+          cd builds
+          
+          # Create zip archives for each platform
+          if [ -d "DangerRose-Windows" ]; then
+            zip -r ../release-assets/DangerRose-Windows-Portable.zip DangerRose-Windows/
+          fi
+          
+          if [ -d "DangerRose-Linux" ]; then
+            zip -r ../release-assets/DangerRose-Linux.zip DangerRose-Linux/
+          fi
+          
+          if [ -d "DangerRose-macOS" ]; then
+            zip -r ../release-assets/DangerRose-macOS.zip DangerRose-macOS/
+          fi
+
+      - name: Run semantic release
+        id: semantic
+        uses: cycjimmy/semantic-release-action@v4
         with:
-          script: |
-            const date = new Date().toISOString().split('T')[0];
-            const tagName = `nightly-${date}`;
+          extra_plugins: |
+            @semantic-release/changelog
+            @semantic-release/git
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-            try {
-              // Delete existing nightly tag if it exists
-              await github.rest.git.deleteRef({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                ref: `tags/${tagName}`
-              });
-            } catch (error) {
-              // Tag doesn't exist, that's fine
-            }
+  build-windows-installer:
+    name: Build Windows Installer
+    needs: semantic-release
+    runs-on: windows-latest
+    if: needs.semantic-release.outputs.new-release-published == 'true'
+    permissions:
+      contents: write
 
-            // Create new nightly tag
-            await github.rest.git.createRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: `refs/tags/${tagName}`,
-              sha: context.sha
-            });
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-            console.log(`Created nightly tag: ${tagName}`);
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+          installer-parallel: true
+
+      - name: Add Poetry to PATH (Windows)
+        run: |
+          echo "C:\Users\runneradmin\.local\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+        shell: pwsh
+
+      - name: Install dependencies
+        run: poetry install --no-interaction
+
+      - name: Build executable with PyInstaller
+        run: |
+          poetry run pyinstaller danger-rose-onefile.spec --noconfirm
+
+      - name: Install Inno Setup
+        shell: pwsh
+        run: |
+          Write-Host "Installing Inno Setup..."
+          $installerUrl = "https://jrsoftware.org/download.php/is.exe"
+          $installerPath = "$env:TEMP\innosetup.exe"
+
+          # Download Inno Setup
+          Invoke-WebRequest -Uri $installerUrl -OutFile $installerPath
+
+          # Install silently
+          Start-Process -FilePath $installerPath -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART" -Wait
+
+          # Add to PATH
+          $innoPath = "${env:ProgramFiles(x86)}\Inno Setup 6"
+          echo "$innoPath" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+      - name: Create Inno Setup script
+        shell: pwsh
+        run: |
+          @"
+          [Setup]
+          AppName=Danger Rose
+          AppVersion=${{ needs.semantic-release.outputs.new-release-version }}
+          AppPublisher=Danger Rose Team
+          AppPublisherURL=https://github.com/svange/danger-rose
+          AppSupportURL=https://github.com/svange/danger-rose/issues
+          DefaultDirName={autopf}\Danger Rose
+          DefaultGroupName=Danger Rose
+          UninstallDisplayIcon={app}\DangerRose.exe
+          Compression=lzma2
+          SolidCompression=yes
+          OutputDir=installer_output
+          OutputBaseFilename=DangerRose-Setup-${{ needs.semantic-release.outputs.new-release-version }}
+          SetupIconFile=assets\images\icon.ico
+          WizardStyle=modern
+          ArchitecturesAllowed=x64
+          ArchitecturesInstallIn64BitMode=x64
+
+          [Languages]
+          Name: "english"; MessagesFile: "compiler:Default.isl"
+
+          [Tasks]
+          Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
+          Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked; OnlyBelowVersion: 6.1; Check: not IsAdminInstallMode
+
+          [Files]
+          Source: "dist\DangerRose.exe"; DestDir: "{app}"; Flags: ignoreversion
+          Source: "assets\*"; DestDir: "{app}\assets"; Flags: ignoreversion recursesubdirs createallsubdirs
+          Source: "README.md"; DestDir: "{app}"; Flags: ignoreversion
+          Source: "LICENSE"; DestDir: "{app}"; Flags: ignoreversion
+
+          [Icons]
+          Name: "{group}\Danger Rose"; Filename: "{app}\DangerRose.exe"
+          Name: "{group}\{cm:UninstallProgram,Danger Rose}"; Filename: "{uninstallexe}"
+          Name: "{commondesktop}\Danger Rose"; Filename: "{app}\DangerRose.exe"; Tasks: desktopicon
+          Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\Danger Rose"; Filename: "{app}\DangerRose.exe"; Tasks: quicklaunchicon
+
+          [Run]
+          Filename: "{app}\DangerRose.exe"; Description: "{cm:LaunchProgram,Danger Rose}"; Flags: nowait postinstall skipifsilent
+          "@ | Out-File -FilePath "danger-rose-installer.iss" -Encoding UTF8
+
+      - name: Build installer
+        run: |
+          iscc danger-rose-installer.iss
+
+      - name: Upload installer to existing release
+        shell: pwsh
+        run: |
+          $version = "${{ needs.semantic-release.outputs.new-release-version }}"
+          $installerPath = "installer_output/DangerRose-Setup-$version.exe"
+          
+          # Use GitHub CLI to upload the installer to the existing release
+          gh release upload "v$version" "$installerPath" --clobber
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   auto-merge:
     name: Auto-merge development branches

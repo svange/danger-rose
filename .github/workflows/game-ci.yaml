@@ -149,6 +149,8 @@ jobs:
     name: Build Game Executables
     needs: [quality-checks, test-game]
     runs-on: ${{ matrix.os }}
+    # Only build executables on main branch and version tags
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
     strategy:
       matrix:
         include:

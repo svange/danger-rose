@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/svange/danger-rose/compare/v1.0.0...v1.0.1) (2025-07-28)
+
+
+### Bug Fixes
+
+* use GH_TOKEN for semantic-release and fix Windows installer condition ([#73](https://github.com/svange/danger-rose/issues/73)) ([e6fb176](https://github.com/svange/danger-rose/commit/e6fb1760e63e48014d0ea7e47b92d0cdfae0f73b))
+
 # 1.0.0 (2025-07-28)
 
 

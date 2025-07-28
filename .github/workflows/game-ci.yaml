@@ -335,7 +335,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GH_TOKEN }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -373,7 +373,7 @@ jobs:
             @semantic-release/changelog
             @semantic-release/git
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
   build-windows-installer:
     name: Build Windows Installer
@@ -486,7 +486,7 @@ jobs:
           # Use GitHub CLI to upload the installer to the existing release
           gh release upload "v$version" "$installerPath" --clobber
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
   auto-merge:
     name: Auto-merge development branches

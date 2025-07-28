@@ -128,25 +128,39 @@ jobs:
           virtualenvs-in-project: true
           installer-parallel: true
 
-      - name: Configure Poetry PATH on Windows
+      - name: Install dependencies (Windows)
         if: runner.os == 'Windows'
-        run: |
-          $env:Path = "$env:APPDATA\Python\Scripts;$env:Path"
-          echo "$env:APPDATA\Python\Scripts" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-          # Verify poetry is accessible
-          where.exe poetry
+        run: poetry install --no-interaction
         shell: pwsh
 
-      - name: Install dependencies
+      - name: Install dependencies (Unix)
+        if: runner.os != 'Windows'
         run: poetry install --no-interaction
+        shell: bash
 
-      - name: Test game startup (headless)
+      - name: Test game startup (Windows)
+        if: runner.os == 'Windows'
         run: |
           poetry run python -c "import pygame; pygame.init(); print('Pygame initialized successfully')"
+        shell: pwsh
 
-      - name: Verify assets
+      - name: Test game startup (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          poetry run python -c "import pygame; pygame.init(); print('Pygame initialized successfully')"
+        shell: bash
+
+      - name: Verify assets (Windows)
+        if: runner.os == 'Windows'
         run: |
           poetry run python -c "import os; import sys; assets_dir = 'assets'; required_dirs = ['audio/music', 'audio/sfx', 'images/characters', 'images/tilesets']; missing = []; [missing.append(os.path.join(assets_dir, d)) for d in required_dirs if not os.path.exists(os.path.join(assets_dir, d))]; print(f'Missing directories: {missing}') if missing else print('All asset directories present'); sys.exit(1) if missing else sys.exit(0)"
+        shell: pwsh
+
+      - name: Verify assets (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          poetry run python -c "import os; import sys; assets_dir = 'assets'; required_dirs = ['audio/music', 'audio/sfx', 'images/characters', 'images/tilesets']; missing = []; [missing.append(os.path.join(assets_dir, d)) for d in required_dirs if not os.path.exists(os.path.join(assets_dir, d))]; print(f'Missing directories: {missing}') if missing else print('All asset directories present'); sys.exit(1) if missing else sys.exit(0)"
+        shell: bash
 
   build-executables:
     name: Build Game Executables
@@ -181,21 +195,27 @@ jobs:
           virtualenvs-in-project: true
           installer-parallel: true
 
-      - name: Configure Poetry PATH on Windows
+      - name: Install dependencies (Windows)
         if: runner.os == 'Windows'
-        run: |
-          $env:Path = "$env:APPDATA\Python\Scripts;$env:Path"
-          echo "$env:APPDATA\Python\Scripts" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-          # Verify poetry is accessible
-          where.exe poetry
+        run: poetry install --no-interaction
         shell: pwsh
 
-      - name: Install dependencies
+      - name: Install dependencies (Unix)
+        if: runner.os != 'Windows'
         run: poetry install --no-interaction
+        shell: bash
 
-      - name: Build with PyInstaller
+      - name: Build with PyInstaller (Windows)
+        if: runner.os == 'Windows'
         run: |
           poetry run pyinstaller danger-rose-onefile.spec --noconfirm
+        shell: pwsh
+
+      - name: Build with PyInstaller (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          poetry run pyinstaller danger-rose-onefile.spec --noconfirm
+        shell: bash
 
       - name: Create distribution folder
         shell: bash

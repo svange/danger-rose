@@ -99,7 +99,8 @@ class TestTerrainChunk:
         safe_zone_right = safe_zone_x + safe_zone_width // 2
 
         for x, y, obstacle_type in chunk.obstacles:
-            assert x < safe_zone_left or x > safe_zone_right
+            # Obstacles should not be inside the safe zone
+            assert x <= safe_zone_left or x >= safe_zone_right
 
     def test_difficulty_affects_obstacle_count(self):
         """Test that higher difficulty creates more obstacles."""

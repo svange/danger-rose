@@ -379,7 +379,7 @@ jobs:
     name: Build Windows Installer
     needs: semantic-release
     runs-on: windows-latest
-    if: needs.semantic-release.outputs.new-release-published == 'true'
+    if: needs.semantic-release.result == 'success'
     permissions:
       contents: write
 

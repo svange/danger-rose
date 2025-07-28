@@ -3,8 +3,7 @@ name: Danger Rose Game CI/CD 🎮
 on:
   pull_request:
     branches:
-      - main
-      - dev
+      - main  # Only PRs targeting main
     types: [opened, synchronize, reopened]
   push:
     branches:

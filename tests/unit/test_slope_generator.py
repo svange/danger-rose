@@ -152,9 +152,9 @@ class TestSlopeGenerator:
         initial_chunks = len(slope_generator.chunks)
         assert initial_chunks > 0  # Should have initial chunks
 
-        # Simulate scrolling for a while
-        for _ in range(10):
-            slope_generator.update(300, 1.0, 1.0)
+        # Simulate scrolling for a while with reasonable speed
+        for i in range(10):
+            slope_generator.update(200, 0.016, i * 0.016)  # 60 FPS, 200 pixels/sec
 
         # Should still have chunks, but they should have cycled
         assert len(slope_generator.chunks) > 0

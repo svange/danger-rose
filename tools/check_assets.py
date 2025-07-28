@@ -70,7 +70,7 @@ def check_assets() -> Tuple[List[str], List[str]]:
     """Check for missing and extra assets."""
     missing = []
     found = []
-    
+
     # Check required assets
     for category, files in REQUIRED_ASSETS.items():
         category_path = ASSETS_DIR / category
@@ -80,7 +80,7 @@ def check_assets() -> Tuple[List[str], List[str]]:
                 found.append(str(file_path.relative_to(PROJECT_ROOT)))
             else:
                 missing.append(str(file_path.relative_to(PROJECT_ROOT)))
-    
+
     return missing, found
 
 
@@ -89,17 +89,17 @@ def main():
     print("Checking game assets...")
     print(f"Assets directory: {ASSETS_DIR}")
     print()
-    
+
     missing, found = check_assets()
-    
+
     # Report found assets
     if found:
         print(f"[OK] Found {len(found)} required assets:")
         for asset in sorted(found):
             print(f"   - {asset}")
-    
+
     print()
-    
+
     # Report missing assets
     if missing:
         print(f"[MISSING] Missing {len(missing)} required assets:")
@@ -110,15 +110,15 @@ def main():
         sys.exit(1)
     else:
         print("[SUCCESS] All required assets found!")
-    
+
     # Check for extra assets (informational only)
     all_assets = []
     for root, dirs, files in os.walk(ASSETS_DIR):
         for file in files:
-            if file.endswith(('.png', '.ogg', '.mp3', '.wav')):
+            if file.endswith((".png", ".ogg", ".mp3", ".wav")):
                 path = Path(root) / file
                 all_assets.append(str(path.relative_to(PROJECT_ROOT)))
-    
+
     extra = set(all_assets) - set(found)
     if extra:
         print()

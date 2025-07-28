@@ -67,14 +67,14 @@ from PIL import Image
 def cut_sprite_sheet(sheet_path, frame_width=256, frame_height=341):
     sheet = Image.open(sheet_path)
     frames = []
-    
+
     for row in range(3):
         for col in range(4):
             x = col * frame_width
             y = row * frame_height
             frame = sheet.crop((x, y, x + frame_width, y + frame_height))
             frames.append(frame)
-    
+
     return frames
 ```
 

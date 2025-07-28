@@ -67,7 +67,7 @@ class SpriteBatcher:
     def __init__(self):
         self.sprite_groups = {}
         self.dirty_rects = []
-    
+
     def batch_draw(self, screen):
         # Group sprites by texture
         # Draw each group in one call
@@ -80,7 +80,7 @@ class SpatialGrid:
     def __init__(self, cell_size=128):
         self.grid = {}
         self.cell_size = cell_size
-    
+
     def get_nearby_objects(self, position, radius):
         # Only check objects in nearby cells
         # Dramatically reduces collision checks
@@ -93,7 +93,7 @@ class ObjectPool:
         self.pool = [object_class() for _ in range(size)]
         self.active = []
         self.inactive = self.pool[:]
-    
+
     def get_object(self):
         # Reuse inactive objects
         # Avoid allocation overhead
@@ -173,15 +173,15 @@ class PerformanceMonitor:
         self.fps_history = deque(maxlen=60)
         self.frame_times = deque(maxlen=120)
         self.memory_usage = []
-    
+
     def update(self, dt):
         self.frame_times.append(dt)
         current_fps = 1.0 / dt if dt > 0 else 0
         self.fps_history.append(current_fps)
-        
+
         if current_fps < 55:  # Below target
             self.log_performance_warning()
-    
+
     def get_stats(self):
         return {
             "avg_fps": sum(self.fps_history) / len(self.fps_history),

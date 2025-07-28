@@ -74,10 +74,10 @@ def test_player_jump():
     """Test jump mechanics work correctly"""
     player = Player(x=100, y=100)
     initial_y = player.y
-    
+
     player.jump()
     player.update(0.016)  # One frame
-    
+
     assert player.y < initial_y  # Player moved up
     assert player.velocity_y < 0  # Negative velocity
     assert player.is_jumping == True
@@ -89,9 +89,9 @@ def test_player_enemy_collision():
     """Test player takes damage from enemies"""
     player = Player(x=100, y=100, lives=3)
     enemy = Enemy(x=100, y=100)
-    
+
     handle_collision(player, enemy)
-    
+
     assert player.lives == 2
     assert player.invulnerable == True
     assert player.invulnerable_timer > 0
@@ -105,11 +105,11 @@ def test_save_load_game():
     game.score = 1000
     game.current_level = 3
     game.unlocked_characters = ["danger", "rose"]
-    
+
     game.save("test_save.json")
     new_game = Game()
     new_game.load("test_save.json")
-    
+
     assert new_game.score == 1000
     assert new_game.current_level == 3
     assert "rose" in new_game.unlocked_characters
@@ -123,7 +123,7 @@ class VisualTest:
     def capture_screenshot(self, name):
         """Capture current game screen"""
         pygame.image.save(screen, f"tests/visual/{name}.png")
-    
+
     def compare_screenshots(self, actual, expected):
         """Compare with baseline image"""
         # Allow small differences for anti-aliasing
@@ -223,12 +223,12 @@ def test_edge_cases():
     player.score = 999999
     player.add_score(1)
     assert player.score == 1000000
-    
+
     # Test minimum lives
     player.lives = 1
     player.lose_life()
     assert player.game_over == True
-    
+
     # Test screen boundaries
     player.x = SCREEN_WIDTH + 100
     player.update()
@@ -241,7 +241,7 @@ def test_difficulty_progression():
     """Test game gets harder appropriately"""
     level1_enemies = count_enemies(level=1)
     level5_enemies = count_enemies(level=5)
-    
+
     assert level5_enemies > level1_enemies
     assert level5_enemies < level1_enemies * 3  # Not too hard
 ```

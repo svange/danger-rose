@@ -30,43 +30,43 @@ jobs:
   quality-checks:
     name: Code Quality & Tests
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          
+
       - name: Install Poetry
         uses: snok/install-poetry@v1
         with:
           virtualenvs-create: true
           virtualenvs-in-project: true
-          
+
       - name: Cache dependencies
         uses: actions/cache@v4
         with:
           path: .venv
           key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
-          
+
       - name: Install dependencies
         run: poetry install --no-interaction
-        
+
       - name: Run linting
         run: |
           poetry run ruff check src/ tests/
-          
+
       - name: Run formatting check
         run: |
           poetry run ruff format --check src/ tests/
-          
+
       - name: Run tests
         run: |
           poetry run pytest tests/unit -v --cov=src --cov-report=xml --cov-report=html
-          
+
       - name: Upload coverage reports
         uses: actions/upload-artifact@v4
         with:
@@ -81,46 +81,32 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          
+
       - name: Install Poetry
         uses: snok/install-poetry@v1
         with:
           virtualenvs-create: true
           virtualenvs-in-project: true
-          
+
       - name: Install dependencies
         run: poetry install --no-interaction
-        
+
       - name: Test game startup (headless)
         run: |
           poetry run python -c "import pygame; pygame.init(); print('Pygame initialized successfully')"
-          
+
       - name: Verify assets
         run: |
-          poetry run python -c "
-import os
-import sys
-assets_dir = 'assets'
-required_dirs = ['audio/music', 'audio/sfx', 'images/characters', 'images/tilesets']
-missing = []
-for d in required_dirs:
-    path = os.path.join(assets_dir, d)
-    if not os.path.exists(path):
-        missing.append(path)
-if missing:
-    print(f'Missing directories: {missing}')
-    sys.exit(1)
-print('All asset directories present')
-"
+          poetry run python -c "import os; import sys; assets_dir = 'assets'; required_dirs = ['audio/music', 'audio/sfx', 'images/characters', 'images/tilesets']; missing = []; [missing.append(os.path.join(assets_dir, d)) for d in required_dirs if not os.path.exists(os.path.join(assets_dir, d))]; print(f'Missing directories: {missing}') if missing else print('All asset directories present'); sys.exit(1) if missing else sys.exit(0)"
 
   build-executables:
     name: Build Game Executables
@@ -138,29 +124,29 @@ print('All asset directories present')
           - os: macos-latest
             name: macOS
             artifact: DangerRose-macOS
-            
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          
+
       - name: Install Poetry
         uses: snok/install-poetry@v1
         with:
           virtualenvs-create: true
           virtualenvs-in-project: true
-          
+
       - name: Install dependencies
         run: poetry install --no-interaction
-        
+
       - name: Build with PyInstaller
         run: |
           poetry run pyinstaller danger-rose-onefile.spec --noconfirm
-          
+
       - name: Create distribution folder
         shell: bash
         run: |
@@ -174,26 +160,26 @@ print('All asset directories present')
             cp dist/DangerRose dist-upload/DangerRose
             chmod +x dist-upload/DangerRose
           fi
-          
+
       - name: Add README to distribution
         shell: bash
         run: |
           cat > dist-upload/README.txt << 'EOF'
           Danger Rose - Family Adventure Game
           ===================================
-          
+
           How to Run:
           - Windows: Double-click DangerRose.exe
           - macOS/Linux: Run ./DangerRose in terminal
-          
+
           Controls:
           - Arrow Keys: Move
           - Space: Jump/Select
           - ESC: Pause/Back
-          
+
           Enjoy the game!
           EOF
-          
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -207,29 +193,29 @@ print('All asset directories present')
     if: startsWith(github.ref, 'refs/tags/v')
     permissions:
       contents: write
-      
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
+
       - name: Download Windows build
         uses: actions/download-artifact@v4
         with:
           name: DangerRose-Windows
           path: builds/windows/
-          
+
       - name: Download Linux build
         uses: actions/download-artifact@v4
         with:
           name: DangerRose-Linux
           path: builds/linux/
-          
+
       - name: Download macOS build
         uses: actions/download-artifact@v4
         with:
           name: DangerRose-macOS
           path: builds/macos/
-          
+
       - name: Create zip archives
         run: |
           cd builds
@@ -237,43 +223,43 @@ print('All asset directories present')
           zip -r ../DangerRose-Linux.zip linux/
           zip -r ../DangerRose-macOS.zip macos/
           cd ..
-          
+
       - name: Extract version from tag
         id: get_version
         run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
-        
+
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
           name: Danger Rose ${{ steps.get_version.outputs.VERSION }}
           body: |
             # Danger Rose ${{ steps.get_version.outputs.VERSION }}
-            
+
             A family-friendly adventure game featuring Danger, Rose, and Dad!
-            
+
             ## 🎮 Download & Play
-            
+
             - **Windows**: Download `DangerRose-Windows.zip`, extract, and run `DangerRose.exe`
             - **macOS**: Download `DangerRose-macOS.zip`, extract, and run `DangerRose`
             - **Linux**: Download `DangerRose-Linux.zip`, extract, and run `DangerRose`
-            
+
             ## 🎯 What's New
-            
+
             Check out the [full changelog](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md)
-            
+
             ## 🕹️ Game Features
-            
+
             - **3 Playable Characters**: Each with unique abilities
             - **Hub World**: Cozy apartment to explore
             - **3 Minigames**: Ski adventure, Pool splash, Vegas dash
             - **Family Fun**: Designed for parents and kids to enjoy together
-            
+
             ## 🐛 Bug Reports
-            
+
             Found a bug? Please [create an issue](https://github.com/${{ github.repository }}/issues/new)
-            
+
             ---
-            
+
             **System Requirements**:
             - Windows 10/11, macOS 10.15+, or Linux
             - 2GB RAM minimum
@@ -292,20 +278,20 @@ print('All asset directories present')
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     permissions:
       contents: write
-      
+
     steps:
       - name: Download all builds
         uses: actions/download-artifact@v4
         with:
           path: builds/
-          
+
       - name: Create nightly tag
         uses: actions/github-script@v7
         with:
           script: |
             const date = new Date().toISOString().split('T')[0];
             const tagName = `nightly-${date}`;
-            
+
             try {
               // Delete existing nightly tag if it exists
               await github.rest.git.deleteRef({
@@ -316,7 +302,7 @@ print('All asset directories present')
             } catch (error) {
               // Tag doesn't exist, that's fine
             }
-            
+
             // Create new nightly tag
             await github.rest.git.createRef({
               owner: context.repo.owner,
@@ -324,7 +310,7 @@ print('All asset directories present')
               ref: `refs/tags/${tagName}`,
               sha: context.sha
             });
-            
+
             console.log(`Created nightly tag: ${tagName}`);
 
   auto-merge:
@@ -341,15 +327,15 @@ print('All asset directories present')
       github.ref != 'refs/heads/dev' &&
       (startsWith(github.ref, 'refs/heads/feat/') ||
        startsWith(github.ref, 'refs/heads/fix/'))
-    
+
     permissions:
       contents: write
       pull-requests: write
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Auto-merge PR for current branch
         uses: actions/github-script@v7
         with:
@@ -357,7 +343,7 @@ print('All asset directories present')
           script: |
             const branch = context.ref.replace('refs/heads/', '');
             console.log(`Looking for PR for branch: ${branch}`);
-            
+
             // Find open PRs for this branch
             const { data: prs } = await github.rest.pulls.list({
               owner: context.repo.owner,
@@ -365,24 +351,24 @@ print('All asset directories present')
               head: `${context.repo.owner}:${branch}`,
               state: 'open'
             });
-            
+
             if (prs.length === 0) {
               console.log(`No open PR found for branch: ${branch}`);
               console.log('Create a PR to enable auto-merge on next push');
               return;
             }
-            
+
             const pr = prs[0];
             console.log(`✅ Found PR #${pr.number}: ${pr.title}`);
-            
+
             // Wait for GitHub's internal state to stabilize
             console.log('Waiting 5 seconds for GitHub status to stabilize...');
             await new Promise(resolve => setTimeout(resolve, 5000));
-            
+
             // Retry logic for auto-merge
             let retries = 3;
             let lastError;
-            
+
             while (retries > 0) {
               try {
                 // Enable auto-merge with squash
@@ -402,7 +388,7 @@ print('All asset directories present')
                 `, {
                   pullRequestId: pr.node_id
                 });
-                
+
                 // Add comment
                 await github.rest.issues.createComment({
                   owner: context.repo.owner,
@@ -410,14 +396,14 @@ print('All asset directories present')
                   issue_number: pr.number,
                   body: '✅ **Auto-merge enabled** - All checks passed!\n\nThis PR will merge automatically when all required status checks pass.\n\n*Automated by game CI/CD pipeline* 🎮'
                 });
-                
+
                 console.log(`🔄 Auto-merge enabled for PR #${pr.number}`);
                 break;
-                
+
               } catch (error) {
                 lastError = error;
                 retries--;
-                
+
                 if (error.message && error.message.includes('Pull request is in unstable status')) {
                   if (retries > 0) {
                     console.log(`PR still unstable, waiting 10 seconds before retry ${3 - retries}/3...`);
@@ -429,7 +415,7 @@ print('All asset directories present')
                 }
               }
             }
-            
+
             if (retries === 0) {
               console.error('Failed to enable auto-merge after 3 attempts');
               console.error('This may happen if required status checks are still pending.');

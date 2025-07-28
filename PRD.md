@@ -50,9 +50,9 @@ danger-rose/
 ## Core Features
 
 ### 1. Character System
-- **Playable Characters**: 
+- **Playable Characters**:
   - Danger (Yasha) - Currently selectable
-  - Rose (Ellie) - Currently selectable  
+  - Rose (Ellie) - Currently selectable
   - Dad - Unlockable after completing all minigames
 - **Co-op Support**: Up to 3 players local multiplayer
 - **Character Selection**: Visual sprite-based selection with attack animations
@@ -81,7 +81,7 @@ danger-rose/
   - Dad on snowboard as pace setter (rubber-band AI)
   - Snowflake collection for points
   - Jump mechanic (Space) to avoid obstacles
-- **Scoring**: 
+- **Scoring**:
   - +10 points per snowflake
   - -1 life per collision (3 lives total)
   - Time bonus for completion
@@ -100,7 +100,7 @@ danger-rose/
   - Rings: 25 points
   - Combo multiplier for consecutive hits
 
-#### Vegas Dash  
+#### Vegas Dash
 - **Setting**: Mandalay Bay pools level
 - **Boss**: Las Vegas Sphere (3 phases with emoji faces)
 - **Mechanics**:
@@ -150,7 +150,7 @@ For consistent animations:
 1. **Dad Character**: Complete all 3 minigames
 2. **Hub Decorations**:
    - Ski trophy (beat ski high score)
-   - Pool float (beat pool high score)  
+   - Pool float (beat pool high score)
    - Neon sign (beat Vegas high score)
    - Family photo (unlock Dad)
 3. **Difficulty Modes**: Easy/Normal/Hard per game
@@ -168,7 +168,7 @@ For consistent animations:
 
 ### Phase 2: Core Gameplay
 - [ ] Pool minigame implementation
-- [ ] Vegas minigame implementation  
+- [ ] Vegas minigame implementation
 - [ ] Dad character unlock system
 - [ ] Sound effects integration
 - [ ] Background music loops

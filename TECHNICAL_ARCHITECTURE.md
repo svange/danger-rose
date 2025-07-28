@@ -23,14 +23,14 @@ graph TB
         C --> D[Game Entities]
         C --> E[UI System]
     end
-    
+
     subgraph "Support Systems"
         F[Asset Manager] --> C
         G[Input Manager] --> C
         H[Audio Manager] --> C
         I[Save Manager] --> B
     end
-    
+
     subgraph "Resource Layer"
         J[(Assets)] --> F
         K[(Save Data)] --> I
@@ -69,32 +69,32 @@ import pygame
 
 class Scene(ABC):
     """Base class for all game scenes"""
-    
+
     def __init__(self, screen_width: int, screen_height: int):
         self.screen_width = screen_width
         self.screen_height = screen_height
         self.next_scene: Optional[str] = None
         self.scene_data: Dict[str, Any] = {}
-    
+
     @abstractmethod
     def handle_event(self, event: pygame.event.Event) -> Optional[str]:
         """Process input events, return next scene name if transitioning"""
         pass
-    
+
     @abstractmethod
     def update(self, dt: float) -> None:
         """Update scene logic with delta time"""
         pass
-    
+
     @abstractmethod
     def draw(self, screen: pygame.Surface) -> None:
         """Render scene to screen"""
         pass
-    
+
     def on_enter(self, previous_scene: Optional[str], data: Dict[str, Any]) -> None:
         """Called when scene becomes active"""
         pass
-    
+
     def on_exit(self) -> Dict[str, Any]:
         """Called when scene is about to change"""
         return self.scene_data
@@ -106,21 +106,21 @@ Game objects use a simplified entity-component pattern:
 ```python
 class Entity:
     """Base game entity with component-like features"""
-    
+
     def __init__(self, x: float, y: float):
         self.transform = Transform(x, y)
         self.sprite = None
         self.collider = None
         self.components = []
-    
+
     def add_component(self, component):
         self.components.append(component)
         component.entity = self
-    
+
     def update(self, dt: float):
         for component in self.components:
             component.update(dt)
-    
+
     def draw(self, screen: pygame.Surface):
         if self.sprite:
             self.sprite.draw(screen, self.transform.position)
@@ -136,7 +136,7 @@ sequenceDiagram
     participant SceneManager
     participant Scene
     participant Renderer
-    
+
     Main->>Clock: tick(60)
     Clock-->>Main: delta_time
     Main->>SceneManager: update(dt)
@@ -153,13 +153,13 @@ sequenceDiagram
 # Event-driven communication between systems
 class EventBus:
     """Central event system for decoupled communication"""
-    
+
     def __init__(self):
         self._listeners = defaultdict(list)
-    
+
     def subscribe(self, event_type: str, callback: Callable):
         self._listeners[event_type].append(callback)
-    
+
     def publish(self, event_type: str, data: Any = None):
         for callback in self._listeners[event_type]:
             callback(data)
@@ -178,24 +178,24 @@ stateDiagram-v2
     [*] --> TitleScreen
     TitleScreen --> CharacterSelect: Start Game
     CharacterSelect --> HubWorld: Character Selected
-    
+
     HubWorld --> SkiGame: Enter Ski Door
     HubWorld --> PoolGame: Enter Pool Door
     HubWorld --> VegasGame: Enter Vegas Door
     HubWorld --> Settings: Settings Button
-    
+
     SkiGame --> GameOver: Lives = 0
     SkiGame --> Results: Finish Line
-    
+
     PoolGame --> Results: Time Up
-    
+
     VegasGame --> GameOver: Lives = 0
     VegasGame --> Results: Boss Defeated
-    
+
     GameOver --> HubWorld: Continue
     Results --> HubWorld: Continue
     Settings --> HubWorld: Back
-    
+
     HubWorld --> TitleScreen: Quit to Menu
 ```
 
@@ -203,28 +203,28 @@ stateDiagram-v2
 ```python
 class SceneManager:
     """Manages scene transitions and game state"""
-    
+
     def __init__(self):
         self.scenes: Dict[str, Scene] = {}
         self.current_scene: Optional[Scene] = None
         self.transition_data: Dict[str, Any] = {}
-    
+
     def register_scene(self, name: str, scene: Scene):
         self.scenes[name] = scene
-    
+
     def transition_to(self, scene_name: str, data: Dict[str, Any] = None):
         # Fade out effect
         self.fade_out()
-        
+
         # Exit current scene
         if self.current_scene:
             self.transition_data = self.current_scene.on_exit()
-        
+
         # Enter new scene
         previous = self.current_scene.__class__.__name__ if self.current_scene else None
         self.current_scene = self.scenes[scene_name]
         self.current_scene.on_enter(previous, data or self.transition_data)
-        
+
         # Fade in effect
         self.fade_in()
 ```
@@ -235,25 +235,25 @@ class SceneManager:
 ```python
 class SpriteSheet:
     """Handles sprite sheet loading and frame extraction"""
-    
+
     def __init__(self, path: str, frame_width: int, frame_height: int):
         self.sheet = pygame.image.load(path)
         self.frame_width = frame_width
         self.frame_height = frame_height
         self.frames = self._extract_frames()
-    
+
     def _extract_frames(self) -> List[pygame.Surface]:
         frames = []
         sheet_width = self.sheet.get_width()
         sheet_height = self.sheet.get_height()
-        
+
         for y in range(0, sheet_height, self.frame_height):
             for x in range(0, sheet_width, self.frame_width):
                 frame = self.sheet.subsurface(
                     pygame.Rect(x, y, self.frame_width, self.frame_height)
                 )
                 frames.append(frame)
-        
+
         return frames
 ```
 
@@ -274,7 +274,7 @@ graph LR
 ```python
 class AnimationController:
     """Manages character animation states and transitions"""
-    
+
     def __init__(self):
         self.animations: Dict[str, Animation] = {}
         self.current_animation = "idle"
@@ -285,10 +285,10 @@ class AnimationController:
             "attack": ["idle"],
             "hurt": ["idle"]
         }
-    
+
     def can_transition(self, from_state: str, to_state: str) -> bool:
         return to_state in self.transition_rules.get(from_state, [])
-    
+
     def transition_to(self, state: str):
         if self.can_transition(self.current_animation, state):
             self.current_animation = state
@@ -305,7 +305,7 @@ graph TD
     C --> D[Action Events]
     D --> E[Scene Handler]
     E --> F[Game Logic]
-    
+
     B --> G[Input Buffer]
     G --> H[Combo Detection]
     H --> D
@@ -315,7 +315,7 @@ graph TD
 ```python
 class InputManager:
     """Centralized input handling with action mapping"""
-    
+
     def __init__(self):
         self.key_map = {
             "move_left": [pygame.K_LEFT, pygame.K_a],
@@ -331,21 +331,21 @@ class InputManager:
             "attack": 1,            # B button
         }
         self.actions = set()
-    
+
     def update(self):
         self.actions.clear()
         keys = pygame.key.get_pressed()
-        
+
         # Keyboard input
         for action, keys_list in self.key_map.items():
             if any(keys[k] for k in keys_list):
                 self.actions.add(action)
-        
+
         # Gamepad input (if connected)
         if pygame.joystick.get_count() > 0:
             joy = pygame.joystick.Joystick(0)
             # Process gamepad inputs
-    
+
     def is_action_pressed(self, action: str) -> bool:
         return action in self.actions
 ```
@@ -354,17 +354,17 @@ class InputManager:
 ```python
 class MultiplayerInputManager:
     """Handles input for multiple local players"""
-    
+
     def __init__(self, max_players: int = 3):
         self.players = []
         self.keyboard_player = PlayerInput(0, "keyboard")
         self.players.append(self.keyboard_player)
-        
+
         # Add gamepad players
         for i in range(pygame.joystick.get_count()):
             if len(self.players) < max_players:
                 self.players.append(PlayerInput(i + 1, f"gamepad_{i}"))
-    
+
     def get_player_input(self, player_id: int) -> Dict[str, bool]:
         if player_id < len(self.players):
             return self.players[player_id].get_actions()
@@ -391,17 +391,17 @@ graph TD
 ```python
 class AssetManager:
     """Centralized asset loading with caching and fallbacks"""
-    
+
     def __init__(self):
         self._image_cache: Dict[str, pygame.Surface] = {}
         self._sound_cache: Dict[str, pygame.mixer.Sound] = {}
         self._music_cache: Dict[str, str] = {}
         self.placeholder_color = (255, 0, 255)  # Magenta
-    
+
     def load_image(self, path: str, fallback_size: Tuple[int, int] = (64, 64)) -> pygame.Surface:
         if path in self._image_cache:
             return self._image_cache[path]
-        
+
         try:
             image = pygame.image.load(path).convert_alpha()
             self._image_cache[path] = image
@@ -410,13 +410,13 @@ class AssetManager:
             # Generate placeholder
             placeholder = pygame.Surface(fallback_size)
             placeholder.fill(self.placeholder_color)
-            
+
             # Add path text
             font = pygame.font.Font(None, 12)
             text = font.render(os.path.basename(path), True, (255, 255, 255))
             text_rect = text.get_rect(center=(fallback_size[0]//2, fallback_size[1]//2))
             placeholder.blit(text, text_rect)
-            
+
             self._image_cache[path] = placeholder
             return placeholder
 ```
@@ -425,27 +425,27 @@ class AssetManager:
 ```python
 class ResourceOptimizer:
     """Optimizes assets for performance"""
-    
+
     @staticmethod
     def optimize_surface(surface: pygame.Surface) -> pygame.Surface:
         """Convert surface to optimal format"""
         if surface.get_alpha():
             return surface.convert_alpha()
         return surface.convert()
-    
+
     @staticmethod
     def create_mipmap_chain(surface: pygame.Surface, levels: int = 4) -> List[pygame.Surface]:
         """Generate mipmaps for distant rendering"""
         mipmaps = [surface]
         current = surface
-        
+
         for _ in range(levels - 1):
             width = max(1, current.get_width() // 2)
             height = max(1, current.get_height() // 2)
             mipmap = pygame.transform.smoothscale(current, (width, height))
             mipmaps.append(mipmap)
             current = mipmap
-        
+
         return mipmaps
 ```
 
@@ -456,22 +456,22 @@ class ResourceOptimizer:
 @dataclass
 class SaveData:
     """Game save data structure"""
-    
+
     # Player progress
     selected_character: str = "Danger"
     unlocked_characters: List[str] = field(default_factory=lambda: ["Danger", "Rose"])
-    
+
     # High scores
     high_scores: Dict[str, Dict[str, int]] = field(default_factory=dict)
-    
+
     # Unlockables
     unlocked_decorations: List[str] = field(default_factory=list)
     unlocked_palettes: Dict[str, List[str]] = field(default_factory=dict)
-    
+
     # Statistics
     total_playtime: float = 0.0
     games_played: Dict[str, int] = field(default_factory=dict)
-    
+
     # Settings
     master_volume: float = 1.0
     sfx_volume: float = 1.0
@@ -483,47 +483,47 @@ class SaveData:
 ```python
 class SaveManager:
     """Handles game save/load operations"""
-    
+
     def __init__(self, save_path: str = "saves/game_save.json"):
         self.save_path = save_path
         self.save_data = SaveData()
         self.auto_save_interval = 60.0  # seconds
         self.last_save_time = 0.0
-    
+
     def save(self) -> bool:
         """Save game data to file"""
         try:
             os.makedirs(os.path.dirname(self.save_path), exist_ok=True)
-            
+
             save_dict = asdict(self.save_data)
             save_dict["version"] = "1.0.0"
             save_dict["timestamp"] = datetime.now().isoformat()
-            
+
             with open(self.save_path, 'w') as f:
                 json.dump(save_dict, f, indent=2)
-            
+
             return True
         except Exception as e:
             print(f"Save failed: {e}")
             return False
-    
+
     def load(self) -> bool:
         """Load game data from file"""
         try:
             if not os.path.exists(self.save_path):
                 return False
-            
+
             with open(self.save_path, 'r') as f:
                 save_dict = json.load(f)
-            
+
             # Version compatibility check
             if save_dict.get("version") != "1.0.0":
                 self.migrate_save(save_dict)
-            
+
             # Remove metadata before loading
             save_dict.pop("version", None)
             save_dict.pop("timestamp", None)
-            
+
             self.save_data = SaveData(**save_dict)
             return True
         except Exception as e:
@@ -537,7 +537,7 @@ sequenceDiagram
     participant Game
     participant SaveManager
     participant FileSystem
-    
+
     loop Every Frame
         Game->>SaveManager: update(dt)
         alt Auto-save interval reached
@@ -546,7 +546,7 @@ sequenceDiagram
             SaveManager-->>Game: Save complete
         end
     end
-    
+
     alt Scene Transition
         Game->>SaveManager: force_save()
         SaveManager->>FileSystem: Write save data
@@ -559,23 +559,23 @@ sequenceDiagram
 ```python
 class RenderOptimizer:
     """Optimizes rendering performance"""
-    
+
     def __init__(self):
         self.dirty_rects: List[pygame.Rect] = []
         self.use_dirty_rects = True
-    
+
     def add_dirty_rect(self, rect: pygame.Rect):
         """Mark area for redraw"""
         if self.use_dirty_rects:
             self.dirty_rects.append(rect)
-    
+
     def optimize_render(self, screen: pygame.Surface, background: pygame.Surface):
         """Render only changed areas"""
         if self.use_dirty_rects and self.dirty_rects:
             # Clear dirty areas
             for rect in self.dirty_rects:
                 screen.blit(background, rect, rect)
-            
+
             # Return rects for targeted drawing
             rects = self.dirty_rects.copy()
             self.dirty_rects.clear()
@@ -590,26 +590,26 @@ class RenderOptimizer:
 ```python
 class MemoryManager:
     """Manages memory usage and garbage collection"""
-    
+
     def __init__(self, max_cache_size_mb: int = 100):
         self.max_cache_size = max_cache_size_mb * 1024 * 1024
         self.current_usage = 0
         self.cache_items: List[Tuple[float, str, Any]] = []
-    
+
     def add_to_cache(self, key: str, item: Any, size_bytes: int):
         """Add item to cache with LRU eviction"""
         self.current_usage += size_bytes
         self.cache_items.append((time.time(), key, item))
-        
+
         # Evict old items if over limit
         while self.current_usage > self.max_cache_size:
             if not self.cache_items:
                 break
-            
+
             _, evict_key, evict_item = self.cache_items.pop(0)
             item_size = self.estimate_size(evict_item)
             self.current_usage -= item_size
-    
+
     @staticmethod
     def estimate_size(obj: Any) -> int:
         """Estimate memory size of object"""
@@ -622,11 +622,11 @@ class MemoryManager:
 ```python
 class PerformanceProfiler:
     """Profile game performance"""
-    
+
     def __init__(self):
         self.frame_times: deque = deque(maxlen=60)
         self.system_times: Dict[str, deque] = defaultdict(lambda: deque(maxlen=60))
-    
+
     @contextmanager
     def profile(self, system_name: str):
         """Profile a system's execution time"""
@@ -634,20 +634,20 @@ class PerformanceProfiler:
         yield
         elapsed = time.perf_counter() - start
         self.system_times[system_name].append(elapsed * 1000)  # Convert to ms
-    
+
     def get_stats(self) -> Dict[str, float]:
         """Get performance statistics"""
         stats = {}
-        
+
         if self.frame_times:
             stats["avg_fps"] = 1000 / np.mean(self.frame_times)
             stats["min_fps"] = 1000 / max(self.frame_times)
-        
+
         for system, times in self.system_times.items():
             if times:
                 stats[f"{system}_avg_ms"] = np.mean(times)
                 stats[f"{system}_max_ms"] = max(times)
-        
+
         return stats
 ```
 
@@ -723,13 +723,13 @@ Windows:
   - Installer: NSIS or MSI
   - Dependencies: Bundled
   - Code Signing: Required for distribution
-  
+
 macOS:
   - Bundle: .app format
   - Notarization: Required for Gatekeeper
   - Universal Binary: Intel + Apple Silicon
   - Dependencies: Bundled in .app
-  
+
 Linux:
   - Formats: AppImage, Snap, Flatpak
   - Dependencies: Can use system or bundle
@@ -741,12 +741,12 @@ Linux:
 ```python
 class VersionInfo:
     """Manage game version information"""
-    
+
     MAJOR = 1
     MINOR = 0
     PATCH = 0
     BUILD = "auto"  # Set by CI
-    
+
     @classmethod
     def get_version_string(cls) -> str:
         """Get formatted version string"""
@@ -754,7 +754,7 @@ class VersionInfo:
         if cls.BUILD != "auto":
             version += f"-{cls.BUILD}"
         return version
-    
+
     @classmethod
     def get_build_info(cls) -> Dict[str, str]:
         """Get detailed build information"""

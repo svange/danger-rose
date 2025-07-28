@@ -2,9 +2,9 @@
 
 <div align="center">
   <img src="docs/images/logo-placeholder.png" alt="Danger Rose Logo" width="400">
-  
+
   **A family-friendly couch co-op adventure starring Dad, Danger (Yasha), and Rose (Ellie)**
-  
+
   [![Python](https://img.shields.io/badge/Python-3.12%2B-blue.svg)](https://www.python.org/downloads/)
   [![Pygame](https://img.shields.io/badge/Pygame--CE-2.4%2B-green.svg)](https://pyga.me/)
   [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -153,7 +153,7 @@ The apartment is your home base! Walk around and interact with:
 Race down the mountain with Dad on his snowboard!
 - **Goal**: Dodge obstacles and collect snowflakes
 - **Duration**: 60-second runs
-- **Scoring**: 
+- **Scoring**:
   - Snowflakes: +10 points
   - Finish bonus: +500 points
   - Perfect run: +1000 points
@@ -280,6 +280,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 <div align="center">
   Made with ❤️ by a coding family
-  
+
   [🐛 Report Bug](https://github.com/svange/danger-rose/issues) • [💡 Request Feature](https://github.com/svange/danger-rose/issues) • [📖 Documentation](docs/)
 </div>

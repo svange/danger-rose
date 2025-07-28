@@ -28,3 +28,8 @@ pyinstaller = "^6.14.2"
 
 [tool.poetry.dependencies]
 pygame-ce = "^2.5.5"
+
+[tool.ruff]
+exclude = [
+    "tools/visual/*.py",  # Visual test tools are allowed to have different import patterns
+]

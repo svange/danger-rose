@@ -4,7 +4,7 @@ Welcome to the Danger Rose family! We're so excited you want to help make our ga
 
 ## 🌟 For Our Young Developers
 
-### Your Ideas Matter! 
+### Your Ideas Matter!
 We LOVE hearing from kids who play our game. You might have the best ideas!
 
 **Ways You Can Help:**
@@ -24,13 +24,13 @@ We LOVE hearing from kids who play our game. You might have the best ideas!
    ```
    🌟 My Cool Idea 🌟
    Name: [Your name and age]
-   
+
    What's your idea?
    [Draw or describe it here!]
-   
+
    Why is it fun?
    [Tell us why other kids would love it]
-   
+
    Can you draw it?
    [Paste a photo of your drawing!]
    ```
@@ -56,7 +56,7 @@ We LOVE hearing from kids who play our game. You might have the best ideas!
    ```bash
    # For features
    git checkout -b feat/issue-NUMBER-description
-   
+
    # For fixes
    git checkout -b fix/issue-NUMBER-description
    ```
@@ -70,7 +70,7 @@ We LOVE hearing from kids who play our game. You might have the best ideas!
    ```bash
    # Run tests
    poetry run pytest
-   
+
    # Check code style
    poetry run black src/ tests/
    poetry run ruff check src/ tests/
@@ -118,13 +118,13 @@ for snowflake in snowflakes:
 def test_player_can_jump():
     """Test that our character can jump like a superhero!"""
     player = Player("Danger")
-    
+
     # The player starts on the ground
     assert player.y == ground_level
-    
+
     # Make them jump!
     player.jump()
-    
+
     # They should be in the air now!
     assert player.y < ground_level
     assert player.is_jumping == True
@@ -135,7 +135,7 @@ def test_player_can_jump():
 feat: add rainbow power-up to ski game
 
 - Rainbow trail follows player
-- Lasts for 10 seconds  
+- Lasts for 10 seconds
 - Makes you invincible
 - Suggested by Ellie, age 8!
 

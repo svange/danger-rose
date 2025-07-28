@@ -133,12 +133,12 @@ class SkiGame:
         self.player = SkiPlayer(
             self.screen_width // 2, self.screen_height - 200, character_name
         )
-        
+
         # Initialize Dad AI
         self.dad = DadAI(
             self.screen_width // 2 - 150,  # Start slightly to the left of player
             self.screen_height - 200,
-            self.screen_width
+            self.screen_width,
         )
 
         # Lives system
@@ -226,7 +226,7 @@ class SkiGame:
         self.snowflakes_collected = 0
         self.active_effects.clear()
         self.slope_generator.reset()
-        
+
         # Reset Dad position
         self.dad.x = self.screen_width // 2 - 150
         self.dad.is_celebrating = False
@@ -251,7 +251,7 @@ class SkiGame:
 
             # Update player
             self.player.update(dt)
-            
+
             # Update Dad AI
             obstacles = self.slope_generator.get_obstacles()
             self.dad.update(dt, self.player.x, obstacles)
@@ -329,7 +329,7 @@ class SkiGame:
 
         # Draw scrolling slope
         self.draw_slope(screen)
-        
+
         # Draw Dad (behind player)
         self.dad.draw(screen)
 

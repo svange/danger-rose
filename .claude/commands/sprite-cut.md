@@ -46,31 +46,31 @@ def cut_sprite_sheet(sheet_path, frame_width=256, frame_height=341, rows=3, cols
     """Cut sprite sheet into individual frames"""
     sheet = Image.open(sheet_path)
     frames = []
-    
+
     for row in range(rows):
         for col in range(cols):
             x = col * frame_width
             y = row * frame_height
             frame = sheet.crop((x, y, x + frame_width, y + frame_height))
             frames.append(frame)
-    
+
     return frames
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage: python sprite_cutter.py <sprite_sheet.png>")
         sys.exit(1)
-    
+
     sheet_path = sys.argv[1]
     frames = cut_sprite_sheet(sheet_path)
-    
+
     # Save frames
     output_dir = Path(sheet_path).parent / Path(sheet_path).stem
     output_dir.mkdir(exist_ok=True)
-    
+
     for i, frame in enumerate(frames):
         frame.save(output_dir / f"frame_{i:02d}.png")
-    
+
     print(f"Extracted {len(frames)} frames to {output_dir}")
 ```
 

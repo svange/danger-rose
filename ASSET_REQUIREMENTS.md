@@ -175,7 +175,7 @@ Vegas Tileset:
 Vegas Sphere Boss:
   - Size: 256x256 pixels
   - Faces: 3 (happy, angry, dizzy)
-  - Animations per face: 
+  - Animations per face:
     - Idle: 4 frames
     - Attack: 6 frames
     - Hurt: 2 frames
@@ -386,7 +386,7 @@ Placeholder Colors:
   - Missing Tile: Cyan (#00FFFF)
   - Missing UI: Yellow (#FFFF00)
   - Missing VFX: Green (#00FF00)
-  
+
 Placeholder Text:
   - Font: System default
   - Size: 25% of asset height

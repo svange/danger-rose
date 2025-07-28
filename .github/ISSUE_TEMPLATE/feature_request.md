@@ -14,7 +14,7 @@ assignees: svange
 - [ ] Title/Menu screens
 - [ ] Hub world
 - [ ] Ski minigame
-- [ ] Pool minigame  
+- [ ] Pool minigame
 - [ ] Vegas minigame
 - [ ] Character abilities
 - [ ] General gameplay

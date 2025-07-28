@@ -141,17 +141,17 @@ class TestBonusGame:
         game = BonusGame()
         assert game.score == 0
         assert game.player is not None
-        
+
     def test_player_controls(self):
         """Test player responds to input"""
         game = BonusGame()
         initial_x = game.player.x
-        
+
         game.handle_input({"left": True})
         game.update(0.016)
-        
+
         assert game.player.x < initial_x
-        
+
     @pytest.mark.visual
     def test_rendering(self, visual_tester):
         """Test game renders correctly"""

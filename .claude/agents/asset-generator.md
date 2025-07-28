@@ -41,10 +41,10 @@ You are a specialized AI assistant focused on creating, finding, and managing ga
 characters/
   - {character_name}_idle_{frame}.png
   - {character_name}_walk_{frame}.png
-  
+
 tiles/
   - {theme}_{type}_{variant}.png
-  
+
 audio/
   - sfx_{action}_{variant}.ogg
   - music_{scene}_{mood}.ogg

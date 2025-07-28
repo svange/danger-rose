@@ -101,12 +101,12 @@ class SaveManager:
         self.current_slot = 1
         self.auto_save_interval = 60  # seconds
         self.last_auto_save = 0
-        
+
     def save_game(self, game_state, slot=None):
         """Save current game state"""
         if slot is None:
             slot = self.current_slot
-            
+
         save_data = {
             "version": GAME_VERSION,
             "metadata": {
@@ -119,14 +119,14 @@ class SaveManager:
             "progress": self._serialize_progress(game_state.progress),
             "statistics": self._serialize_stats(game_state.stats)
         }
-        
+
         save_path = self.save_dir / f"slot_{slot}.json"
-        
+
         # Create backup of existing save
         if save_path.exists():
             backup_path = self.save_dir / f"slot_{slot}.backup"
             save_path.rename(backup_path)
-        
+
         try:
             with open(save_path, 'w') as f:
                 json.dump(save_data, f, indent=2)
@@ -136,22 +136,22 @@ class SaveManager:
             if backup_path.exists():
                 backup_path.rename(save_path)
             return False
-    
+
     def load_game(self, slot=1):
         """Load game state from slot"""
         save_path = self.save_dir / f"slot_{slot}.json"
-        
+
         if not save_path.exists():
             return None
-            
+
         try:
             with open(save_path, 'r') as f:
                 save_data = json.load(f)
-                
+
             # Check version compatibility
             if not self._is_compatible(save_data.get("version")):
                 save_data = self._migrate_save(save_data)
-                
+
             return self._deserialize_save(save_data)
         except Exception as e:
             print(f"Failed to load save: {e}")
@@ -165,15 +165,15 @@ def update_auto_save(self, current_time, game_state):
     if current_time - self.last_auto_save > self.auto_save_interval:
         self.auto_save(game_state)
         self.last_auto_save = current_time
-        
+
 def auto_save(self, game_state):
     """Perform auto-save with visual feedback"""
     # Show saving indicator
     self.show_save_indicator()
-    
+
     # Save to auto-save slot (slot 0)
     success = self.save_game(game_state, slot=0)
-    
+
     if success:
         self.show_save_success()
     else:
@@ -272,7 +272,7 @@ def get_save_slots(self):
 def _migrate_save(self, old_save):
     """Migrate old save format to current version"""
     version = old_save.get("version", "0.0.0")
-    
+
     if version < "1.0.0":
         # Add new fields with defaults
         old_save["statistics"]["achievements"] = {}
@@ -281,7 +281,7 @@ def _migrate_save(self, old_save):
             "stars_found": [],
             "secrets_discovered": []
         }
-    
+
     old_save["version"] = GAME_VERSION
     return old_save
 ```

@@ -63,7 +63,7 @@ def victory_dance():
     rose.spin()
     rose.jump()
     rose.sparkle()
-    
+
     # 🌟 Bonus: Add music to the dance!
 ```
 
@@ -75,7 +75,7 @@ class SpeedBoost(PowerUp):
         super().__init__()
         self.duration = 5  # seconds
         self.speed_multiplier = 2
-        
+
     def activate(self, player):
         # Your code here!
         # Make the player go zoom! 🏃‍♂️💨
@@ -123,7 +123,7 @@ def generate_challenge(difficulty="easy", topic=None):
         for topic_challenges in CHALLENGES[difficulty].values():
             all_challenges.extend(topic_challenges)
         challenges = all_challenges
-    
+
     return random.choice(challenges)
 ```
 

@@ -48,17 +48,17 @@ class AudioManager:
             channels=2,         # Stereo
             buffer=512          # Low latency
         )
-        
+
         # Set up channels
         self.sfx_channels = [mixer.Channel(i) for i in range(8)]
         self.music_channel = mixer.music
         self.ui_channel = mixer.Channel(8)
-        
+
         # Volume settings
         self.master_volume = 0.8
         self.sfx_volume = 1.0
         self.music_volume = 0.7
-        
+
         # Loaded sounds cache
         self.sounds = {}
         self.current_music = None
@@ -129,11 +129,11 @@ class MusicSystem:
         self.current_track = None
         self.queued_track = None
         self.fade_time = 1000  # ms
-        
+
     def play_music(self, track_name, loops=-1):
         """Play music with fade transition"""
         track_path = f"music/{track_name}"
-        
+
         if self.current_track:
             mixer.music.fadeout(self.fade_time)
             self.queued_track = (track_path, loops)
@@ -141,7 +141,7 @@ class MusicSystem:
             mixer.music.load(track_path)
             mixer.music.play(loops)
             self.current_track = track_name
-    
+
     def update(self):
         """Check for queued tracks"""
         if self.queued_track and not mixer.music.get_busy():
@@ -196,7 +196,7 @@ def duck_music_for_sfx(self, duration=0.3):
     """Temporarily lower music for important sounds"""
     current = mixer.music.get_volume()
     mixer.music.set_volume(current * 0.3)
-    
+
     # Restore after duration
     pygame.time.set_timer(RESTORE_MUSIC_EVENT, int(duration * 1000))
 ```
@@ -207,7 +207,7 @@ def play_positional_sound(self, sound_name, source_x, listener_x, max_distance=5
     """Play sound with volume based on distance"""
     distance = abs(source_x - listener_x)
     volume = max(0, 1 - (distance / max_distance))
-    
+
     if volume > 0:
         self.play_sound(sound_name, volume)
 ```
@@ -256,7 +256,7 @@ MIXING_LEVELS = {
     "sfx": 0.7,         # Clear but not overpowering
     "ui": 0.6,          # Subtle feedback
     "voice": 0.9,       # If used, should be clear
-    
+
     # Special cases
     "victory_music": 0.8,    # Celebration!
     "error_sound": 0.4,      # Gentle for kids
@@ -294,7 +294,7 @@ TUTORIAL_NARRATION = {
 def preload_scene_audio(self, scene_name):
     """Preload audio for upcoming scene"""
     scene_sounds = SCENE_AUDIO_MANIFEST[scene_name]
-    
+
     for sound in scene_sounds:
         if sound not in self.sounds:
             self.sounds[sound] = mixer.Sound(f"audio/{sound}")

@@ -3,3 +3,8 @@ test-artifacts/
 # Coverage files
 .coverage
 htmlcov/
+
+# PyInstaller
+build/
+dist/
+*.spec.bak

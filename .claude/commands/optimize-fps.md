@@ -48,27 +48,27 @@ class FPSProfiler:
         self.target_fps = target_fps
         self.frame_times = deque(maxlen=300)  # 5 seconds at 60 FPS
         self.performance_events = []
-        
+
     def profile_scene(self, scene_name):
         """Profile specific scene performance"""
         profiler = cProfile.Profile()
         profiler.enable()
-        
+
         # Run scene for 10 seconds
         start_time = time.time()
         while time.time() - start_time < 10:
             frame_start = time.time()
-            
+
             # Scene update/draw
             scene.update(dt)
             scene.draw(screen)
-            
+
             frame_time = time.time() - frame_start
             self.frame_times.append(frame_time)
-            
+
             if frame_time > 1.0 / self.target_fps:
                 self.log_performance_event(frame_time)
-        
+
         profiler.disable()
         return profiler.stats
 ```

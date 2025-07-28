@@ -141,7 +141,7 @@ def test_player_collision():
     """Test that player collides with obstacles correctly"""
     player = Player(x=100, y=100)
     obstacle = Tree(x=100, y=100)
-    
+
     assert player.check_collision(obstacle) == True
     assert player.lives == 2  # Lost one life
 ```

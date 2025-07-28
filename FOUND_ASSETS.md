@@ -6,7 +6,7 @@ This document lists all the free game assets found from Kenney.nl, OpenGameArt.o
 ## Character Sprites
 
 ### Primary Option - Kenney.nl
-1. **Platformer Characters** 
+1. **Platformer Characters**
    - URL: https://kenney.nl/assets/platformer-characters
    - License: CC0
    - Contents: 150 character variations/sprites

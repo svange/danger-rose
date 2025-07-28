@@ -66,7 +66,7 @@ class Celebration:
         self.type = celebration_type
         self.particles = []
         self.font = pygame.font.Font(None, 72)
-        
+
     def create_confetti(self):
         """Create confetti particles"""
         colors = [
@@ -77,7 +77,7 @@ class Celebration:
             (255, 0, 255),   # Magenta
             (0, 255, 255),   # Cyan
         ]
-        
+
         for _ in range(100):
             self.particles.append({
                 'x': random.randint(0, 800),
@@ -88,12 +88,12 @@ class Celebration:
                 'angle': random.uniform(0, 360),
                 'spin': random.uniform(-10, 10)
             })
-    
+
     def create_fireworks(self):
         """Create firework bursts"""
         # Launch firework
         self.firework_burst(400, 300, 50)
-        
+
     def firework_burst(self, x, y, count):
         """Create a burst of particles"""
         for i in range(count):
@@ -111,7 +111,7 @@ class Celebration:
                 ),
                 'life': 60
             })
-    
+
     def run(self):
         """Run celebration animation"""
         # Initialize particles
@@ -119,35 +119,35 @@ class Celebration:
             self.create_confetti()
         elif self.type == "fireworks":
             self.create_fireworks()
-            
+
         # Animation loop
         running = True
         duration = 5000  # 5 seconds
         start_time = pygame.time.get_ticks()
-        
+
         while running:
             current_time = pygame.time.get_ticks()
             if current_time - start_time > duration:
                 running = False
-                
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
-                    
+
             # Clear screen
             self.screen.fill((20, 20, 40))
-            
+
             # Update and draw particles
             self.update_particles()
             self.draw_particles()
-            
+
             # Draw message
             self.draw_message()
-            
+
             # Update display
             pygame.display.flip()
             self.clock.tick(60)
-            
+
         pygame.quit()
 ```
 
@@ -187,10 +187,10 @@ ENCOURAGEMENT_MESSAGES = [
 def check_achievements():
     if score > high_score:
         trigger_celebration("New High Score!", "fireworks")
-    
+
     if all_coins_collected:
         trigger_celebration("All Coins Found!", "stars")
-        
+
     if first_bug_fixed:
         trigger_celebration("First Bug Fixed!", "confetti")
 ```

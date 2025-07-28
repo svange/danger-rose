@@ -160,7 +160,7 @@ stateDiagram-v2
 
 #### Gameplay Elements
 - **Movement**: Left/Right arrows for steering
-- **Jump Mechanic**: 
+- **Jump Mechanic**:
   - Hold Space to charge (max 1 second)
   - Release for variable height jump
   - Can jump over small obstacles
@@ -267,7 +267,7 @@ stateDiagram-v2
 ```yaml
 Phase 1 - Happy Face 😊:
   - HP: 10
-  - Attacks: 
+  - Attacks:
     - Coin shower (avoid)
     - Laser sweep (jump over)
   - Pattern: Predictable 3-attack loop
@@ -308,15 +308,15 @@ graph TD
     C --> D{First Completion}
     D --> E[Unlock Trophy]
     D --> F[Unlock Difficulty Select]
-    
+
     C --> G{All 3 Games Completed}
     G --> H[Unlock Dad Character]
     H --> I[Unlock Dad's Workshop Hub Theme]
-    
+
     C --> J{High Score Achieved}
     J --> K[Unlock Color Palette]
     J --> L[Unlock Decoration]
-    
+
     C --> M{100% Completion}
     M --> N[Unlock Secret Character?]
     M --> O[Unlock Bonus Minigame?]
@@ -357,9 +357,9 @@ graph TD
 #### Base Scoring Formula
 ```python
 final_score = (
-    base_points + 
-    time_bonus + 
-    (combo_points * difficulty_multiplier) + 
+    base_points +
+    time_bonus +
+    (combo_points * difficulty_multiplier) +
     perfect_bonus
 ) * character_multiplier
 ```
@@ -512,7 +512,7 @@ if player_health < 30%:
     music.add_tension_layer()
 elif combo > 10:
     music.add_excitement_layer()
-    
+
 # Adaptive SFX
 splash_volume = min(1.0, target_distance / 500)
 play_sfx("splash", volume=splash_volume)

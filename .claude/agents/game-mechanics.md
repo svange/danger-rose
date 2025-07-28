@@ -46,20 +46,20 @@ class PlayerMovement:
         self.friction = 0.9
         self.jump_power = -12
         self.gravity = 0.5
-        
+
     def update(self, keys, dt):
         # Horizontal movement
         if keys[pygame.K_LEFT]:
             self.velocity.x -= self.acceleration
         if keys[pygame.K_RIGHT]:
             self.velocity.x += self.acceleration
-            
+
         # Apply friction
         self.velocity.x *= self.friction
-        
+
         # Apply gravity
         self.velocity.y += self.gravity
-        
+
         # Clamp to max speed
         self.velocity.x = max(-self.max_speed, min(self.max_speed, self.velocity.x))
 ```

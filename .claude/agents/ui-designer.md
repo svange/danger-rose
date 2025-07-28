@@ -80,18 +80,18 @@ class Button:
         self.click_color = UI_COLORS["primary_dark"]
         self.current_color = self.base_color
         self.font = pygame.font.Font("fonts/kid_friendly.ttf", 32)
-        
+
         # Animation properties
         self.scale = 1.0
         self.hover_scale = 1.05
         self.click_scale = 0.95
-        
+
     def update(self, mouse_pos, mouse_click):
         """Handle button states and animation"""
         if self.rect.collidepoint(mouse_pos):
             self.current_color = self.hover_color
             self.scale = self.hover_scale
-            
+
             if mouse_click:
                 self.current_color = self.click_color
                 self.scale = self.click_scale
@@ -99,21 +99,21 @@ class Button:
         else:
             self.current_color = self.base_color
             self.scale = 1.0
-            
+
     def draw(self, screen):
         """Draw button with rounded corners and shadow"""
         # Draw shadow
         shadow_rect = self.rect.copy()
         shadow_rect.move_ip(4, 4)
         pygame.draw.rect(screen, (0, 0, 0, 50), shadow_rect, border_radius=10)
-        
+
         # Draw button
         scaled_rect = self.rect.inflate(
             (self.scale - 1) * self.rect.width,
             (self.scale - 1) * self.rect.height
         )
         pygame.draw.rect(screen, self.current_color, scaled_rect, border_radius=10)
-        
+
         # Draw text
         text_surface = self.font.render(self.text, True, WHITE)
         text_rect = text_surface.get_rect(center=scaled_rect.center)
@@ -130,17 +130,17 @@ class GameHUD:
             "coins": HUDElement(x=20, y=-20, anchor="bottom-left"),
             "timer": HUDElement(x=0, y=20, anchor="top-center")
         }
-        
+
     def draw_score(self, screen, score):
         """Draw score with animation"""
         # Score background panel
         panel = pygame.Surface((200, 60), pygame.SRCALPHA)
         pygame.draw.rect(panel, (0, 0, 0, 128), (0, 0, 200, 60), border_radius=30)
-        
+
         # Score text with outline
         score_text = f"Score: {score:,}"
         self.draw_text_with_outline(panel, score_text, (100, 30))
-        
+
         screen.blit(panel, (20, 20))
 ```
 
@@ -197,12 +197,12 @@ class UIAnimator:
         """Bounce animation for appearing elements"""
         # Scale from 0 to 1.2 to 1.0
         pass
-        
+
     @staticmethod
     def slide_in(element, direction="left", duration=0.3):
         """Slide animation from edge"""
         pass
-        
+
     @staticmethod
     def fade_in(element, duration=0.2):
         """Fade in animation"""
@@ -237,13 +237,13 @@ def show_achievement(self, achievement_name):
     """Display achievement with celebration"""
     # Create achievement panel
     panel = self.create_achievement_panel(achievement_name)
-    
+
     # Add sparkle effects
     self.add_sparkles(panel.rect)
-    
+
     # Play celebration sound
     self.audio_manager.play("achievement_unlock")
-    
+
     # Animate in with bounce
     self.animate_bounce_in(panel)
 ```
@@ -279,13 +279,13 @@ class UIScaler:
     def __init__(self, base_width=1280, base_height=720):
         self.base_width = base_width
         self.base_height = base_height
-        
+
     def scale_ui(self, current_width, current_height):
         """Scale UI elements to fit screen"""
         scale_x = current_width / self.base_width
         scale_y = current_height / self.base_height
         scale = min(scale_x, scale_y)  # Maintain aspect ratio
-        
+
         return scale
 ```
 

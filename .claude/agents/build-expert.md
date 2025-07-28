@@ -129,7 +129,7 @@ def build_windows():
     # Clean previous builds
     shutil.rmtree('build', ignore_errors=True)
     shutil.rmtree('dist', ignore_errors=True)
-    
+
     # Run PyInstaller
     PyInstaller.__main__.run([
         'danger_rose.spec',
@@ -138,36 +138,36 @@ def build_windows():
         '--windowed',  # No console
         '--onefile',   # Single executable
     ])
-    
+
     # Create installer with NSIS
     create_windows_installer()
-    
+
 def create_windows_installer():
     """Create NSIS installer"""
     nsis_script = """
     !define APPNAME "Danger Rose"
     !define COMPANYNAME "Family Games"
     !define DESCRIPTION "A fun family adventure game"
-    
+
     InstallDir "$PROGRAMFILES\${APPNAME}"
-    
+
     Section "install"
         SetOutPath $INSTDIR
         File "dist\DangerRose.exe"
-        
+
         # Create shortcuts
         CreateDirectory "$SMPROGRAMS\${APPNAME}"
         CreateShortcut "$SMPROGRAMS\${APPNAME}\${APPNAME}.lnk" "$INSTDIR\DangerRose.exe"
         CreateShortcut "$DESKTOP\${APPNAME}.lnk" "$INSTDIR\DangerRose.exe"
-        
+
         # Uninstaller
         WriteUninstaller "$INSTDIR\uninstall.exe"
     SectionEnd
     """
-    
+
     with open('installer.nsi', 'w') as f:
         f.write(nsis_script)
-    
+
     os.system('makensis installer.nsi')
 ```
 
@@ -182,11 +182,11 @@ def build_macos():
         '--clean',
         '--noconfirm',
     ])
-    
+
     # Sign the app (if certificates available)
     if has_signing_certificate():
         sign_macos_app()
-    
+
     # Create DMG
     create_dmg()
 
@@ -217,25 +217,25 @@ def build_linux():
         '--clean',
         '--noconfirm',
     ])
-    
+
     # Create AppImage
     create_appimage()
-    
+
     # Create .deb package
     create_deb_package()
 
 def create_appimage():
     """Create portable AppImage"""
     appdir = "DangerRose.AppDir"
-    
+
     # Create directory structure
     os.makedirs(f"{appdir}/usr/bin", exist_ok=True)
     os.makedirs(f"{appdir}/usr/share/icons", exist_ok=True)
-    
+
     # Copy files
     shutil.copy("dist/DangerRose", f"{appdir}/usr/bin/")
     shutil.copy("assets/icons/danger_rose.png", f"{appdir}/usr/share/icons/")
-    
+
     # Create desktop entry
     desktop_entry = """
     [Desktop Entry]
@@ -245,10 +245,10 @@ def create_appimage():
     Type=Application
     Categories=Game;
     """
-    
+
     with open(f"{appdir}/DangerRose.desktop", 'w') as f:
         f.write(desktop_entry)
-    
+
     # Build AppImage
     os.system(f"appimagetool {appdir}")
 ```
@@ -261,10 +261,10 @@ def optimize_assets():
     """Optimize assets for distribution"""
     # Compress images
     optimize_images()
-    
+
     # Convert audio to optimal format
     optimize_audio()
-    
+
     # Create asset manifest
     create_asset_manifest()
 
@@ -272,17 +272,17 @@ def optimize_images():
     """Compress images without losing quality"""
     from PIL import Image
     import os
-    
+
     for root, dirs, files in os.walk("assets/images"):
         for file in files:
             if file.endswith(('.png', '.jpg')):
                 path = os.path.join(root, file)
                 img = Image.open(path)
-                
+
                 # Optimize PNG
                 if file.endswith('.png'):
                     img.save(path, 'PNG', optimize=True)
-                
+
                 # Convert appropriate PNGs to JPEG
                 if not has_transparency(img) and img.size[0] > 512:
                     jpg_path = path.replace('.png', '.jpg')
@@ -352,12 +352,12 @@ class AutoUpdater:
         try:
             current = self.get_current_version()
             latest = self.fetch_latest_version()
-            
+
             if self.is_newer(latest, current):
                 self.notify_update_available(latest)
         except:
             pass  # Fail silently
-            
+
     def download_update(self, version):
         """Download new version in background"""
         # Download to temp directory
@@ -424,21 +424,21 @@ jobs:
     strategy:
       matrix:
         os: [windows-latest, macos-latest, ubuntu-latest]
-    
+
     runs-on: ${{ matrix.os }}
-    
+
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-python@v2
-    
+
     - name: Install dependencies
       run: |
         pip install -r requirements.txt
         pip install pyinstaller
-    
+
     - name: Build executable
       run: python build.py --platform ${{ matrix.os }}
-    
+
     - name: Upload artifacts
       uses: actions/upload-artifact@v2
 ```

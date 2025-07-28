@@ -14,7 +14,7 @@ class TestSnowflake:
         assert snowflake.y == 200
         assert snowflake.width == 32
         assert snowflake.height == 32
-        assert snowflake.collected == False
+        assert not snowflake.collected
         assert snowflake.float_offset == 0.0
         assert snowflake.float_speed == 2.0
         assert snowflake.float_amplitude == 10.0
@@ -35,7 +35,7 @@ class TestSnowflakePool:
         assert pool.max_snowflakes == 5
         assert len(pool.active_snowflakes) == 0
         assert len(pool.inactive_snowflakes) == 0
-        assert pool.sprites_loaded == False
+        assert not pool.sprites_loaded
 
     def test_spawn_snowflake(self, pool):
         """Test spawning a snowflake from the pool."""
@@ -45,7 +45,7 @@ class TestSnowflakePool:
         assert snowflake is not None
         assert snowflake.x == 150
         assert snowflake.y == 250
-        assert snowflake.collected == False
+        assert not snowflake.collected
         assert len(pool.active_snowflakes) == 1
         assert len(pool.inactive_snowflakes) == 4  # 5 total - 1 active
 
@@ -87,7 +87,7 @@ class TestSnowflakePool:
     def test_despawn_offscreen_snowflakes(self, pool):
         """Test that off-screen snowflakes are despawned."""
         # Spawn snowflake near bottom of screen
-        snowflake = pool.spawn_snowflake(100, 600)
+        pool.spawn_snowflake(100, 600)
         assert len(pool.active_snowflakes) == 1
 
         # Update to move it off screen
@@ -110,7 +110,7 @@ class TestSnowflakePool:
 
         assert len(collected) == 1
         assert collected[0] == snowflake
-        assert snowflake.collected == True
+        assert snowflake.collected
 
         # Check again - should not collect already collected snowflake
         collected_again = pool.check_collection(player_rect)
@@ -148,7 +148,7 @@ class TestSnowflakeEffect:
         # Update effect
         still_alive = effect.update(0.1)
 
-        assert still_alive == True
+        assert still_alive
         assert effect.lifetime < 0.5
 
         # Particles should have moved
@@ -162,5 +162,5 @@ class TestSnowflakeEffect:
         # Update with large time step
         still_alive = effect.update(1.0)
 
-        assert still_alive == False
+        assert not still_alive
         assert effect.lifetime <= 0

@@ -80,7 +80,7 @@ class TestTerrainChunk:
         assert chunk.chunk_height == 300
         assert chunk.chunk_y == -300
         assert chunk.screen_width == 1280
-        assert chunk.is_active == True
+        assert chunk.is_active
         assert len(chunk.obstacles) == 0
 
     def test_generate_obstacles_respects_safe_zone(self):
@@ -143,7 +143,7 @@ class TestSlopeGenerator:
 
     def test_chunk_generation_and_removal(self, slope_generator):
         """Test chunks are generated and removed as needed."""
-        initial_chunks = len(slope_generator.chunks)
+        len(slope_generator.chunks)
 
         # Simulate scrolling for a while
         for _ in range(10):

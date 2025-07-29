@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/svange/danger-rose/compare/v1.4.0...v1.5.0) (2025-07-29)
+
+
+### Features
+
+* implement moving targets for pool game ([#85](https://github.com/svange/danger-rose/issues/85)) ([877ec07](https://github.com/svange/danger-rose/commit/877ec0789478de6b1e4d99c469bd17c86afa9d08)), closes [#29](https://github.com/svange/danger-rose/issues/29) [#29](https://github.com/svange/danger-rose/issues/29) [#28](https://github.com/svange/danger-rose/issues/28)
+
 # [1.4.0](https://github.com/svange/danger-rose/compare/v1.3.0...v1.4.0) (2025-07-29)
 
 

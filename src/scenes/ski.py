@@ -2,8 +2,7 @@ import pygame
 import time
 import random
 from datetime import datetime
-from src.utils.asset_paths import get_character_sprite_path
-from src.utils.attack_character import AttackCharacter
+from src.utils.attack_character import AnimatedCharacter
 from src.scenes.slope_generator import SlopeGenerator
 from src.entities.snowflake import SnowflakeEffect
 from src.entities.dad_ai import DadAI
@@ -30,11 +29,12 @@ class SkiPlayer:
         self.speed = 5
         self.diagonal_speed = 3.5  # Slower when moving diagonally
 
-        # Create animated character
-        sprite_path = get_character_sprite_path(character_name.lower())
-        self.sprite = AttackCharacter(
-            character_name, sprite_path, (SPRITE_DISPLAY_SIZE, SPRITE_DISPLAY_SIZE)
+        # Create animated character using new individual file system
+        self.sprite = AnimatedCharacter(
+            character_name.lower(), "ski", (SPRITE_DISPLAY_SIZE, SPRITE_DISPLAY_SIZE)
         )
+        # Set to walk animation for skiing
+        self.sprite.set_animation("walk", loop=True)
 
         # Collision rect - smaller than sprite for more forgiving collisions
         self.rect = pygame.Rect(x - 24, y - 24, 48, 48)

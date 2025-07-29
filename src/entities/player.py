@@ -2,8 +2,7 @@
 
 import pygame
 from typing import List, Tuple
-from src.utils.animated_character import AnimatedCharacter
-from src.utils.asset_paths import get_character_sprite_path
+from src.utils.attack_character import AnimatedCharacter
 from src.config.constants import (
     PLAYER_SPEED,
     SPRITE_DISPLAY_SIZE,
@@ -35,9 +34,12 @@ class Player:
         # Direction facing (for sprite flipping)
         self.facing_right = True
 
-        # Load character sprite
-        sprite_path = get_character_sprite_path(character_name)
-        self.sprite = AnimatedCharacter(character_name, sprite_path)
+        # Load character sprite using new individual file system
+        self.sprite = AnimatedCharacter(
+            character_name.lower(),
+            "hub",
+            scale=(SPRITE_DISPLAY_SIZE, SPRITE_DISPLAY_SIZE),
+        )
 
         # Collision rectangle (centered on position)
         self.rect = pygame.Rect(
@@ -151,11 +153,9 @@ class Player:
 
         # Update animation state
         if abs(self.vx) > 10 or abs(self.vy) > 10:
-            self.sprite.set_animation("walking")
+            self.sprite.set_animation("walk", loop=True)
         else:
-            # For idle, we'll use the first frame of walking for now
-            self.sprite.set_animation("walking")
-            self.sprite.current_frame = 0
+            self.sprite.set_animation("idle", loop=True)
 
         # Update sprite animation
         self.sprite.update()

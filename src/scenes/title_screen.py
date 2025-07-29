@@ -1,6 +1,6 @@
 import pygame
 from src.utils.sprite_loader import load_image
-from src.utils.attack_character import AttackCharacter
+from src.utils.attack_character import AnimatedCharacter
 from src.utils.asset_paths import (
     get_living_room_bg,
     get_danger_sprite,
@@ -29,10 +29,12 @@ class CharacterButton:
         self.selected = False
         self.hovered = False
 
-        # Create attack-only animated character
-        self.animated_character = AttackCharacter(
-            character_name, sprite_path, (SPRITE_DISPLAY_SIZE, SPRITE_DISPLAY_SIZE)
+        # Create animated character using new individual file system
+        self.animated_character = AnimatedCharacter(
+            character_name.lower(), "hub", (SPRITE_DISPLAY_SIZE, SPRITE_DISPLAY_SIZE)
         )
+        # Set to idle animation for title screen
+        self.animated_character.set_animation("idle", loop=True)
 
         # Font for character name
         self.font = pygame.font.Font(None, 36)
@@ -99,13 +101,15 @@ class TitleScreen:
 
         # Create character selection buttons
         button_y = screen_height // 2 - 150
-        danger_x = screen_width // 2 - 250
-        rose_x = screen_width // 2 + 50
+        danger_x = screen_width // 2 - 350
+        rose_x = screen_width // 2 - 50
+        dad_x = screen_width // 2 + 250
 
         self.danger_button = CharacterButton(
             danger_x, button_y, "Danger", get_danger_sprite()
         )
         self.rose_button = CharacterButton(rose_x, button_y, "Rose", get_rose_sprite())
+        self.dad_button = CharacterButton(dad_x, button_y, "Dad", "")
 
         # Title text
         self.title_font = pygame.font.Font(None, 72)
@@ -147,6 +151,7 @@ class TitleScreen:
             self.selected_character = "Danger"
             self.danger_button.selected = True
             self.rose_button.selected = False
+            self.dad_button.selected = False
             self.sound_manager.play_sfx(get_sfx_path("menu_select.wav"))
             return None
 
@@ -154,6 +159,15 @@ class TitleScreen:
             self.selected_character = "Rose"
             self.rose_button.selected = True
             self.danger_button.selected = False
+            self.dad_button.selected = False
+            self.sound_manager.play_sfx(get_sfx_path("menu_select.wav"))
+            return None
+
+        if self.dad_button.handle_event(event):
+            self.selected_character = "Dad"
+            self.dad_button.selected = True
+            self.danger_button.selected = False
+            self.rose_button.selected = False
             self.sound_manager.play_sfx(get_sfx_path("menu_select.wav"))
             return None
 
@@ -181,6 +195,7 @@ class TitleScreen:
         mouse_pos = pygame.mouse.get_pos()
         self.danger_button.update(mouse_pos)
         self.rose_button.update(mouse_pos)
+        self.dad_button.update(mouse_pos)
 
     def draw(self, screen):
         # Draw background
@@ -199,6 +214,7 @@ class TitleScreen:
         # Draw character buttons
         self.danger_button.draw(screen)
         self.rose_button.draw(screen)
+        self.dad_button.draw(screen)
 
         # Draw settings button
         mouse_pos = pygame.mouse.get_pos()

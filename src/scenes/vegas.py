@@ -1,7 +1,7 @@
 import pygame
 from src.utils.sprite_loader import load_image
-from src.utils.asset_paths import get_vegas_bg, get_character_sprite_path
-from src.utils.attack_character import AttackCharacter
+from src.utils.asset_paths import get_vegas_bg
+from src.utils.attack_character import AnimatedCharacter
 from src.entities.vegas_boss import VegasBoss, BossPhase
 from src.managers.sound_manager import SoundManager
 from src.config.constants import (
@@ -49,11 +49,13 @@ class Player:
         self.gravity = 0.8
         self.max_fall_speed = 12
 
-        # Create animated character
-        sprite_path = get_character_sprite_path(character_name.lower())
-        self.sprite = AttackCharacter(
-            character_name, sprite_path, (SPRITE_DISPLAY_SIZE, SPRITE_DISPLAY_SIZE)
+        # Create animated character using new individual file system
+        self.sprite = AnimatedCharacter(
+            character_name.lower(), "vegas", (SPRITE_DISPLAY_SIZE, SPRITE_DISPLAY_SIZE)
         )
+        # Set to idle animation by default
+        self.sprite.set_animation("idle", loop=True)
+        self.facing_right = True
 
         # Collision rect (smaller than sprite for better feel)
         self.rect = pygame.Rect(x, y, 64, 100)
@@ -70,8 +72,10 @@ class Player:
         self.vx = 0
         if keys[pygame.K_LEFT] or keys[pygame.K_a]:
             self.vx = -self.speed
+            self.facing_right = False
         if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
             self.vx = self.speed
+            self.facing_right = True
 
         # Jumping
         if (
@@ -79,6 +83,7 @@ class Player:
         ) and self.on_ground:
             self.vy = self.jump_power
             self.on_ground = False
+            self.sprite.set_animation("jump", loop=False)
 
     def update(self, dt: float, ground_y: int):
         # Apply gravity
@@ -100,6 +105,13 @@ class Player:
         self.rect.x = self.x
         self.rect.y = self.y
 
+        # Update animation state
+        if self.on_ground:
+            if abs(self.vx) > 0:
+                self.sprite.set_animation("walk", loop=True)
+            else:
+                self.sprite.set_animation("idle", loop=True)
+
         # Update animation
         self.sprite.update()
 
@@ -119,6 +131,11 @@ class Player:
 
     def draw(self, screen, camera):
         sprite = self.sprite.get_current_sprite()
+
+        # Flip sprite if facing left
+        if not self.facing_right:
+            sprite = pygame.transform.flip(sprite, True, False)
+
         screen_x, screen_y = camera.apply_to_pos(self.x, self.y)
 
         # Apply flash effect when hit

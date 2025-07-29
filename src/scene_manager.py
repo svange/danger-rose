@@ -69,7 +69,7 @@ class SceneManager:
         self.current_scene = self.scenes[SCENE_TITLE]
 
         # Start title music
-        self.sound_manager.play_music(get_music_path("title_theme.wav"), fade_ms=1000)
+        self.sound_manager.play_music(get_music_path("title_theme.ogg"), fade_ms=1000)
 
     def handle_event(self, event):
         # Handle ESC key for pause (only in allowed scenes)
@@ -172,11 +172,11 @@ class SceneManager:
     def _handle_music_transition(self, scene_name: str):
         """Handle music transitions between scenes."""
         music_map = {
-            SCENE_TITLE: "title_theme.wav",
-            SCENE_HUB_WORLD: "hub_theme.wav",
-            SCENE_SKI_GAME: "ski_theme.wav",
-            SCENE_VEGAS_GAME: "vegas_theme.wav",
-            SCENE_POOL_GAME: "pool_theme.wav",
+            SCENE_TITLE: "title_theme.ogg",
+            SCENE_HUB_WORLD: "hub_theme.ogg",
+            SCENE_SKI_GAME: "ski_theme.ogg",
+            SCENE_VEGAS_GAME: "vegas_theme.ogg",
+            SCENE_POOL_GAME: "pool_theme.ogg",
         }
 
         if scene_name in music_map:

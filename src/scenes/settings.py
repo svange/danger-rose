@@ -33,9 +33,7 @@ class SettingsScene:
         self.font_button = pygame.font.Font(None, 32)
 
         # Back button
-        self.back_button = pygame.Rect(
-            50, self.screen_height - 100, BUTTON_WIDTH, BUTTON_HEIGHT
-        )
+        self.back_button = pygame.Rect(50, 50, BUTTON_WIDTH, BUTTON_HEIGHT)
 
         # Volume sliders
         self.master_volume_rect = pygame.Rect(
@@ -47,8 +45,38 @@ class SettingsScene:
         # Fullscreen toggle
         self.fullscreen_rect = pygame.Rect(self.screen_width // 2 - 100, 500, 200, 50)
 
+        # Key bindings
+        self.key_binding_rects = {}
+        self.key_labels = ["Up", "Down", "Left", "Right", "Jump", "Attack"]
+        self.key_configs = ["up", "down", "left", "right", "jump", "attack"]
+
+        # Create rectangles for key bindings
+        start_y = 600
+        for i, label in enumerate(self.key_labels):
+            rect = pygame.Rect(self.screen_width // 2 - 150, start_y + i * 50, 300, 40)
+            self.key_binding_rects[self.key_configs[i]] = rect
+
         # State
-        self.dragging_slider = None
+        self.dragging_slider: Optional[str] = None
+        self.rebinding_key: Optional[str] = None  # Which key is being rebound
+        self.waiting_for_key = False  # Are we waiting for a key press?
+        self.selected_player = "player1"  # Currently selected player for rebinding
+
+        # Keyboard navigation
+        self.focusable_elements = [
+            "master_volume",
+            "music_volume",
+            "sfx_volume",
+            "fullscreen",
+            "up",
+            "down",
+            "left",
+            "right",
+            "jump",
+            "attack",
+            "back",
+        ]
+        self.focused_element_index = 0
 
     def handle_event(self, event: pygame.event.Event) -> Optional[str]:
         """Handle input events.
@@ -78,6 +106,14 @@ class SettingsScene:
                 self.config.fullscreen = not self.config.fullscreen
                 # Note: Actual fullscreen toggle would require recreating the display
 
+            # Check key binding buttons
+            if not self.waiting_for_key:
+                for key, rect in self.key_binding_rects.items():
+                    if rect.collidepoint(mouse_pos):
+                        self.rebinding_key = key
+                        self.waiting_for_key = True
+                        break
+
             # Check volume sliders
             if self.master_volume_rect.collidepoint(mouse_pos):
                 self.dragging_slider = "master"
@@ -97,21 +133,95 @@ class SettingsScene:
                 relative_x = mouse_x - self.master_volume_rect.x
                 volume = max(0.0, min(1.0, relative_x / self.master_volume_rect.width))
                 self.config.master_volume = volume
+                self.sound_manager.set_master_volume(volume)
 
             elif self.dragging_slider == "music":
                 relative_x = mouse_x - self.music_volume_rect.x
                 volume = max(0.0, min(1.0, relative_x / self.music_volume_rect.width))
                 self.config.music_volume = volume
+                self.sound_manager.set_music_volume(volume)
 
             elif self.dragging_slider == "sfx":
                 relative_x = mouse_x - self.sfx_volume_rect.x
                 volume = max(0.0, min(1.0, relative_x / self.sfx_volume_rect.width))
                 self.config.sfx_volume = volume
+                self.sound_manager.set_sfx_volume(volume)
 
         elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE:
-                self.config.save()
-                return SCENE_TITLE
+            if self.waiting_for_key:
+                # Cancel rebinding on ESC
+                if event.key == pygame.K_ESCAPE:
+                    self.waiting_for_key = False
+                    self.rebinding_key = None
+                else:
+                    # Set the new key binding
+                    key_name = pygame.key.name(event.key)
+                    control_path = (
+                        f"controls.{self.selected_player}.{self.rebinding_key}"
+                    )
+                    self.config.set(control_path, key_name)
+                    self.waiting_for_key = False
+                    self.rebinding_key = None
+            else:
+                if event.key == pygame.K_ESCAPE:
+                    self.config.save()
+                    return SCENE_TITLE
+                elif event.key == pygame.K_TAB:
+                    # Navigate through focusable elements
+                    if pygame.key.get_mods() & pygame.KMOD_SHIFT:
+                        self.focused_element_index = (
+                            self.focused_element_index - 1
+                        ) % len(self.focusable_elements)
+                    else:
+                        self.focused_element_index = (
+                            self.focused_element_index + 1
+                        ) % len(self.focusable_elements)
+                elif event.key in [pygame.K_UP, pygame.K_DOWN]:
+                    # Navigate vertically
+                    if event.key == pygame.K_UP:
+                        self.focused_element_index = (
+                            self.focused_element_index - 1
+                        ) % len(self.focusable_elements)
+                    else:
+                        self.focused_element_index = (
+                            self.focused_element_index + 1
+                        ) % len(self.focusable_elements)
+                elif event.key in [pygame.K_LEFT, pygame.K_RIGHT]:
+                    # Adjust volume sliders or toggle fullscreen
+                    focused = self.focusable_elements[self.focused_element_index]
+                    if focused == "master_volume":
+                        delta = 0.05 if event.key == pygame.K_RIGHT else -0.05
+                        self.config.master_volume = max(
+                            0.0, min(1.0, self.config.master_volume + delta)
+                        )
+                        self.sound_manager.set_master_volume(self.config.master_volume)
+                    elif focused == "music_volume":
+                        delta = 0.05 if event.key == pygame.K_RIGHT else -0.05
+                        self.config.music_volume = max(
+                            0.0, min(1.0, self.config.music_volume + delta)
+                        )
+                        self.sound_manager.set_music_volume(self.config.music_volume)
+                    elif focused == "sfx_volume":
+                        delta = 0.05 if event.key == pygame.K_RIGHT else -0.05
+                        self.config.sfx_volume = max(
+                            0.0, min(1.0, self.config.sfx_volume + delta)
+                        )
+                        self.sound_manager.set_sfx_volume(self.config.sfx_volume)
+                elif event.key in [pygame.K_RETURN, pygame.K_SPACE]:
+                    # Activate focused element
+                    focused = self.focusable_elements[self.focused_element_index]
+                    if focused == "fullscreen":
+                        self.config.fullscreen = not self.config.fullscreen
+                    elif focused in self.key_configs:
+                        self.rebinding_key = focused
+                        self.waiting_for_key = True
+                    elif focused == "back":
+                        self.config.save()
+                        if self.paused_scene:
+                            return_scene = self.paused_scene
+                            self.paused_scene = None
+                            return return_scene
+                        return SCENE_TITLE
 
         return None
 
@@ -139,12 +249,14 @@ class SettingsScene:
         screen.blit(title_surface, title_rect)
 
         # Volume controls
+        focused_element = self.focusable_elements[self.focused_element_index]
         self._draw_volume_slider(
             screen,
             "Master Volume",
             self.master_volume_rect,
             self.config.master_volume,
             150,
+            focused_element == "master_volume",
         )
         self._draw_volume_slider(
             screen,
@@ -152,9 +264,15 @@ class SettingsScene:
             self.music_volume_rect,
             self.config.music_volume,
             250,
+            focused_element == "music_volume",
         )
         self._draw_volume_slider(
-            screen, "SFX Volume", self.sfx_volume_rect, self.config.sfx_volume, 350
+            screen,
+            "SFX Volume",
+            self.sfx_volume_rect,
+            self.config.sfx_volume,
+            350,
+            focused_element == "sfx_volume",
         )
 
         # Fullscreen toggle
@@ -164,27 +282,64 @@ class SettingsScene:
             center=(self.screen_width // 2, 525)
         )
         screen.blit(fullscreen_surface, fullscreen_rect)
-        pygame.draw.rect(screen, COLOR_WHITE, self.fullscreen_rect, 2)
+        fullscreen_border_color = (
+            (255, 255, 100) if focused_element == "fullscreen" else COLOR_WHITE
+        )
+        pygame.draw.rect(
+            screen,
+            fullscreen_border_color,
+            self.fullscreen_rect,
+            3 if focused_element == "fullscreen" else 2,
+        )
+
+        # Key bindings section
+        controls_title = self.font_label.render(
+            "Key Bindings (Player 1)", True, COLOR_WHITE
+        )
+        controls_rect = controls_title.get_rect(center=(self.screen_width // 2, 580))
+        screen.blit(controls_title, controls_rect)
+
+        # Draw key binding buttons
+        for i, (key, label) in enumerate(zip(self.key_configs, self.key_labels)):
+            rect = self.key_binding_rects[key]
+
+            # Highlight if this key is being rebound
+            if self.waiting_for_key and self.rebinding_key == key:
+                pygame.draw.rect(screen, (100, 100, 255), rect)
+                key_text = "Press any key..."
+            else:
+                pygame.draw.rect(screen, (60, 60, 60), rect)
+                # Get current key binding
+                current_key = self.config.get(
+                    f"controls.{self.selected_player}.{key}", "?"
+                )
+                key_text = f"{label}: {current_key.upper()}"
+
+            border_color = (255, 255, 100) if focused_element == key else COLOR_WHITE
+            pygame.draw.rect(
+                screen, border_color, rect, 3 if focused_element == key else 2
+            )
+
+            # Draw the label and key
+            text_surface = self.font_button.render(key_text, True, COLOR_WHITE)
+            text_rect = text_surface.get_rect(center=rect.center)
+            screen.blit(text_surface, text_rect)
 
         # Back button
-        pygame.draw.rect(screen, COLOR_BLUE, self.back_button)
-        pygame.draw.rect(screen, COLOR_WHITE, self.back_button, 2)
+        back_color = (100, 150, 255) if focused_element == "back" else COLOR_BLUE
+        pygame.draw.rect(screen, back_color, self.back_button)
+        back_border_color = (
+            (255, 255, 100) if focused_element == "back" else COLOR_WHITE
+        )
+        pygame.draw.rect(
+            screen,
+            back_border_color,
+            self.back_button,
+            3 if focused_element == "back" else 2,
+        )
         back_text = self.font_button.render("Back", True, COLOR_WHITE)
         back_rect = back_text.get_rect(center=self.back_button.center)
         screen.blit(back_text, back_rect)
-
-        # Instructions
-        instructions = [
-            "Click and drag sliders to adjust volume",
-            "Click fullscreen to toggle",
-            "Press ESC or click Back to return",
-        ]
-        y_offset = self.screen_height - 250
-        for instruction in instructions:
-            inst_surface = self.font_button.render(instruction, True, COLOR_WHITE)
-            inst_rect = inst_surface.get_rect(center=(self.screen_width // 2, y_offset))
-            screen.blit(inst_surface, inst_rect)
-            y_offset += 40
 
     def _draw_volume_slider(
         self,
@@ -193,6 +348,7 @@ class SettingsScene:
         rect: pygame.Rect,
         value: float,
         y_pos: int,
+        is_focused: bool = False,
     ) -> None:
         """Draw a volume slider.
 
@@ -210,7 +366,8 @@ class SettingsScene:
 
         # Slider track
         pygame.draw.rect(screen, (60, 60, 60), rect)
-        pygame.draw.rect(screen, COLOR_WHITE, rect, 2)
+        border_color = (255, 255, 100) if is_focused else COLOR_WHITE
+        pygame.draw.rect(screen, border_color, rect, 3 if is_focused else 2)
 
         # Slider fill
         fill_width = int(rect.width * value)

@@ -1,6 +1,7 @@
 import pygame
 import pytest
 import math
+from unittest.mock import MagicMock
 from src.entities.vegas_boss import VegasBoss, BossPhase, Projectile
 
 
@@ -219,3 +220,51 @@ class TestVegasBoss:
             color = boss.get_phase_color()
             assert color not in colors.values()  # Each color should be unique
             colors[phase] = color
+
+    def test_projectile_rect_updates(self):
+        """Test projectile rect updates with position."""
+        proj = Projectile(100, 100, 10, 0, (255, 0, 0), 20)
+
+        # Initial rect position
+        assert proj.rect.centerx == 100
+        assert proj.rect.centery == 100
+
+        # Update position
+        proj.update(1.0)
+
+        # Rect should follow position
+        assert proj.rect.centerx == 110  # 100 + 10*1
+        assert proj.rect.centery == 100
+
+    def test_boss_rect_follows_position(self, boss):
+        """Test boss collision rect follows boss position."""
+        initial_x = boss.rect.centerx
+        initial_y = boss.rect.centery
+
+        # Move boss
+        boss.x += 50
+        boss.y += 30
+        boss.update_rect()
+
+        # Rect should update
+        assert boss.rect.centerx == initial_x + 50
+        assert boss.rect.centery == initial_y + 30
+
+    def test_boss_draw_methods(self, boss):
+        """Test boss drawing methods don't crash."""
+        mock_screen = MagicMock()
+
+        # Test main draw
+        boss.draw(mock_screen, 0)
+
+        # Test health bar draw
+        boss.draw_health_bar(mock_screen, 100, 50)
+
+        # Test face drawing for each phase
+        for phase in [
+            BossPhase.PHASE_1_HAPPY,
+            BossPhase.PHASE_2_ANGRY,
+            BossPhase.PHASE_3_DIZZY,
+        ]:
+            boss.phase = phase
+            boss.draw_face(mock_screen, 400, 300, 100)

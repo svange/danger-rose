@@ -1,5 +1,6 @@
 import pytest
 import pygame
+import time
 from unittest.mock import Mock, patch
 
 from src.scenes.pool import PoolGame, WaterBalloon, Target
@@ -20,7 +21,16 @@ def mock_scene_manager():
 @pytest.fixture
 def pool_game(mock_scene_manager):
     """Create a pool game instance."""
-    with patch("pygame.font.Font"):
+    # Mock pygame.font.Font to return a mock font
+    # Create a single surface to reuse instead of creating new ones
+    test_surface = pygame.Surface((100, 30))
+    test_rect = pygame.Rect(0, 0, 100, 30)
+
+    mock_font = Mock()
+    mock_font.render = Mock(return_value=test_surface)
+    mock_font.get_rect = Mock(return_value=test_rect)
+
+    with patch("pygame.font.Font", return_value=mock_font):
         game = PoolGame(mock_scene_manager)
     return game
 
@@ -43,9 +53,9 @@ class TestPoolPowerUpSpawning:
     def test_spawn_timing(self, pool_game):
         """Test power-up spawn timing."""
         pool_game.state = pool_game.STATE_PLAYING
-        pool_game.time_remaining = 52.0  # 8 seconds into game
+        pool_game.start_time = time.time() - 8.0  # Start 8 seconds ago
 
-        # Should spawn first power-up
+        # Update to trigger spawn
         pool_game.update(0.1)
         assert len(pool_game.powerups) == 1
 
@@ -243,7 +253,7 @@ class TestPowerUpUI:
 
     def test_active_powerup_display(self, pool_game):
         """Test drawing active power-ups doesn't crash."""
-        pygame.init()
+        # Don't initialize pygame here - it's already initialized
         screen = pygame.Surface((1280, 720))
 
         # Add active power-ups
@@ -255,7 +265,10 @@ class TestPowerUpUI:
 
         # Should not crash
         pool_game.state = pool_game.STATE_PLAYING
-        pool_game.draw_game_ui(screen)
+        try:
+            pool_game.draw_game_ui(screen)
+        except Exception as e:
+            pytest.fail(f"draw_game_ui raised {e!r}")
 
 
 class TestPowerUpReset:

@@ -88,24 +88,21 @@ class PowerUp(ABC):
         pulse_scale = 1 + math.sin(self.pulse_time * 4) * 0.1
         current_radius = int(self.radius * pulse_scale)
 
-        # Draw outer glow
-        glow_radius = current_radius + 10
-        glow_surface = pygame.Surface(
-            (glow_radius * 2, glow_radius * 2), pygame.SRCALPHA
-        )
+        # Draw outer glow (simplified without creating surfaces)
         color = self.get_color()
-        for i in range(10):
-            alpha = 20 - i * 2
+
+        # Draw glow rings directly to screen
+        for i in range(10, 0, -1):
+            # Fade the glow color based on distance from center
+            fade_factor = (10 - i) / 10.0
+            glow_color = tuple(int(c * (1 - fade_factor * 0.8)) for c in color)
             pygame.draw.circle(
-                glow_surface,
-                (*color, alpha),
-                (glow_radius, glow_radius),
-                glow_radius - i,
+                screen,
+                glow_color,
+                (int(self.x), int(self.y + self.float_offset)),
+                current_radius + i,
+                1,
             )
-        screen.blit(
-            glow_surface,
-            (self.x - glow_radius, self.y + self.float_offset - glow_radius),
-        )
 
         # Draw main circle
         pygame.draw.circle(
@@ -269,4 +266,6 @@ class ActivePowerUp:
 
     def get_progress(self) -> float:
         """Get the progress percentage (0-1) of the power-up."""
+        if self.duration <= 0:
+            return 0
         return self.get_time_remaining() / self.duration

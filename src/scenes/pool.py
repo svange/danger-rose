@@ -228,22 +228,26 @@ class WaterBalloon:
         if not self.active:
             return
 
-        # Draw trail
+        # Draw trail (simplified without creating surfaces)
         for i, (tx, ty) in enumerate(self.trail):
-            alpha = int(255 * (i / len(self.trail)) * 0.3)
             trail_radius = int(self.radius * (i / len(self.trail)))
             if trail_radius > 0:
-                # Create transparent surface for trail
-                trail_surf = pygame.Surface(
-                    (trail_radius * 2, trail_radius * 2), pygame.SRCALPHA
-                )
-                pygame.draw.circle(
-                    trail_surf,
-                    (*self.color, alpha),
-                    (trail_radius, trail_radius),
-                    trail_radius,
-                )
-                screen.blit(trail_surf, (tx - trail_radius, ty - trail_radius))
+                # Draw directly to screen with decreasing opacity
+                color = (*self.color, int(255 * (i / len(self.trail)) * 0.3))
+                # Use gfxdraw for per-pixel alpha if available, otherwise just draw solid
+                try:
+                    import pygame.gfxdraw
+
+                    pygame.gfxdraw.filled_circle(
+                        screen, int(tx), int(ty), trail_radius, color
+                    )
+                except ImportError:
+                    # Fallback to regular circle with fading color
+                    fade_factor = i / len(self.trail)
+                    faded_color = tuple(int(c * fade_factor) for c in self.color)
+                    pygame.draw.circle(
+                        screen, faded_color, (int(tx), int(ty)), trail_radius
+                    )
 
         # Draw main balloon
         pygame.draw.circle(screen, self.color, (int(self.x), int(self.y)), self.radius)
@@ -341,7 +345,9 @@ class PoolGame:
         # Power-ups
         self.powerups: List[PowerUp] = []
         self.active_powerups: List[ActivePowerUp] = []
-        self.next_powerup_spawn = 8.0  # First power-up after 8 seconds
+        self.next_powerup_spawn = (
+            self.game_duration - 8.0
+        )  # First power-up after 8 seconds (52s remaining)
         self.powerup_spawn_interval = 12.0  # Spawn every 12 seconds
         self.max_powerups_on_field = 2  # Maximum power-ups on field at once
 

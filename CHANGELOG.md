@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/svange/danger-rose/compare/v1.1.1...v1.2.0) (2025-07-29)
+
+
+### Features
+
+* implement hub world save point system closes [#16](https://github.com/svange/danger-rose/issues/16) ([#81](https://github.com/svange/danger-rose/issues/81)) ([9dde62e](https://github.com/svange/danger-rose/commit/9dde62ee3b4bc5e32e787d91457298d35c4ae05f))
+
 ## [1.1.1](https://github.com/svange/danger-rose/compare/v1.1.0...v1.1.1) (2025-07-29)
 
 

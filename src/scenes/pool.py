@@ -5,6 +5,13 @@ import random
 from typing import List
 from src.utils.asset_paths import get_character_sprite_path
 from src.utils.attack_character import AttackCharacter
+from src.entities.powerup import (
+    PowerUp,
+    TripleShotPowerUp,
+    RapidFirePowerUp,
+    HomingPowerUp,
+    ActivePowerUp,
+)
 from src.config.constants import (
     SPRITE_DISPLAY_SIZE,
     COLOR_WHITE,
@@ -110,6 +117,7 @@ class WaterBalloon:
         target_x: float,
         target_y: float,
         launch_speed: float = 800,
+        is_homing: bool = False,
     ):
         self.x = float(start_x)
         self.y = float(start_y)
@@ -142,12 +150,17 @@ class WaterBalloon:
         self.gravity = GRAVITY * 0.5  # Reduced gravity for better arc
         self.active = True
 
+        # Homing properties
+        self.is_homing = is_homing
+        self.homing_strength = 300.0  # Acceleration towards target
+        self.max_speed = 1000.0
+
         # Collision rect
         self.rect = pygame.Rect(
             self.x - self.radius, self.y - self.radius, self.radius * 2, self.radius * 2
         )
 
-    def update(self, dt: float):
+    def update(self, dt: float, targets: List[Target] = None):
         """Update projectile physics."""
         if not self.active:
             return
@@ -158,6 +171,42 @@ class WaterBalloon:
         else:
             self.trail.pop(0)
             self.trail.append((self.x, self.y))
+
+        # Apply homing if enabled and targets exist
+        if self.is_homing and targets:
+            # Find nearest target
+            nearest_target = None
+            min_distance = float("inf")
+
+            for target in targets:
+                if not target.hit:
+                    distance = math.sqrt(
+                        (target.x - self.x) ** 2 + (target.y - self.y) ** 2
+                    )
+                    if distance < min_distance:
+                        min_distance = distance
+                        nearest_target = target
+
+            # Apply homing force towards nearest target
+            if nearest_target and min_distance < 300:  # Homing range
+                dx = nearest_target.x - self.x
+                dy = nearest_target.y - self.y
+                distance = math.sqrt(dx**2 + dy**2)
+
+                if distance > 0:
+                    # Acceleration towards target
+                    ax = (dx / distance) * self.homing_strength
+                    ay = (dy / distance) * self.homing_strength
+
+                    # Apply acceleration
+                    self.vx += ax * dt
+                    self.vy += ay * dt
+
+                    # Limit speed
+                    speed = math.sqrt(self.vx**2 + self.vy**2)
+                    if speed > self.max_speed:
+                        self.vx = (self.vx / speed) * self.max_speed
+                        self.vy = (self.vy / speed) * self.max_speed
 
         # Update position
         self.x += self.vx * dt
@@ -179,22 +228,26 @@ class WaterBalloon:
         if not self.active:
             return
 
-        # Draw trail
+        # Draw trail (simplified without creating surfaces)
         for i, (tx, ty) in enumerate(self.trail):
-            alpha = int(255 * (i / len(self.trail)) * 0.3)
             trail_radius = int(self.radius * (i / len(self.trail)))
             if trail_radius > 0:
-                # Create transparent surface for trail
-                trail_surf = pygame.Surface(
-                    (trail_radius * 2, trail_radius * 2), pygame.SRCALPHA
-                )
-                pygame.draw.circle(
-                    trail_surf,
-                    (*self.color, alpha),
-                    (trail_radius, trail_radius),
-                    trail_radius,
-                )
-                screen.blit(trail_surf, (tx - trail_radius, ty - trail_radius))
+                # Draw directly to screen with decreasing opacity
+                color = (*self.color, int(255 * (i / len(self.trail)) * 0.3))
+                # Use gfxdraw for per-pixel alpha if available, otherwise just draw solid
+                try:
+                    import pygame.gfxdraw
+
+                    pygame.gfxdraw.filled_circle(
+                        screen, int(tx), int(ty), trail_radius, color
+                    )
+                except ImportError:
+                    # Fallback to regular circle with fading color
+                    fade_factor = i / len(self.trail)
+                    faded_color = tuple(int(c * fade_factor) for c in self.color)
+                    pygame.draw.circle(
+                        screen, faded_color, (int(tx), int(ty)), trail_radius
+                    )
 
         # Draw main balloon
         pygame.draw.circle(screen, self.color, (int(self.x), int(self.y)), self.radius)
@@ -288,6 +341,22 @@ class PoolGame:
 
         # Effects
         self.splash_effects: List[SplashEffect] = []
+
+        # Power-ups
+        self.powerups: List[PowerUp] = []
+        self.active_powerups: List[ActivePowerUp] = []
+        self.next_powerup_spawn = (
+            self.game_duration - 8.0
+        )  # First power-up after 8 seconds (52s remaining)
+        self.powerup_spawn_interval = 12.0  # Spawn every 12 seconds
+        self.max_powerups_on_field = 2  # Maximum power-ups on field at once
+
+        # Power-up effects flags
+        self.triple_shot_active = False
+        self.rapid_fire_active = False
+        self.homing_active = False
+        self.original_reload_time = 0.5
+        self.original_reload_duration = 2.0
 
         # Mouse aiming
         self.mouse_x = 0
@@ -397,20 +466,57 @@ class PoolGame:
         self.is_reloading = False
         self.can_shoot = True
 
+        # Clear power-ups
+        self.powerups.clear()
+        for active in self.active_powerups:
+            active.powerup.remove_effect(self)
+        self.active_powerups.clear()
+        self.next_powerup_spawn = self.game_duration - 10.0  # Reset spawn timer
+
     def shoot_balloon(self):
         """Shoot a water balloon towards the mouse position."""
         # Check if we can shoot
         if not self.can_shoot or self.is_reloading or self.current_ammo <= 0:
             return
 
-        # Create new balloon from player position to mouse position
-        balloon = WaterBalloon(
-            self.player.x,
-            self.player.y - 20,  # Start slightly above player
-            self.mouse_x,
-            self.mouse_y,
-        )
-        self.projectiles.append(balloon)
+        if self.triple_shot_active:
+            # Create three balloons in a spread pattern
+            spread_angle = 15  # degrees
+            for i in range(3):
+                angle_offset = (i - 1) * spread_angle  # -15, 0, 15 degrees
+
+                # Calculate offset target position
+                dx = self.mouse_x - self.player.x
+                dy = self.mouse_y - self.player.y
+                distance = math.sqrt(dx**2 + dy**2)
+
+                if distance > 0:
+                    # Rotate the direction vector
+                    angle = math.atan2(dy, dx) + math.radians(angle_offset)
+                    target_x = self.player.x + math.cos(angle) * distance
+                    target_y = self.player.y + math.sin(angle) * distance
+                else:
+                    target_x = self.mouse_x
+                    target_y = self.mouse_y
+
+                balloon = WaterBalloon(
+                    self.player.x,
+                    self.player.y - 20,
+                    target_x,
+                    target_y,
+                    is_homing=self.homing_active,
+                )
+                self.projectiles.append(balloon)
+        else:
+            # Single balloon
+            balloon = WaterBalloon(
+                self.player.x,
+                self.player.y - 20,
+                self.mouse_x,
+                self.mouse_y,
+                is_homing=self.homing_active,
+            )
+            self.projectiles.append(balloon)
 
         # Update ammo and cooldown
         self.current_ammo -= 1
@@ -426,6 +532,36 @@ class PoolGame:
         self.is_reloading = True
         self.reload_progress = 0
         self.can_shoot = False
+
+    def spawn_powerup(self):
+        """Spawn a random power-up at a random location."""
+        # Random position within pool area (avoiding edges)
+        x = random.randint(200, self.screen_width - 200)
+        y = random.randint(200, 400)
+
+        # Random power-up type
+        powerup_types = [TripleShotPowerUp, RapidFirePowerUp, HomingPowerUp]
+        PowerUpClass = random.choice(powerup_types)
+
+        powerup = PowerUpClass(x, y)
+        self.powerups.append(powerup)
+
+    def collect_powerup(self, powerup: PowerUp):
+        """Collect a power-up and apply its effect."""
+        # Remove any existing power-up of the same type
+        for active in self.active_powerups[:]:
+            if isinstance(active.powerup, type(powerup)):
+                active.powerup.remove_effect(self)
+                self.active_powerups.remove(active)
+
+        # Apply new power-up
+        powerup.apply_effect(self)
+        active = ActivePowerUp(powerup)
+        self.active_powerups.append(active)
+
+        # Play collection sound (if sound manager available)
+        if hasattr(self.scene_manager, "sound_manager"):
+            self.scene_manager.sound_manager.play_sound("powerup")
 
     def update(self, dt: float):
         if self.state == self.STATE_PLAYING:
@@ -461,7 +597,7 @@ class PoolGame:
                 :
             ]:  # Copy list to allow removal during iteration
                 old_active = balloon.active
-                balloon.update(dt)
+                balloon.update(dt, self.targets)  # Pass targets for homing
 
                 if not balloon.active:
                     # Create splash if balloon just became inactive (hit water)
@@ -484,6 +620,29 @@ class PoolGame:
             for target in self.targets:
                 target.update(dt)
 
+            # Power-up spawning
+            if (
+                self.time_remaining <= self.next_powerup_spawn
+                and len(self.powerups) < self.max_powerups_on_field
+            ):
+                self.spawn_powerup()
+                self.next_powerup_spawn -= self.powerup_spawn_interval
+
+            # Update power-ups
+            for powerup in self.powerups[:]:
+                powerup.update(dt)
+
+                # Check collection
+                if powerup.check_collection(self.player.x, self.player.y):
+                    self.collect_powerup(powerup)
+                    self.powerups.remove(powerup)
+
+            # Update active power-ups
+            for active in self.active_powerups[:]:
+                if active.is_expired():
+                    active.powerup.remove_effect(self)
+                    self.active_powerups.remove(active)
+
             # Update splash effects
             for splash in self.splash_effects[:]:
                 splash.update(dt)
@@ -505,6 +664,10 @@ class PoolGame:
         # Draw targets
         for target in self.targets:
             target.draw(screen)
+
+        # Draw power-ups
+        for powerup in self.powerups:
+            powerup.draw(screen)
 
         # Draw projectiles
         for balloon in self.projectiles:
@@ -669,6 +832,54 @@ class PoolGame:
                 hint = self.font.render("Press R to reload", True, COLOR_BLACK)
                 hint_rect = hint.get_rect(center=(self.screen_width // 2, ammo_y + 30))
                 screen.blit(hint, hint_rect)
+
+        # Draw active power-ups
+        if self.active_powerups:
+            powerup_y = 100
+            powerup_x = self.screen_width - 250
+
+            # Background for power-up display
+            bg_height = len(self.active_powerups) * 50 + 20
+            bg_rect = pygame.Rect(powerup_x - 10, powerup_y - 10, 240, bg_height)
+            pygame.draw.rect(screen, COLOR_WHITE, bg_rect)
+            pygame.draw.rect(screen, COLOR_BLACK, bg_rect, 2)
+
+            for i, active in enumerate(self.active_powerups):
+                y = powerup_y + i * 50
+
+                # Power-up icon
+                icon_x = powerup_x + 20
+                icon_y = y + 20
+                pygame.draw.circle(screen, active.color, (icon_x, icon_y), 15)
+                pygame.draw.circle(screen, COLOR_WHITE, (icon_x, icon_y), 12, 2)
+
+                # Power-up name
+                name_text = self.font.render(active.name, True, COLOR_BLACK)
+                screen.blit(name_text, (icon_x + 30, icon_y - 10))
+
+                # Timer bar
+                bar_x = icon_x + 30
+                bar_y = icon_y + 10
+                bar_width = 150
+                bar_height = 8
+
+                # Background bar
+                pygame.draw.rect(
+                    screen, (200, 200, 200), (bar_x, bar_y, bar_width, bar_height)
+                )
+
+                # Progress bar
+                progress_width = int(bar_width * active.get_progress())
+                bar_color = active.color
+
+                # Flash when almost expired
+                if active.get_time_remaining() < 2.0:
+                    if int(active.get_time_remaining() * 4) % 2 == 0:
+                        bar_color = COLOR_RED
+
+                pygame.draw.rect(
+                    screen, bar_color, (bar_x, bar_y, progress_width, bar_height)
+                )
 
     def draw_game_over_screen(self, screen):
         """Draw the game over state UI."""

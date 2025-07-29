@@ -1,3 +1,10 @@
+# [1.7.0](https://github.com/svange/danger-rose/compare/v1.6.0...v1.7.0) (2025-07-29)
+
+
+### Features
+
+* complete high score tracking system for pool game ([#88](https://github.com/svange/danger-rose/issues/88)) ([7d49e4e](https://github.com/svange/danger-rose/commit/7d49e4e04ee94ab8ede39c5e1ef020662e861ffe)), closes [#25](https://github.com/svange/danger-rose/issues/25)
+
 # [1.6.0](https://github.com/svange/danger-rose/compare/v1.5.0...v1.6.0) (2025-07-29)
 
 

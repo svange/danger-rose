@@ -25,6 +25,7 @@ class SettingsScene:
         self.screen_height = screen_height
         self.config = get_config()
         self.sound_manager = sound_manager
+        self.paused_scene = None  # Track if we came from pause menu
 
         # UI elements
         self.font_title = pygame.font.Font(None, 72)
@@ -65,6 +66,11 @@ class SettingsScene:
             if self.back_button.collidepoint(mouse_pos):
                 # Save settings before going back
                 self.config.save()
+                # Return to paused scene if we came from pause menu, otherwise title
+                if self.paused_scene:
+                    return_scene = self.paused_scene
+                    self.paused_scene = None  # Reset for next time
+                    return return_scene
                 return SCENE_TITLE
 
             # Check fullscreen toggle

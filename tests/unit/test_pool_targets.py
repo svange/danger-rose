@@ -325,6 +325,11 @@ class TestTargetIntegration:
         scene_manager.screen_height = 720
         scene_manager.game_data = {"selected_character": "Danger"}
 
+        # Mock save manager with proper data structure
+        save_manager = Mock()
+        save_manager._current_save_data = {"high_scores": {}}
+        scene_manager.save_manager = save_manager
+
         # Create game
         game = PoolGame(scene_manager)
 

@@ -1,7 +1,8 @@
 import pytest
 import pygame
 from unittest.mock import Mock, patch
-from src.scenes.pool import PoolGame, PoolPlayer, WaterBalloon, Target, SplashEffect
+from src.scenes.pool import PoolGame, PoolPlayer, WaterBalloon, SplashEffect
+from src.entities.pool_targets import DuckTarget
 
 
 class TestPoolPlayer:
@@ -75,18 +76,18 @@ class TestTarget:
 
     def test_init(self):
         """Test target initialization."""
-        target = Target(300, 200, 40)
+        target = DuckTarget(300, 200)
 
         assert target.x == 300
         assert target.y == 200
-        assert target.size == 40
-        assert target.radius == 20
+        assert target.get_size() == 50  # DuckTarget has fixed size
+        assert target.get_point_value() == 25  # DuckTarget point value
         assert not target.hit
-        assert target.point_value == 10
+        assert target.active
 
     def test_collision_detection(self):
         """Test target collision with balloon."""
-        target = Target(300, 200, 40)
+        target = DuckTarget(300, 200)
         balloon = WaterBalloon(280, 200, 400, 200)
 
         # Test hit
@@ -100,14 +101,15 @@ class TestTarget:
 
     def test_hit_reset(self):
         """Test target hit animation reset."""
-        target = Target(300, 200)
+        target = DuckTarget(300, 200)
         target.hit = True
 
-        # Update for more than reset time
+        # Update for hit animation time
         target.update(0.6)
 
-        assert not target.hit
-        assert target.hit_time == 0
+        # After 0.5s, target becomes inactive, not reset
+        assert not target.active
+        assert target.hit_time > 0.5
 
 
 class TestSplashEffect:

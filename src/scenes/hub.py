@@ -6,6 +6,9 @@ from src.utils.asset_paths import get_living_room_bg, get_sfx_path
 from src.config.constants import SCREEN_WIDTH, SCREEN_HEIGHT
 from src.entities.player import Player
 from src.entities.door import Door
+from src.entities.couch import Couch
+from src.ui.notification import SaveNotification
+from datetime import datetime
 
 
 class HubWorld:
@@ -63,7 +66,12 @@ class HubWorld:
 
         # Other interactive areas
         self.trophy_shelf_area = pygame.Rect(100, 200, 150, 100)  # Trophy shelf
-        self.couch_area = pygame.Rect(350, 400, 200, 100)  # Save point couch
+
+        # Create couch save point
+        self.couch = Couch(350, 400)
+
+        # Save notification
+        self.save_notification = SaveNotification(self.font, self.small_font)
 
     def handle_event(self, event) -> Optional[str]:
         """Handle input events."""
@@ -74,12 +82,25 @@ class HubWorld:
             if event.key == pygame.K_ESCAPE:
                 return "settings"
             elif event.key == pygame.K_e:
+                # Check if player is near couch
+                if self.couch.is_highlighted:
+                    # Save the game
+                    self.scene_manager.save_game()
+                    self.couch.trigger_save()
+                    self.save_notification.show()
+                    self.scene_manager.sound_manager.play_sfx(
+                        get_sfx_path("save_game.wav")
+                    )
                 # Check if player is near any door
-                if self.highlighted_door:
+                elif self.highlighted_door:
                     self.scene_manager.sound_manager.play_sfx(
                         get_sfx_path("door_open.wav")
                     )
                     return self.highlighted_door.target_scene
+            elif event.key == pygame.K_TAB:
+                # Check if player is near couch for settings access
+                if self.couch.is_highlighted:
+                    return "settings"
 
         return None
 
@@ -96,6 +117,15 @@ class HubWorld:
                 door.is_highlighted = True
                 self.highlighted_door = door
 
+        # Check couch proximity
+        self.couch.is_highlighted = self.couch.check_player_proximity(self.player.rect)
+
+        # Update couch animation
+        self.couch.update(dt)
+
+        # Update save notification
+        self.save_notification.update(dt)
+
     def draw(self, screen: pygame.Surface) -> None:
         """Draw the hub world."""
         # Draw background
@@ -109,6 +139,9 @@ class HubWorld:
         # Draw doors
         for door in self.doors:
             door.draw(screen, self.small_font)
+
+        # Draw couch
+        self.couch.draw(screen, self.small_font)
 
         # Draw player
         self.player.draw(screen)
@@ -133,6 +166,32 @@ class HubWorld:
             inst_rect = inst_text.get_rect(center=(SCREEN_WIDTH // 2, y_offset))
             screen.blit(inst_text, inst_rect)
             y_offset += 25
+
+        # Draw save notification (on top of everything)
+        self.save_notification.draw(screen)
+
+        # Draw last save time in corner
+        last_save_time = self.scene_manager.save_manager.get_last_save_time()
+        if last_save_time:
+            # Calculate time ago
+            now = datetime.now()
+            time_diff = now - last_save_time
+
+            if time_diff.total_seconds() < 60:
+                time_str = "Just now"
+            elif time_diff.total_seconds() < 3600:
+                minutes = int(time_diff.total_seconds() / 60)
+                time_str = f"{minutes} min ago"
+            else:
+                time_str = last_save_time.strftime("%I:%M %p")
+
+            save_text = self.small_font.render(
+                f"Last save: {time_str}", True, (200, 200, 200)
+            )
+            save_rect = save_text.get_rect(
+                bottomright=(SCREEN_WIDTH - 20, SCREEN_HEIGHT - 20)
+            )
+            screen.blit(save_text, save_rect)
 
     def on_enter(self, previous_scene: Optional[str], data: Dict[str, Any]) -> None:
         """Called when entering the hub world."""

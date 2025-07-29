@@ -72,6 +72,7 @@ SCENE_VEGAS_GAME = "vegas_game"
 SCENE_SETTINGS = "settings"
 SCENE_PAUSE = "pause"
 SCENE_LEADERBOARD = "leaderboard"
+SCENE_NAME_ENTRY = "name_entry"
 
 # Audio Settings
 DEFAULT_MASTER_VOLUME = 0.7

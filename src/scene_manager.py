@@ -4,6 +4,7 @@ from src.scenes.hub import HubWorld
 from src.scenes.vegas import VegasGame
 from src.scenes.ski import SkiGame
 from src.scenes.pool import PoolGame
+from src.scenes.pause_menu import PauseMenu
 from src.config.constants import (
     SCENE_TITLE,
     SCENE_SETTINGS,
@@ -11,10 +12,12 @@ from src.config.constants import (
     SCENE_VEGAS_GAME,
     SCENE_SKI_GAME,
     SCENE_POOL_GAME,
+    SCENE_PAUSE,
 )
 from src.managers.sound_manager import SoundManager
 from src.utils.asset_paths import get_music_path
 from src.utils.save_manager import SaveManager
+import pygame
 import logging
 
 logger = logging.getLogger(__name__)
@@ -27,6 +30,14 @@ class SceneManager:
         self.current_scene = None
         self.scenes = {}
         self.game_data = {"selected_character": None}
+        self.paused = False
+        self.paused_scene_name = None
+        self.pause_allowed_scenes = [
+            SCENE_HUB_WORLD,
+            SCENE_VEGAS_GAME,
+            SCENE_SKI_GAME,
+            SCENE_POOL_GAME,
+        ]
 
         # Initialize sound manager
         self.sound_manager = SoundManager()
@@ -46,14 +57,41 @@ class SceneManager:
         self.scenes[SCENE_VEGAS_GAME] = VegasGame(self)
         self.scenes[SCENE_SKI_GAME] = SkiGame(self)
         self.scenes[SCENE_POOL_GAME] = PoolGame(self)
+        self.scenes[SCENE_PAUSE] = PauseMenu(
+            screen_width, screen_height, self.sound_manager
+        )
         self.current_scene = self.scenes[SCENE_TITLE]
 
         # Start title music
         self.sound_manager.play_music(get_music_path("title_theme.wav"), fade_ms=1000)
 
     def handle_event(self, event):
+        # Handle ESC key for pause (only in allowed scenes)
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+            current_scene_name = self._get_current_scene_name()
+            if current_scene_name in self.pause_allowed_scenes and not self.paused:
+                self.pause_game()
+                return
+
         if self.current_scene:
             result = self.current_scene.handle_event(event)
+
+            # Get previous scene name for checking
+            previous_scene_name = self._get_current_scene_name()
+
+            # Handle pause menu results
+            if self.paused and result:
+                if result == "resume":
+                    self.resume_game()
+                elif result == "quit":
+                    pygame.event.post(pygame.event.Event(pygame.QUIT))
+                elif result == SCENE_TITLE:
+                    self.resume_game()
+                    self.switch_scene(SCENE_TITLE)
+                elif result == SCENE_SETTINGS:
+                    # Don't resume yet, let settings handle the return
+                    self.switch_scene(SCENE_SETTINGS)
+                return
 
             # Handle scene transitions
             if result == "start_game":
@@ -68,13 +106,25 @@ class SceneManager:
                 self.switch_scene(SCENE_SKI_GAME)
             elif result == "pool":
                 self.switch_scene(SCENE_POOL_GAME)
+            elif (
+                result in self.pause_allowed_scenes
+                and previous_scene_name == SCENE_SETTINGS
+            ):
+                # Returning from settings to a paused game
+                self.paused = False
+                self.paused_scene_name = None
+                self.switch_scene(result)
             elif result:
                 # Handle other scene transitions
                 self.switch_scene(result)
 
     def update(self, dt: float):
         if self.current_scene:
-            self.current_scene.update(dt)
+            # Only update pause menu when paused, not the underlying scene
+            if self.paused:
+                self.scenes[SCENE_PAUSE].update(dt)
+            else:
+                self.current_scene.update(dt)
 
     def draw(self, screen):
         if self.current_scene:
@@ -94,8 +144,13 @@ class SceneManager:
                 if hasattr(self.current_scene, "on_exit"):
                     data = self.current_scene.on_exit()
 
+            # Special handling for settings from pause menu
+            if scene_name == SCENE_SETTINGS and self.paused:
+                self.scenes[SCENE_SETTINGS].paused_scene = self.paused_scene_name
+                # Don't clear pause state yet
+
             # Auto-save when transitioning between gameplay scenes
-            if previous_scene_name not in [SCENE_TITLE, SCENE_SETTINGS]:
+            if previous_scene_name not in [SCENE_TITLE, SCENE_SETTINGS, SCENE_PAUSE]:
                 self._auto_save()
 
             # Switch to the new scene
@@ -159,3 +214,43 @@ class SceneManager:
     def get_save_manager(self):
         """Get the save manager instance for other components to use."""
         return self.save_manager
+
+    def _get_current_scene_name(self):
+        """Get the name of the current scene."""
+        for name, scene in self.scenes.items():
+            if scene == self.current_scene:
+                return name
+        return None
+
+    def pause_game(self):
+        """Pause the current game scene and show pause menu."""
+        if self.paused:
+            return
+
+        # Store the current scene name
+        self.paused_scene_name = self._get_current_scene_name()
+
+        # Create a surface with the current frame
+        screen = pygame.display.get_surface()
+        paused_surface = screen.copy()
+
+        # Set up the pause menu with the paused scene info
+        self.scenes[SCENE_PAUSE].set_paused_scene(self.current_scene, paused_surface)
+
+        # Switch to pause menu (without triggering auto-save)
+        self.paused = True
+        self.current_scene = self.scenes[SCENE_PAUSE]
+
+        logger.info(f"Game paused from scene: {self.paused_scene_name}")
+
+    def resume_game(self):
+        """Resume the paused game scene."""
+        if not self.paused or not self.paused_scene_name:
+            return
+
+        # Return to the paused scene
+        self.current_scene = self.scenes[self.paused_scene_name]
+        self.paused = False
+
+        logger.info(f"Game resumed to scene: {self.paused_scene_name}")
+        self.paused_scene_name = None

@@ -1,3 +1,10 @@
+## [1.0.5](https://github.com/svange/danger-rose/compare/v1.0.4...v1.0.5) (2025-07-29)
+
+
+### Bug Fixes
+
+* use GH_TOKEN for auto-merge workflow permissions ([#77](https://github.com/svange/danger-rose/issues/77)) ([f68bcee](https://github.com/svange/danger-rose/commit/f68bcee42303f2e10e1ed14f708d74a951ca8f34))
+
 ## [1.0.4](https://github.com/svange/danger-rose/compare/v1.0.3...v1.0.4) (2025-07-29)
 
 

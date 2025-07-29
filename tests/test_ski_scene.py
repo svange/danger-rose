@@ -16,6 +16,7 @@ def scene_manager():
     manager.screen_width = 800
     manager.screen_height = 600
     manager.game_data = {"selected_character": "Danger"}
+    manager.sound_manager = Mock()  # Add mock sound manager
     return manager
 
 

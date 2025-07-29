@@ -6,6 +6,9 @@ from unittest.mock import Mock, patch
 from src.scenes.hub import HubWorld
 from src.config.constants import SCREEN_WIDTH, SCREEN_HEIGHT
 
+# Use the mock_sound_manager fixture for all tests
+pytestmark = pytest.mark.usefixtures("mock_sound_manager")
+
 
 class TestHubWorld:
     """Test suite for HubWorld scene."""
@@ -16,6 +19,7 @@ class TestHubWorld:
         manager = Mock()
         manager.game_data = {"selected_character": "danger"}
         manager.debug_mode = False
+        manager.sound_manager = Mock()  # Add mock sound manager
         return manager
 
     @pytest.fixture
@@ -26,9 +30,7 @@ class TestHubWorld:
         pygame.display.set_mode((800, 600))
 
         with patch("pygame.font.Font"):
-            with patch("pygame.image.load"):
-                with patch("pygame.transform.scale"):
-                    return HubWorld(mock_scene_manager)
+            return HubWorld(mock_scene_manager)
 
     def test_initialization(self, hub_world, mock_scene_manager):
         """Test HubWorld initialization."""

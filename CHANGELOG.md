@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/svange/danger-rose/compare/v1.2.0...v1.3.0) (2025-07-29)
+
+
+### Features
+
+* implement game settings scene closes [#10](https://github.com/svange/danger-rose/issues/10) ([#82](https://github.com/svange/danger-rose/issues/82)) ([0816dd9](https://github.com/svange/danger-rose/commit/0816dd91c04ca4d4db56db12c53deb0615f1bfc3))
+
 # [1.2.0](https://github.com/svange/danger-rose/compare/v1.1.1...v1.2.0) (2025-07-29)
 
 

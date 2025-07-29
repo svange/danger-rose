@@ -1,3 +1,10 @@
+## [1.0.4](https://github.com/svange/danger-rose/compare/v1.0.3...v1.0.4) (2025-07-29)
+
+
+### Bug Fixes
+
+* remove non-existent LICENSE file from Windows installer ([#76](https://github.com/svange/danger-rose/issues/76)) ([0141904](https://github.com/svange/danger-rose/commit/01419044bde1273e37471ab08005290e2c228f37))
+
 ## [1.0.3](https://github.com/svange/danger-rose/compare/v1.0.2...v1.0.3) (2025-07-28)
 
 

@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/svange/danger-rose/compare/v1.1.0...v1.1.1) (2025-07-29)
+
+
+### Bug Fixes
+
+* simplify auto-merge to use direct merge ([#79](https://github.com/svange/danger-rose/issues/79)) ([da40562](https://github.com/svange/danger-rose/commit/da4056226a53404b7a95a6edd4264eaf4710dafa)), closes [#24](https://github.com/svange/danger-rose/issues/24)
+
 # [1.1.0](https://github.com/svange/danger-rose/compare/v1.0.5...v1.1.0) (2025-07-29)
 
 

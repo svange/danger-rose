@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/svange/danger-rose/compare/v1.5.0...v1.6.0) (2025-07-29)
+
+
+### Features
+
+* implement trophy shelf with score display functionality ([#86](https://github.com/svange/danger-rose/issues/86)) ([a81da89](https://github.com/svange/danger-rose/commit/a81da894c23006d40010abf912644c35799026e2)), closes [#29](https://github.com/svange/danger-rose/issues/29) [#29](https://github.com/svange/danger-rose/issues/29) [#15](https://github.com/svange/danger-rose/issues/15)
+
 # [1.5.0](https://github.com/svange/danger-rose/compare/v1.4.0...v1.5.0) (2025-07-29)
 
 

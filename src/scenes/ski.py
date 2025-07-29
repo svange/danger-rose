@@ -4,7 +4,6 @@ import random
 from src.utils.asset_paths import get_character_sprite_path
 from src.utils.attack_character import AttackCharacter
 from src.scenes.slope_generator import SlopeGenerator
-from src.managers.sound_manager import SoundManager
 from src.entities.snowflake import SnowflakeEffect
 from src.entities.dad_ai import DadAI
 from src.config.constants import (
@@ -165,8 +164,8 @@ class SkiGame:
         # Create slope generator
         self.slope_generator = SlopeGenerator(self.screen_width, self.screen_height)
 
-        # Sound manager
-        self.sound_manager = SoundManager()
+        # Sound manager from scene manager
+        self.sound_manager = scene_manager.sound_manager
 
         # Create simple snow texture for background
         self.create_snow_texture()

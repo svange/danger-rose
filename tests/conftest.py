@@ -66,24 +66,21 @@ def mock_sound_manager():
     with patch("src.managers.sound_manager.SoundManager", MockSoundManager):
         # Also patch where it's imported
         with patch("src.scene_manager.SoundManager", MockSoundManager):
-            with patch("src.scenes.ski.SoundManager", MockSoundManager):
-                # Mock sprite loading functions to avoid file dependencies
+            # Mock sprite loading functions to avoid file dependencies
+            with patch("src.utils.sprite_loader.load_image", return_value=mock_surface):
                 with patch(
-                    "src.utils.sprite_loader.load_image", return_value=mock_surface
+                    "src.utils.sprite_loader.load_sprite_sheet",
+                    return_value=[mock_surface] * 4,
                 ):
                     with patch(
-                        "src.utils.sprite_loader.load_sprite_sheet",
-                        return_value=[mock_surface] * 4,
-                    ):
-                        with patch(
-                            "src.utils.sprite_loader.load_character_animations"
-                        ) as mock_animations:
-                            with patch("pygame.image.load", return_value=mock_surface):
-                                # Return animations dict with mock surfaces
-                                mock_animations.return_value = {
-                                    "walking": [mock_surface] * 4,
-                                    "jumping": [mock_surface] * 4,
-                                    "idle": [mock_surface] * 4,
-                                    "attacking": [mock_surface] * 4,
-                                }
-                                yield
+                        "src.utils.sprite_loader.load_character_animations"
+                    ) as mock_animations:
+                        with patch("pygame.image.load", return_value=mock_surface):
+                            # Return animations dict with mock surfaces
+                            mock_animations.return_value = {
+                                "walking": [mock_surface] * 4,
+                                "jumping": [mock_surface] * 4,
+                                "idle": [mock_surface] * 4,
+                                "attacking": [mock_surface] * 4,
+                            }
+                            yield

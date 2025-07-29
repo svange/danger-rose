@@ -1,7 +1,8 @@
 [project]
 name = "danger-rose"
 version = "0.1.0"
-description = ""
+description = "A retro-style adventure game featuring Danger, Rose, and their snowboarding Dad"
+license = {text = "MIT"}
 authors = [
     {name = "Samuel Vange",email = "7166607+svange@users.noreply.github.com"}
 ]

@@ -187,22 +187,12 @@ class WaterBalloon:
         for i, (tx, ty) in enumerate(self.trail):
             trail_radius = int(self.radius * (i / len(self.trail)))
             if trail_radius > 0:
-                # Draw directly to screen with decreasing opacity
-                color = (*self.color, int(255 * (i / len(self.trail)) * 0.3))
-                # Use gfxdraw for per-pixel alpha if available, otherwise just draw solid
-                try:
-                    import pygame.gfxdraw
-
-                    pygame.gfxdraw.filled_circle(
-                        screen, int(tx), int(ty), trail_radius, color
-                    )
-                except ImportError:
-                    # Fallback to regular circle with fading color
-                    fade_factor = i / len(self.trail)
-                    faded_color = tuple(int(c * fade_factor) for c in self.color)
-                    pygame.draw.circle(
-                        screen, faded_color, (int(tx), int(ty)), trail_radius
-                    )
+                # Simple fading trail without per-pixel alpha
+                fade_factor = i / len(self.trail)
+                faded_color = tuple(int(c * fade_factor) for c in self.color)
+                pygame.draw.circle(
+                    screen, faded_color, (int(tx), int(ty)), trail_radius
+                )
 
         # Draw main balloon
         pygame.draw.circle(screen, self.color, (int(self.x), int(self.y)), self.radius)

@@ -53,12 +53,27 @@ We LOVE hearing from kids who play our game. You might have the best ideas!
    ```
 
 2. **Create a Branch**
-   ```bash
-   # For features
-   git checkout -b feat/issue-NUMBER-description
 
-   # For fixes
-   git checkout -b fix/issue-NUMBER-description
+   **Branch Naming Convention (Required):**
+   - Format: `{type}/issue-{number}-{description}`
+   - Types: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`
+   - Always include the issue number
+   - Use kebab-case for descriptions
+
+   ```bash
+   # Features
+   git checkout -b feat/issue-123-add-power-ups
+
+   # Bug fixes
+   git checkout -b fix/issue-456-player-collision
+
+   # Documentation
+   git checkout -b docs/issue-789-update-readme
+
+   # Other examples
+   git checkout -b refactor/issue-101-scene-manager
+   git checkout -b test/issue-202-add-minigame-tests
+   git checkout -b chore/issue-303-update-dependencies
    ```
 
 3. **Make Your Changes**
@@ -72,7 +87,7 @@ We LOVE hearing from kids who play our game. You might have the best ideas!
    poetry run pytest
 
    # Check code style
-   poetry run black src/ tests/
+   poetry run ruff format src/ tests/
    poetry run ruff check src/ tests/
    ```
 

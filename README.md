@@ -3,7 +3,7 @@
 <div align="center">
   <img src="docs/images/logo-placeholder.png" alt="Danger Rose Logo" width="400">
 
-  **A family-friendly couch co-op adventure starring Dad, Danger (Yasha), and Rose (Ellie)**
+  **A retro-style adventure game featuring Danger, Rose, and their snowboarding Dad**
 
   [![Python](https://img.shields.io/badge/Python-3.12%2B-blue.svg)](https://www.python.org/downloads/)
   [![Pygame](https://img.shields.io/badge/Pygame--CE-2.4%2B-green.svg)](https://pyga.me/)
@@ -12,9 +12,9 @@
   [![Issues](https://img.shields.io/github/issues/svange/danger-rose)](https://github.com/svange/danger-rose/issues)
 </div>
 
-## 🌟 Overview
+## 🌟 About The Game
 
-**Danger Rose** is an educational game development project designed to teach kids programming through collaborative coding with AI assistance. Players control family members through a cozy apartment hub world and three exciting minigames, each offering unique gameplay experiences.
+**Danger Rose** is a pixel-art adventure game where you play as two siblings exploring their apartment and competing in wild minigames. From racing down snowy mountains to battling the Vegas Sphere boss, every room holds a new challenge!
 
 <div align="center">
   <h3>
@@ -28,11 +28,11 @@
 </div>
 
 ### 🎯 Key Features
-- **Family Characters**: Play as Danger (10), Rose (8), or unlock Dad
-- **3 Unique Minigames**: Ski, Pool, and Vegas themed adventures
-- **Couch Co-op**: Up to 3 players local multiplayer
-- **Educational**: Learn programming concepts through game development
-- **AI-Assisted**: Built with Claude Code for collaborative learning
+- **Choose Your Hero**: Play as Danger, Rose, or unlock their snowboarding Dad
+- **3 Epic Minigames**: Ski down treacherous mountains, splash targets at the pool, and survive Vegas!
+- **Local Co-op**: Up to 3 players on one screen
+- **Retro Pixel Art**: Classic arcade style with modern gameplay
+- **Boss Battles**: Face off against the notorious Vegas Sphere
 
 ## 📸 Screenshots
 
@@ -66,13 +66,11 @@
 ### 🎮 Download and Play (Easiest!)
 
 1. **Go to [Releases](https://github.com/svange/danger-rose/releases)**
-2. **Download the installer for your system:**
-   - 🪟 **Windows**: `DangerRose-Setup-vX.X.X.exe` (Recommended)
-   - 🍎 **macOS**: `DangerRose-macOS.zip`
-   - 🐧 **Linux**: `DangerRose-Linux.zip`
-3. **Install and play!**
-   - Windows: Run the installer and follow the steps
-   - macOS/Linux: Extract the zip and run `DangerRose`
+2. **Download for your system:**
+   - 🪟 **Windows**: `DangerRose.exe` - Just download and play!
+   - 🍎 **macOS**: `DangerRose-macOS.zip` - Extract and run
+   - 🐧 **Linux**: `DangerRose-Linux.zip` - Extract and run
+3. **No installation needed!** The game runs directly from the executable
 
 ### 🎯 First Time Playing?
 1. **Choose Your Character**: Use ← → arrows to pick Danger or Rose
@@ -80,17 +78,9 @@
 3. **Explore**: Walk around with arrow keys
 4. **Play Minigames**: Stand by doors and press SPACE
 
-## 👩‍💻 For Young Developers
+## 🎮 Game Modes Breakdown
 
-Want to modify the game or learn programming? Follow the development setup below!
-
-## 👨‍👩‍👧‍👦 For Parents
-
-**Danger Rose** is designed as a learning tool for families:
-- **Safe & Offline**: No internet connection required, no ads, no in-app purchases
-- **Educational**: Teaches problem-solving, creativity, and basic programming concepts
-- **Open Source**: See exactly what your kids are playing, modify together
-- **Family-Friendly**: All content appropriate for ages 8+
+Each minigame brings its own unique challenge and scoring system. Master them all to become the ultimate champion!
 
 ## 📋 Table of Contents
 
@@ -113,21 +103,33 @@ Want to modify the game or learn programming? Follow the development setup below
 
 ### Installation Options
 
-#### Option 1: Download Release (Recommended for Players)
-1. Visit [Releases](https://github.com/svange/danger-rose/releases)
-2. Download the appropriate file:
-   - **Windows**: Use the installer (.exe) for easy setup
-   - **macOS/Linux**: Download the zip file
-3. Run and enjoy!
+#### Option 1: Portable Executable (Recommended)
+- Download from [Releases](https://github.com/svange/danger-rose/releases)
+- No installation required - just run!
+- Keep it on your desktop or USB drive
 
-#### Option 2: Play from Source (For Developers)
-If you want to modify the game, see [Development Setup](#-development-setup) below.
+#### Option 2: Add to System PATH (Optional)
+Want to run the game from anywhere? Add it to your PATH:
+
+**Windows:**
+1. Move `DangerRose.exe` to `C:\Program Files\DangerRose\`
+2. Add `C:\Program Files\DangerRose` to your PATH environment variable
+3. Run `DangerRose` from any command prompt
+
+**macOS/Linux:**
+```bash
+# Move to a directory in your PATH
+sudo mv DangerRose /usr/local/bin/
+# Now run from anywhere
+DangerRose
+```
+
+#### Option 3: Run from Source (For Developers)
+See [Development Setup](#-development-setup) below.
 
 ## 🛠️ Development Setup
 
-### For Young Programmers & Contributors
-
-#### Prerequisites
+### Prerequisites
 - **Python**: 3.12 or higher ([Download Python](https://python.org))
 - **Poetry**: Package manager ([Install Poetry](https://python-poetry.org/docs/))
 - **Git**: Version control ([Download Git](https://git-scm.com))
@@ -190,38 +192,28 @@ The apartment is your home base! Walk around and interact with:
 ## 🎯 Game Modes
 
 ### 🎿 Ski Downhill
-Race down the mountain with Dad on his snowboard!
-- **Goal**: Dodge obstacles and collect snowflakes
-- **Duration**: 60-second runs
-- **Scoring**:
-  - Snowflakes: +10 points
-  - Finish bonus: +500 points
-  - Perfect run: +1000 points
-- **Tips**: Dad uses rubber-band AI to stay near you!
+Race down the mountain while Dad chases you on his snowboard!
+- **The Challenge**: Survive 60 seconds of high-speed skiing
+- **Obstacles**: Trees, rocks, and ice patches
+- **Collect**: Snowflakes for points (+10 each)
+- **Pro Tip**: Dad's AI keeps him close - use this to your advantage!
+- **High Score Target**: 1,000+ points
 
 ### 🏊 Pool Splash
-A relaxing water balloon target practice!
-- **Goal**: Hit floating targets and collect rings
-- **Duration**: 60-second rounds
-- **Power-ups**:
-  - 🎯 Triple Shot: Fire 3 balloons at once
-  - ⚡ Speed Boost: Move faster for 10 seconds
-- **Scoring**:
-  - Targets: +50 points
-  - Rings: +25 points
-  - Combo multiplier: x2, x3, x4...
+Water balloon mayhem at the neighborhood pool!
+- **The Challenge**: Hit as many targets as possible in 60 seconds
+- **Targets**: Rubber ducks, beach balls, and donut floats
+- **Power-ups**: Triple shot, rapid fire, homing balloons
+- **Combo System**: Chain hits for massive multipliers
+- **High Score Target**: 5,000+ points
 
 ### 🎰 Vegas Dash
-Adventure through the neon streets of mini Las Vegas!
-- **Goal**: Collect chips and defeat the Vegas Sphere boss
-- **Boss Fight**: 3 phases with different emoji faces
-- **Weapons**:
-  - ⚔️ Sword slash (close range)
-  - 🌈 Rainbow beam (long range)
-- **Scoring**:
-  - Chips: +100 points
-  - Enemies: +200 points
-  - Boss victory: +5000 points
+Side-scrolling beat 'em up through neon-lit Vegas!
+- **The Challenge**: Reach the Vegas Sphere boss and defeat it
+- **Enemies**: Casino chips, dice, and playing cards come to life
+- **Boss Battle**: The Vegas Sphere with 3 increasingly chaotic phases
+- **Weapons**: Sword for close combat, rainbow beam for range
+- **High Score Target**: 10,000+ points
 
 ## 🔧 Technical Details
 
@@ -293,24 +285,18 @@ poetry run pre-commit run --all-files
 
 ## 🤝 Contributing
 
-We love contributions from our young developers! See [CONTRIBUTING.md](CONTRIBUTING.md) for:
-- How to report bugs 🐛
-- How to suggest features 💡
-- Coding guidelines 📝
-- How to submit changes 🚀
-
-### For Kids
-1. **Find a Bug?** Tell us what happened!
-2. **Have an Idea?** Draw it or describe it!
-3. **Want to Code?** Start with "good first issue" tags!
+Want to help make Danger Rose even better? Check out [CONTRIBUTING.md](CONTRIBUTING.md) for:
+- Bug reporting guidelines
+- Feature request process
+- Code style guide
+- Pull request workflow
 
 ## 👥 Credits
 
 ### Development Team
-- **Game Design**: The whole family!
-- **Programming**: Parents & Kids with Claude Code
-- **Art Direction**: Kids' creative vision
-- **Testing**: Daily family game nights
+- **Game Design & Programming**: Samuel Vange
+- **Character Concepts**: Yasha & Ellie
+- **Quality Assurance**: The whole crew
 
 ### Assets
 - Character sprites from [Kenney.nl](https://kenney.nl)
@@ -319,8 +305,8 @@ We love contributions from our young developers! See [CONTRIBUTING.md](CONTRIBUT
 - Additional art from [OpenGameArt.org](https://opengameart.org)
 
 ### Special Thanks
-- Claude Code for AI-assisted development
-- The Pygame community for inspiration
+- The Pygame-CE community
+- All our playtesters and contributors
 
 ## 📄 License
 
@@ -329,7 +315,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 <div align="center">
-  Made with ❤️ by a coding family
 
   [🐛 Report Bug](https://github.com/svange/danger-rose/issues) • [💡 Request Feature](https://github.com/svange/danger-rose/issues) • [📖 Documentation](docs/)
 </div>

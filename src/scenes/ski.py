@@ -1,11 +1,13 @@
 import pygame
 import time
 import random
+from datetime import datetime
 from src.utils.asset_paths import get_character_sprite_path
 from src.utils.attack_character import AttackCharacter
 from src.scenes.slope_generator import SlopeGenerator
 from src.entities.snowflake import SnowflakeEffect
 from src.entities.dad_ai import DadAI
+from src.utils.high_score_manager import HighScoreManager, ScoreEntry
 from src.config.constants import (
     SPRITE_DISPLAY_SIZE,
     COLOR_WHITE,
@@ -14,6 +16,7 @@ from src.config.constants import (
     COLOR_RED,
     COLOR_BLUE,
     SCENE_HUB_WORLD,
+    SCENE_LEADERBOARD,
 )
 
 
@@ -149,6 +152,12 @@ class SkiGame:
         self.snowflakes_collected = 0
         self.points_per_snowflake = 10
 
+        # High score tracking
+        self.high_score_manager = HighScoreManager()
+        self.is_new_high_score = False
+        self.final_time = 0.0
+        self.difficulty = "normal"  # Could be set based on game settings
+
         # Visual elements
         self.scroll_speed = 200  # Base scrolling speed
         self.scroll_offset = 0
@@ -200,6 +209,9 @@ class SkiGame:
                 if event.key == pygame.K_SPACE:
                     # Restart
                     self.reset_game()
+                elif event.key == pygame.K_l:
+                    # View leaderboard
+                    return SCENE_LEADERBOARD
                 elif event.key == pygame.K_ESCAPE:
                     return SCENE_HUB_WORLD
 
@@ -223,6 +235,7 @@ class SkiGame:
         self.lives = self.max_lives
         self.score = 0
         self.snowflakes_collected = 0
+        self.is_new_high_score = False
         self.active_effects.clear()
         self.slope_generator.reset()
 
@@ -241,8 +254,11 @@ class SkiGame:
                 # Check for game over
                 if self.time_remaining <= 0:
                     self.state = self.STATE_GAME_OVER
+                    self.final_time = elapsed
                     # Make Dad celebrate
                     self.dad.start_celebration()
+                    # Submit high score
+                    self._submit_high_score()
 
             # Handle player input
             keys = pygame.key.get_pressed()
@@ -291,6 +307,11 @@ class SkiGame:
                     # Check for game over
                     if self.lives <= 0:
                         self.state = self.STATE_GAME_OVER
+                        self.final_time = (
+                            time.time() - self.start_time if self.start_time else 0
+                        )
+                        # Submit high score
+                        self._submit_high_score()
                     break
 
     def check_snowflake_collection(self):
@@ -535,15 +556,30 @@ class SkiGame:
         snowflake_rect = snowflake_text.get_rect(center=(self.screen_width // 2, 400))
         screen.blit(snowflake_text, snowflake_rect)
 
-        # Options
-        options = ["Press SPACE to play again", "Press ESC to return to hub"]
+        # Show if new high score
+        if self.is_new_high_score:
+            high_score_text = self.big_font.render("NEW HIGH SCORE!", True, COLOR_GREEN)
+            high_score_rect = high_score_text.get_rect(
+                center=(self.screen_width // 2, 440)
+            )
+            screen.blit(high_score_text, high_score_rect)
+            y_start = 490
+        else:
+            y_start = 470
 
-        y = 470
+        # Options
+        options = [
+            "Press SPACE to play again",
+            "Press L to view leaderboard",
+            "Press ESC to return to hub",
+        ]
+
+        y = y_start
         for option in options:
             text = self.font.render(option, True, COLOR_WHITE)
             text_rect = text.get_rect(center=(self.screen_width // 2, y))
             screen.blit(text, text_rect)
-            y += 40
+            y += 35
 
     def on_enter(self, previous_scene, data):
         """Called when entering this scene."""
@@ -553,3 +589,26 @@ class SkiGame:
     def on_exit(self):
         """Called when leaving this scene."""
         return {}
+
+    def _submit_high_score(self):
+        """Submit the current score as a high score."""
+        # For ski game, the score is the time taken (lower is better)
+        # Only submit if the game was completed (not crashed out)
+        if self.lives > 0 and self.final_time > 0:
+            character_name = self.scene_manager.game_data.get(
+                "selected_character", "Danger"
+            )
+
+            # Create score entry
+            score_entry = ScoreEntry(
+                player_name=character_name,  # Could prompt for player name
+                score=self.final_time,
+                character=character_name.lower(),
+                game_mode="ski",
+                difficulty=self.difficulty,
+                date=datetime.now(),
+                time_elapsed=self.final_time,
+            )
+
+            # Submit and check if it's a high score
+            self.is_new_high_score = self.high_score_manager.submit_score(score_entry)

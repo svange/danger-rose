@@ -52,11 +52,7 @@ class SaveManager:
                 "minigames_unlocked": {"ski": False, "pool": False, "vegas": False},
                 "trophies_earned": [],
             },
-            "high_scores": {
-                "ski": {"danger": [], "rose": [], "dad": []},
-                "pool": {"danger": [], "rose": [], "dad": []},
-                "vegas": {"danger": [], "rose": [], "dad": []},
-            },
+            "high_scores": {},
         }
 
         self._current_save_data = None
@@ -180,7 +176,50 @@ class SaveManager:
             logger.info(
                 f"Migrating save data from version {save_version} to {self.SAVE_VERSION}"
             )
-            # Add migration logic here as needed
+            # Migrate old high score format to new format with difficulties
+            if "high_scores" in validated_data:
+                old_scores = validated_data["high_scores"]
+                new_scores = {}
+
+                # Convert old format to new format
+                for game_mode, characters in old_scores.items():
+                    if isinstance(characters, dict):
+                        new_scores[game_mode] = {}
+                        for character, scores in characters.items():
+                            if isinstance(scores, list):
+                                # Old format: just a list of scores
+                                # Add missing fields to each score
+                                migrated_scores = []
+                                for score in scores:
+                                    if isinstance(score, dict):
+                                        # Add missing fields with defaults
+                                        if "player_name" not in score:
+                                            score["player_name"] = character.title()
+                                        if "character" not in score:
+                                            score["character"] = character
+                                        if "game_mode" not in score:
+                                            score["game_mode"] = game_mode
+                                        if "difficulty" not in score:
+                                            score["difficulty"] = "normal"
+                                        if "time_elapsed" not in score:
+                                            score["time_elapsed"] = score.get(
+                                                "time", score.get("score", 0)
+                                            )
+                                        migrated_scores.append(score)
+
+                                new_scores[game_mode][character] = {
+                                    "easy": [],
+                                    "normal": migrated_scores,  # Assume old scores were normal difficulty
+                                    "hard": [],
+                                }
+                            elif isinstance(scores, dict) and all(
+                                diff in scores for diff in ["easy", "normal", "hard"]
+                            ):
+                                # Already in new format
+                                new_scores[game_mode][character] = scores
+
+                validated_data["high_scores"] = new_scores
+
             validated_data["version"] = self.SAVE_VERSION
 
         return validated_data
@@ -240,32 +279,62 @@ class SaveManager:
             self.load()
         self._current_save_data["settings"][key] = value
 
-    def get_high_scores(self, game: str, character: str) -> list:
-        """Get high scores for a specific game and character."""
+    def get_high_scores(
+        self, game: str, character: str, difficulty: str = "normal"
+    ) -> list:
+        """Get high scores for a specific game and character.
+
+        Args:
+            game: Game name (ski, pool, vegas)
+            character: Character name (danger, rose, dad)
+            difficulty: Difficulty level (easy, normal, hard)
+        """
         if self._current_save_data is None:
             self.load()
         return (
             self._current_save_data.get("high_scores", {})
             .get(game, {})
-            .get(character, [])
+            .get(character, {})
+            .get(difficulty, [])
         )
 
-    def add_high_score(self, game: str, character: str, score: Dict[str, Any]) -> None:
+    def add_high_score(
+        self,
+        game: str,
+        character: str,
+        score: Dict[str, Any],
+        difficulty: str = "normal",
+    ) -> None:
         """Add a high score for a specific game and character.
 
         Args:
             game: Game name (ski, pool, vegas)
             character: Character name (danger, rose, dad)
             score: Score data dict with at least 'score' and 'date' keys
+            difficulty: Difficulty level (easy, normal, hard)
         """
         if self._current_save_data is None:
             self.load()
 
-        scores = self._current_save_data["high_scores"][game][character]
+        # Ensure structure exists
+        if game not in self._current_save_data["high_scores"]:
+            self._current_save_data["high_scores"][game] = {}
+        if character not in self._current_save_data["high_scores"][game]:
+            self._current_save_data["high_scores"][game][character] = {
+                "easy": [],
+                "normal": [],
+                "hard": [],
+            }
+        if difficulty not in self._current_save_data["high_scores"][game][character]:
+            self._current_save_data["high_scores"][game][character][difficulty] = []
+
+        scores = self._current_save_data["high_scores"][game][character][difficulty]
         scores.append(score)
         # Keep only top 10 scores
         scores.sort(key=lambda x: x.get("score", 0), reverse=True)
-        self._current_save_data["high_scores"][game][character] = scores[:10]
+        self._current_save_data["high_scores"][game][character][difficulty] = scores[
+            :10
+        ]
 
     def unlock_minigame(self, game: str) -> None:
         """Unlock a minigame."""

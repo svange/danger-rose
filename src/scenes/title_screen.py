@@ -14,6 +14,7 @@ from src.config.constants import (
     BUTTON_WIDTH,
     BUTTON_HEIGHT,
     SCENE_SETTINGS,
+    SCENE_LEADERBOARD,
 )
 
 
@@ -132,6 +133,15 @@ class TitleScreen:
         self.settings_font = pygame.font.Font(None, 36)
         self.settings_surface = self.settings_font.render("Settings", True, COLOR_WHITE)
 
+        # Leaderboard button
+        self.leaderboard_button_rect = pygame.Rect(
+            screen_width - 250, 120, BUTTON_WIDTH, BUTTON_HEIGHT
+        )
+        self.leaderboard_font = pygame.font.Font(None, 36)
+        self.leaderboard_surface = self.leaderboard_font.render(
+            "Leaderboard", True, COLOR_WHITE
+        )
+
     def handle_event(self, event):
         if self.danger_button.handle_event(event):
             self.selected_character = "Danger"
@@ -159,6 +169,11 @@ class TitleScreen:
             if self.settings_button_rect.collidepoint(event.pos):
                 self.sound_manager.play_sfx(get_sfx_path("menu_navigate.wav"))
                 return SCENE_SETTINGS
+
+            # Leaderboard button
+            if self.leaderboard_button_rect.collidepoint(event.pos):
+                self.sound_manager.play_sfx(get_sfx_path("menu_navigate.wav"))
+                return SCENE_LEADERBOARD
 
         return None
 
@@ -197,6 +212,18 @@ class TitleScreen:
             center=self.settings_button_rect.center
         )
         screen.blit(self.settings_surface, settings_text_rect)
+
+        # Draw leaderboard button
+        leaderboard_hovered = self.leaderboard_button_rect.collidepoint(mouse_pos)
+        leaderboard_color = (80, 120, 200) if leaderboard_hovered else COLOR_BLUE
+
+        pygame.draw.rect(screen, leaderboard_color, self.leaderboard_button_rect)
+        pygame.draw.rect(screen, COLOR_WHITE, self.leaderboard_button_rect, 2)
+
+        leaderboard_text_rect = self.leaderboard_surface.get_rect(
+            center=self.leaderboard_button_rect.center
+        )
+        screen.blit(self.leaderboard_surface, leaderboard_text_rect)
 
         # Draw start button if character selected
         if self.selected_character:

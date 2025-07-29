@@ -2,10 +2,13 @@ import pygame
 from src.utils.sprite_loader import load_image
 from src.utils.asset_paths import get_vegas_bg, get_character_sprite_path
 from src.utils.attack_character import AttackCharacter
+from src.entities.vegas_boss import VegasBoss, BossPhase
+from src.managers.sound_manager import SoundManager
 from src.config.constants import (
     SPRITE_DISPLAY_SIZE,
     COLOR_WHITE,
     COLOR_BLACK,
+    COLOR_RED,
     SCENE_HUB_WORLD,
 )
 
@@ -55,6 +58,13 @@ class Player:
         # Collision rect (smaller than sprite for better feel)
         self.rect = pygame.Rect(x, y, 64, 100)
 
+        # Player state
+        self.health = 3  # 3 hits
+        self.invulnerable = False
+        self.invuln_timer = 0
+        self.hit_flash_timer = 0
+        self.attack_cooldown = 0
+
     def handle_input(self, keys):
         # Horizontal movement
         self.vx = 0
@@ -93,15 +103,52 @@ class Player:
         # Update animation
         self.sprite.update()
 
+        # Update invulnerability
+        if self.invulnerable:
+            self.invuln_timer -= dt
+            if self.invuln_timer <= 0:
+                self.invulnerable = False
+
+        # Update hit flash
+        if self.hit_flash_timer > 0:
+            self.hit_flash_timer -= dt
+
+        # Update attack cooldown
+        if self.attack_cooldown > 0:
+            self.attack_cooldown -= dt
+
     def draw(self, screen, camera):
         sprite = self.sprite.get_current_sprite()
         screen_x, screen_y = camera.apply_to_pos(self.x, self.y)
+
+        # Apply flash effect when hit
+        if self.hit_flash_timer > 0 and int(self.hit_flash_timer * 20) % 2 == 0:
+            # Flash white
+            flash_sprite = sprite.copy()
+            flash_sprite.fill((255, 255, 255), special_flags=pygame.BLEND_ADD)
+            sprite = flash_sprite
+
+        # Blink when invulnerable
+        if self.invulnerable and int(self.invuln_timer * 10) % 2 == 0:
+            return  # Don't draw every other frame
 
         # Center sprite on player rect
         sprite_rect = sprite.get_rect(
             center=(screen_x + self.rect.width // 2, screen_y + self.rect.height // 2)
         )
         screen.blit(sprite, sprite_rect)
+
+    def take_damage(self):
+        """Apply damage to player."""
+        if not self.invulnerable and self.health > 0:
+            self.health -= 1
+            self.invulnerable = True
+            self.invuln_timer = 2.0  # 2 seconds of invulnerability
+            self.hit_flash_timer = 0.5
+
+            # Play hurt sound
+            sound_manager = SoundManager()
+            sound_manager.play_sfx("assets/audio/sfx/player_hurt.wav")
 
 
 class VegasGame:
@@ -130,7 +177,21 @@ class VegasGame:
 
         # Game state
         self.reached_boss = False
+        self.boss_fight_started = False
         self.paused = False
+        self.game_over = False
+        self.victory = False
+
+        # Boss
+        self.boss = None
+        self.boss_arena_x = self.level_width - 640  # Boss arena center
+
+        # Sound manager
+        self.sound_manager = SoundManager()
+
+        # Start Vegas theme music
+        vegas_music = "assets/audio/music/vegas_theme.ogg"
+        self.sound_manager.play_music(vegas_music, fade_ms=1000)
 
     def init_backgrounds(self):
         # Try to load Vegas background, use placeholder if not found
@@ -183,27 +244,89 @@ class VegasGame:
 
             # Return to hub on Q
             if event.key == pygame.K_q:
+                # Stop music when leaving
+                self.sound_manager.stop_music(fade_ms=500)
                 return SCENE_HUB_WORLD
 
         return None
 
     def update(self, dt: float):
-        if self.paused:
+        if self.paused or self.game_over:
             return
 
         # Handle input
         keys = pygame.key.get_pressed()
-        self.player.handle_input(keys)
+
+        # Only allow movement if not in boss fight or boss is defeated
+        if not self.boss_fight_started or (
+            self.boss and self.boss.phase == BossPhase.DEFEATED
+        ):
+            self.player.handle_input(keys)
 
         # Update player
         self.player.update(dt, self.ground_y)
 
-        # Update camera to follow player
-        self.camera.update(self.player.rect, self.level_width)
+        # Update camera to follow player (lock during boss fight)
+        if not self.boss_fight_started:
+            self.camera.update(self.player.rect, self.level_width)
 
         # Check if reached boss arena
-        if self.player.x >= self.level_width - 300:
+        if self.player.x >= self.boss_arena_x and not self.reached_boss:
             self.reached_boss = True
+            self.start_boss_fight()
+
+        # Update boss fight
+        if self.boss:
+            self.boss.update(dt, self.player.x, self.player.y)
+
+            # Check projectile collisions
+            if not self.player.invulnerable:
+                for projectile in self.boss.projectiles:
+                    if projectile.active and self.player.rect.colliderect(
+                        projectile.rect
+                    ):
+                        self.player.take_damage()
+                        projectile.active = False
+
+                        if self.player.health <= 0:
+                            self.game_over = True
+
+            # Check boss defeat
+            if self.boss.phase == BossPhase.DEFEATED and self.boss.y > 800:
+                self.victory = True
+                self.game_over = True
+
+        # Handle player attack on boss (spacebar during boss fight)
+        if (
+            self.boss_fight_started
+            and self.boss
+            and keys[pygame.K_SPACE]
+            and self.player.attack_cooldown <= 0
+        ):
+            # Simple attack: damage boss if close enough
+            dx = abs(self.player.x - self.boss.x)
+            dy = abs(self.player.y - self.boss.y)
+            if dx < 150 and dy < 150:  # Close range attack
+                self.boss.take_damage(1)  # Small damage per hit
+                self.player.attack_cooldown = 0.5  # Half second cooldown
+                # Play attack sound
+                self.sound_manager.play_sfx("assets/audio/sfx/attack.ogg")
+
+    def start_boss_fight(self):
+        """Initialize the boss fight."""
+        self.boss_fight_started = True
+
+        # Create boss
+        self.boss = VegasBoss(self.boss_arena_x, 300)
+
+        # Lock camera on boss arena
+        self.camera.x = self.boss_arena_x - self.screen_width // 2
+
+        # Play boss music (could use a boss theme here, but we'll intensify Vegas theme)
+        # Duck the audio briefly for dramatic effect
+        self.sound_manager.duck_audio(0.3, 500)
+        pygame.time.wait(500)
+        self.sound_manager.restore_audio_levels()
 
     def draw(self, screen):
         # Clear screen
@@ -231,22 +354,49 @@ class VegasGame:
         # Draw player
         self.player.draw(screen, self.camera)
 
+        # Draw boss
+        if self.boss:
+            self.boss.draw(screen, self.camera.x)
+
         # Draw UI
         self.draw_ui(screen)
+
+        # Draw boss health bar
+        if (
+            self.boss_fight_started
+            and self.boss
+            and self.boss.phase != BossPhase.DEFEATED
+        ):
+            self.boss.draw_health_bar(screen, self.screen_width // 2 - 200, 50)
+
+            # Draw attack indicator if in range
+            dx = abs(self.player.x - self.boss.x)
+            dy = abs(self.player.y - self.boss.y)
+            if dx < 150 and dy < 150 and self.player.attack_cooldown <= 0:
+                # Draw "Press SPACE to attack!" text
+                attack_text = self.font.render(
+                    "Press SPACE to attack!", True, COLOR_WHITE
+                )
+                attack_rect = attack_text.get_rect(center=(self.screen_width // 2, 150))
+                screen.blit(attack_text, attack_rect)
 
         # Draw pause overlay
         if self.paused:
             self.draw_pause_overlay(screen)
 
-        # Draw boss arena reached message
-        if self.reached_boss:
+        # Draw boss arena reached message (only if boss not started)
+        if self.reached_boss and not self.boss_fight_started:
             self.draw_boss_message(screen)
+
+        # Draw game over screen
+        if self.game_over:
+            self.draw_game_over_screen(screen)
 
     def draw_ui(self, screen):
         # Instructions
         instructions = [
             "Arrow Keys/WASD: Move",
-            "Space/Up/W: Jump",
+            "Space/Up/W: Jump" + (" / Attack" if self.boss_fight_started else ""),
             "ESC: Pause",
             "Q: Return to Hub",
         ]
@@ -257,12 +407,32 @@ class VegasGame:
             screen.blit(text, (10, y))
             y += 30
 
-        # Progress indicator
-        progress = min(self.player.x / self.level_width, 1.0)
-        progress_text = self.font.render(
-            f"Progress: {int(progress * 100)}%", True, COLOR_WHITE
-        )
-        screen.blit(progress_text, (self.screen_width - 200, 10))
+        # Player health
+        health_text = "Health: "
+        health_surface = self.font.render(health_text, True, COLOR_WHITE)
+        screen.blit(health_surface, (10, y))
+
+        # Draw hearts for health
+        heart_x = 100
+        for i in range(3):
+            color = COLOR_RED if i < self.player.health else (50, 50, 50)
+            # Simple heart shape
+            pygame.draw.circle(screen, color, (heart_x, y + 10), 8)
+            pygame.draw.circle(screen, color, (heart_x + 12, y + 10), 8)
+            pygame.draw.polygon(
+                screen,
+                color,
+                [(heart_x - 8, y + 12), (heart_x + 20, y + 12), (heart_x + 6, y + 25)],
+            )
+            heart_x += 30
+
+        # Progress indicator (only if not in boss fight)
+        if not self.boss_fight_started:
+            progress = min(self.player.x / self.level_width, 1.0)
+            progress_text = self.font.render(
+                f"Progress: {int(progress * 100)}%", True, COLOR_WHITE
+            )
+            screen.blit(progress_text, (self.screen_width - 200, 10))
 
     def draw_pause_overlay(self, screen):
         # Semi-transparent overlay
@@ -285,10 +455,64 @@ class VegasGame:
         )
         screen.blit(boss_text, boss_rect)
 
-        sub_text = self.font.render(
-            "Boss fight coming in Issue #31!", True, COLOR_WHITE
-        )
+        sub_text = self.font.render("Prepare for battle!", True, COLOR_WHITE)
         sub_rect = sub_text.get_rect(
             center=(self.screen_width // 2, self.screen_height // 2 + 50)
         )
         screen.blit(sub_text, sub_rect)
+
+    def draw_game_over_screen(self, screen):
+        """Draw game over or victory screen."""
+        # Semi-transparent overlay
+        overlay = pygame.Surface((self.screen_width, self.screen_height))
+        overlay.set_alpha(180)
+        overlay.fill(COLOR_BLACK)
+        screen.blit(overlay, (0, 0))
+
+        if self.victory:
+            # Victory screen
+            title_text = self.big_font.render("VICTORY!", True, (255, 215, 0))  # Gold
+            title_rect = title_text.get_rect(
+                center=(self.screen_width // 2, self.screen_height // 2 - 50)
+            )
+            screen.blit(title_text, title_rect)
+
+            sub_text = self.font.render(
+                "You defeated the Vegas Sphere!", True, COLOR_WHITE
+            )
+            sub_rect = sub_text.get_rect(
+                center=(self.screen_width // 2, self.screen_height // 2)
+            )
+            screen.blit(sub_text, sub_rect)
+
+            # Score
+            score = 1000 + (self.player.health * 500)  # Bonus for remaining health
+            score_text = self.font.render(f"Score: {score}", True, COLOR_WHITE)
+            score_rect = score_text.get_rect(
+                center=(self.screen_width // 2, self.screen_height // 2 + 40)
+            )
+            screen.blit(score_text, score_rect)
+        else:
+            # Game over screen
+            title_text = self.big_font.render("GAME OVER", True, COLOR_RED)
+            title_rect = title_text.get_rect(
+                center=(self.screen_width // 2, self.screen_height // 2 - 50)
+            )
+            screen.blit(title_text, title_rect)
+
+            sub_text = self.font.render(
+                "The Vegas Sphere was too powerful!", True, COLOR_WHITE
+            )
+            sub_rect = sub_text.get_rect(
+                center=(self.screen_width // 2, self.screen_height // 2)
+            )
+            screen.blit(sub_text, sub_rect)
+
+        # Instructions
+        instruction_text = self.font.render(
+            "Press Q to return to Hub World", True, COLOR_WHITE
+        )
+        instruction_rect = instruction_text.get_rect(
+            center=(self.screen_width // 2, self.screen_height // 2 + 100)
+        )
+        screen.blit(instruction_text, instruction_rect)

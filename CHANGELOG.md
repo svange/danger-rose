@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/svange/danger-rose/compare/v1.0.5...v1.1.0) (2025-07-29)
+
+
+### Features
+
+* implement pause menu functionality ([#78](https://github.com/svange/danger-rose/issues/78)) ([42913b5](https://github.com/svange/danger-rose/commit/42913b5842911159844094cd523c676235538667)), closes [#24](https://github.com/svange/danger-rose/issues/24)
+
 ## [1.0.5](https://github.com/svange/danger-rose/compare/v1.0.4...v1.0.5) (2025-07-29)
 
 

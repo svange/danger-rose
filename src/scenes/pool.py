@@ -2,9 +2,11 @@ import pygame
 import time
 import math
 import random
+from datetime import datetime
 from typing import List
 from src.utils.asset_paths import get_character_sprite_path
 from src.utils.attack_character import AttackCharacter
+from src.utils.high_score_manager import HighScoreManager, ScoreEntry
 from src.entities.powerup import (
     PowerUp,
     TripleShotPowerUp,
@@ -27,6 +29,7 @@ from src.config.constants import (
     COLOR_GREEN,
     COLOR_RED,
     SCENE_HUB_WORLD,
+    SCENE_NAME_ENTRY,
     GRAVITY,
 )
 
@@ -272,6 +275,11 @@ class PoolGame:
         self.start_time = None
         self.score = 0
 
+        # High score tracking
+        self.high_score_manager = HighScoreManager(scene_manager.save_manager)
+        self.is_new_high_score = False
+        self.score_submitted = False
+
         # Initialize player
         character_name = scene_manager.game_data.get("selected_character") or "Danger"
         self.player = PoolPlayer(
@@ -401,7 +409,11 @@ class PoolGame:
 
             elif self.state == self.STATE_GAME_OVER:
                 if event.key == pygame.K_SPACE:
-                    self.reset_game()
+                    if self.is_new_high_score and not self.score_submitted:
+                        # Go to name entry for new high score
+                        return SCENE_NAME_ENTRY
+                    else:
+                        self.reset_game()
                 elif event.key == pygame.K_ESCAPE:
                     return SCENE_HUB_WORLD
 
@@ -443,6 +455,10 @@ class PoolGame:
         for active in self.active_powerups:
             active.powerup.remove_effect(self)
         self.active_powerups.clear()
+
+        # Reset high score tracking
+        self.is_new_high_score = False
+        self.score_submitted = False
         self.next_powerup_spawn = self.game_duration - 8.0  # Reset spawn timer
 
     def shoot_balloon(self):
@@ -545,6 +561,7 @@ class PoolGame:
                 # Check for game over
                 if self.time_remaining <= 0:
                     self.state = self.STATE_GAME_OVER
+                    self._submit_high_score()
 
             # Update player
             self.player.update(dt)
@@ -905,14 +922,31 @@ class PoolGame:
         screen.blit(game_over_text, game_over_rect)
 
         # Score
+        score_color = COLOR_GREEN
+        score_prefix = "Final Score: "
+        if self.is_new_high_score:
+            score_color = (255, 215, 0)  # Gold color
+            score_prefix = "NEW HIGH SCORE: "
+
         score_text = self.big_font.render(
-            f"Final Score: {self.score}", True, COLOR_GREEN
+            f"{score_prefix}{self.score}", True, score_color
         )
         score_rect = score_text.get_rect(center=(self.screen_width // 2, 350))
         screen.blit(score_text, score_rect)
 
+        # New high score celebration
+        if self.is_new_high_score:
+            celebration_text = self.font.render("🎉 AMAZING! 🎉", True, (255, 255, 0))
+            celebration_rect = celebration_text.get_rect(
+                center=(self.screen_width // 2, 390)
+            )
+            screen.blit(celebration_text, celebration_rect)
+
         # Options
-        options = ["Press SPACE to play again", "Press ESC to return to hub"]
+        if self.is_new_high_score and not self.score_submitted:
+            options = ["Press SPACE to enter name", "Press ESC to return to hub"]
+        else:
+            options = ["Press SPACE to play again", "Press ESC to return to hub"]
 
         y = 450
         for option in options:
@@ -921,12 +955,70 @@ class PoolGame:
             screen.blit(text, text_rect)
             y += 40
 
+    def _submit_high_score(self):
+        """Check if current score would be a high score."""
+        if self.score_submitted:
+            return
+
+        # Get current character and difficulty
+        character_name = self.player.character_name.lower()
+        difficulty = "normal"  # TODO: Add difficulty selection later
+
+        # Check if this would be a high score
+        self.is_new_high_score = self.high_score_manager.is_high_score(
+            float(self.score), "pool", character_name, difficulty
+        )
+
+    def submit_final_score(self, player_name: str = None):
+        """Actually submit the score to the high score system."""
+        if self.score_submitted:
+            return False
+
+        self.score_submitted = True
+
+        # Get current character and difficulty
+        character_name = self.player.character_name.lower()
+        difficulty = "normal"  # TODO: Add difficulty selection later
+
+        # Use provided name or default to character name
+        final_player_name = player_name or character_name.title()
+
+        # Create score entry
+        score_entry = ScoreEntry(
+            player_name=final_player_name,
+            score=float(self.score),
+            character=character_name,
+            game_mode="pool",
+            difficulty=difficulty,
+            date=datetime.now(),
+            time_elapsed=self.game_duration - self.time_remaining,
+        )
+
+        # Submit score and return if it made the leaderboard
+        return self.high_score_manager.submit_score(score_entry)
+
     def on_enter(self, previous_scene, data):
         """Called when entering this scene."""
-        # Reset to ready state when entering
+        # Handle returning from name entry scene
+        if previous_scene == "name_entry" and data and "player_name" in data:
+            # Submit the score with the entered name
+            self.submit_final_score(data["player_name"])
+            # Keep current game state (showing game over screen)
+            return
+
+        # Reset to ready state when entering normally
         self.reset_game()
         self.create_targets()  # Ensure we have fresh targets
 
     def on_exit(self):
         """Called when leaving this scene."""
+        # If going to name entry, pass score data
+        if self.is_new_high_score and not self.score_submitted:
+            return {
+                "game_mode": "pool",
+                "character": self.player.character_name.lower(),
+                "difficulty": "normal",
+                "score": self.score,
+                "callback_scene": "pool_game",  # Return to pool after name entry
+            }
         return {}

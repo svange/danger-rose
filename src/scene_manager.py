@@ -6,6 +6,7 @@ from src.scenes.ski import SkiGame
 from src.scenes.pool import PoolGame
 from src.scenes.pause_menu import PauseMenu
 from src.scenes.leaderboard import LeaderboardScene
+from src.scenes.name_entry import NameEntryScene
 from src.config.constants import (
     SCENE_TITLE,
     SCENE_SETTINGS,
@@ -15,6 +16,7 @@ from src.config.constants import (
     SCENE_POOL_GAME,
     SCENE_PAUSE,
     SCENE_LEADERBOARD,
+    SCENE_NAME_ENTRY,
 )
 from src.managers.sound_manager import SoundManager
 from src.utils.asset_paths import get_music_path
@@ -63,6 +65,7 @@ class SceneManager:
             screen_width, screen_height, self.sound_manager
         )
         self.scenes[SCENE_LEADERBOARD] = LeaderboardScene()
+        self.scenes[SCENE_NAME_ENTRY] = NameEntryScene()
         self.current_scene = self.scenes[SCENE_TITLE]
 
         # Start title music

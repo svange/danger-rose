@@ -16,6 +16,12 @@ def mock_scene_manager():
     manager.screen_height = 720
     manager.game_data = {"selected_character": "Danger"}
     manager.sound_manager = Mock()
+
+    # Mock save manager with proper data structure
+    save_manager = Mock()
+    save_manager._current_save_data = {"high_scores": {}}
+    manager.save_manager = save_manager
+
     return manager
 
 

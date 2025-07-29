@@ -461,7 +461,6 @@ jobs:
           Source: "dist\DangerRose.exe"; DestDir: "{app}"; Flags: ignoreversion
           Source: "assets\*"; DestDir: "{app}\assets"; Flags: ignoreversion recursesubdirs createallsubdirs
           Source: "README.md"; DestDir: "{app}"; Flags: ignoreversion
-          Source: "LICENSE"; DestDir: "{app}"; Flags: ignoreversion
 
           [Icons]
           Name: "{group}\Danger Rose"; Filename: "{app}\DangerRose.exe"

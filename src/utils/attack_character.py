@@ -1,98 +1,139 @@
 import pygame
 import time
-from typing import List
+from typing import List, Dict, Optional
 from src.config.constants import (
     SPRITE_DISPLAY_SIZE,
-    SPRITE_FRAME_WIDTH,
-    SPRITE_FRAME_HEIGHT,
     ANIMATION_ATTACK_DURATION,
 )
+from src.utils.sprite_loader import load_character_individual_files
 
 
-class AttackCharacter:
-    """Simplified character animation that only shows the attack animation."""
+class AnimatedCharacter:
+    """Flexible character animation system supporting multiple animation types and scenes."""
 
     def __init__(
         self,
         character_name: str,
-        sprite_path: str,
+        scene: str = "hub",
         scale: tuple = (SPRITE_DISPLAY_SIZE, SPRITE_DISPLAY_SIZE),
+        sprite_path: Optional[str] = None,  # For backward compatibility
     ):
         self.character_name = character_name
+        self.scene = scene
         self.scale = scale
-        self.attack_frames = self._load_attack_frames(sprite_path)
+
+        # Load all animations for this character and scene
+        self.animations = self._load_character_animations(sprite_path)
 
         # Animation state
+        self.current_animation = "idle"
         self.current_frame = 0
-        self.animation_speed = (
-            ANIMATION_ATTACK_DURATION / 1000.0
-        )  # Convert ms to seconds
+        self.animation_speed = 0.1  # Default speed in seconds per frame
         self.last_frame_time = time.time()
+        self.loop_animation = True
 
-    def _load_attack_frames(self, sprite_path: str) -> List[pygame.Surface]:
-        """Load just the attack animation frames (row 2) from the sprite sheet."""
-        if not sprite_path:
-            return self._create_placeholder_frames()
+        # Animation-specific speeds
+        self.animation_speeds = {
+            "idle": 0.2,
+            "walk": 0.1,
+            "jump": 0.15,
+            "attack": ANIMATION_ATTACK_DURATION / 1000.0 / 6,  # 6 frames for attack
+            "hurt": 0.2,
+            "victory": 0.15,
+        }
 
+    def _load_character_animations(
+        self, sprite_path: Optional[str] = None
+    ) -> Dict[str, List[pygame.Surface]]:
+        """Load all character animations from individual files or fallback to sprite sheet."""
         try:
-            sheet = pygame.image.load(sprite_path)
-            if pygame.display.get_surface() is not None:
-                sheet = sheet.convert_alpha()
-            else:
-                # If no display surface, just use the raw surface
-                sheet = sheet.convert()
+            # Try loading from individual files first
+            animations = load_character_individual_files(
+                character_name=self.character_name, scene=self.scene, scale=self.scale
+            )
+            if animations:
+                return animations
+        except Exception as e:
+            print(f"Error loading individual files for {self.character_name}: {e}")
 
-            # Calculate frame dimensions for 3x4 grid (3 rows, 4 columns)
-            frame_width = SPRITE_FRAME_WIDTH
-            frame_height = SPRITE_FRAME_HEIGHT
+        # Fallback to old sprite sheet method if individual files not available
+        if sprite_path:
+            return self._load_legacy_sprite_sheet(sprite_path)
 
-            # Row 2 is the attack animation (0-indexed, bottom row)
-            attack_row = 2
-            base_y_start = attack_row * frame_height  # y = 2 * 341 = 682
+        # Final fallback: create placeholder animations
+        return self._create_placeholder_animations()
 
-            # Adjust sprite positioning UP by 1/3 of frame height to fix head cutoff
-            y_offset = frame_height // 3  # 341 // 3 = 113 pixels up
-            y_start = base_y_start - y_offset  # 682 - 113 = 569
+    def _load_legacy_sprite_sheet(
+        self, sprite_path: str
+    ) -> Dict[str, List[pygame.Surface]]:
+        """Legacy method to load from sprite sheets (for backward compatibility)."""
+        try:
+            from src.utils.sprite_loader import load_character_animations
 
-            frames = []
-            # Extract 3 attack frames (ignoring the 4th frame which is the effect)
-            for col in range(3):
-                x_start = col * frame_width
+            return load_character_animations(sprite_path, scale=self.scale)
+        except Exception as e:
+            print(f"Error loading legacy sprite sheet {sprite_path}: {e}")
+            return self._create_placeholder_animations()
 
-                # Extract frame with adjusted positioning
-                frame = pygame.Surface((frame_width, frame_height), pygame.SRCALPHA)
-                frame.blit(sheet, (0, 0), (x_start, y_start, frame_width, frame_height))
-
-                # Scale if requested
-                if self.scale:
-                    frame = pygame.transform.scale(frame, self.scale)
-
-                frames.append(frame)
-
-            return frames if frames else self._create_placeholder_frames()
-
-        except pygame.error as e:
-            print(f"Error loading sprite sheet {sprite_path}: {e}")
-            return self._create_placeholder_frames()
-
-    def _create_placeholder_frames(self) -> List[pygame.Surface]:
-        """Create placeholder frames if sprite loading fails."""
+    def _create_placeholder_animations(self) -> Dict[str, List[pygame.Surface]]:
+        """Create placeholder animations if loading fails."""
         placeholder = pygame.Surface(self.scale)
         placeholder.fill((255, 0, 255))  # Magenta placeholder
-        return [placeholder] * 3
+
+        return {
+            "idle": [placeholder] * 4,
+            "walk": [placeholder] * 5,
+            "jump": [placeholder] * 3,
+            "attack": [placeholder] * 6,
+            "hurt": [placeholder] * 2,
+            "victory": [placeholder] * 4,
+            # Add backward compatibility mappings
+            "walking": [placeholder] * 5,
+            "jumping": [placeholder] * 3,
+            "attacking": [placeholder] * 6,
+        }
 
     def update(self):
         """Update the animation frame."""
         current_time = time.time()
 
-        if current_time - self.last_frame_time >= self.animation_speed:
-            self.current_frame = (self.current_frame + 1) % len(self.attack_frames)
+        # Use animation-specific speed if available
+        speed = self.animation_speeds.get(self.current_animation, self.animation_speed)
+
+        if current_time - self.last_frame_time >= speed:
+            current_frames = self.animations.get(self.current_animation, [])
+            if current_frames:
+                if self.loop_animation:
+                    self.current_frame = (self.current_frame + 1) % len(current_frames)
+                else:
+                    # Non-looping animation (e.g., attack, hurt)
+                    if self.current_frame < len(current_frames) - 1:
+                        self.current_frame += 1
+                    # Stay on last frame if not looping
             self.last_frame_time = current_time
 
+    def set_animation(self, animation_name: str, loop: bool = True):
+        """Switch to a different animation.
+
+        Args:
+            animation_name: Name of animation (idle, walk, jump, attack, hurt, victory)
+            loop: Whether the animation should loop
+        """
+        if (
+            animation_name in self.animations
+            and animation_name != self.current_animation
+        ):
+            self.current_animation = animation_name
+            self.current_frame = 0
+            self.loop_animation = loop
+            self.last_frame_time = time.time()
+
     def get_current_sprite(self) -> pygame.Surface:
-        """Get the current attack animation frame."""
-        if self.attack_frames and 0 <= self.current_frame < len(self.attack_frames):
-            return self.attack_frames[self.current_frame]
+        """Get the current animation frame."""
+        current_frames = self.animations.get(self.current_animation, [])
+
+        if current_frames and 0 <= self.current_frame < len(current_frames):
+            return current_frames[self.current_frame]
 
         # Fallback
         fallback = pygame.Surface(self.scale)
@@ -100,9 +141,47 @@ class AttackCharacter:
         return fallback
 
     def get_frame_count(self) -> int:
-        """Get the number of attack frames."""
-        return len(self.attack_frames)
+        """Get the number of frames in current animation."""
+        current_frames = self.animations.get(self.current_animation, [])
+        return len(current_frames)
 
     def get_animation_info(self) -> str:
         """Get current animation info for debugging."""
-        return f"Attack (Frame {self.current_frame + 1}/{len(self.attack_frames)})"
+        frame_count = self.get_frame_count()
+        return f"{self.current_animation.title()} (Frame {self.current_frame + 1}/{frame_count})"
+
+    def has_animation(self, animation_name: str) -> bool:
+        """Check if character has a specific animation."""
+        return animation_name in self.animations
+
+    def get_available_animations(self) -> List[str]:
+        """Get list of available animation names."""
+        return list(self.animations.keys())
+
+    def change_scene(self, scene: str):
+        """Change the character's scene and reload sprites."""
+        if scene != self.scene:
+            self.scene = scene
+            self.animations = self._load_character_animations()
+            # Reset to idle animation
+            self.set_animation("idle")
+
+
+# Maintain backward compatibility with old class name
+class AttackCharacter(AnimatedCharacter):
+    """Backward compatibility wrapper for the old AttackCharacter class."""
+
+    def __init__(
+        self,
+        character_name: str,
+        sprite_path: str,
+        scale: tuple = (SPRITE_DISPLAY_SIZE, SPRITE_DISPLAY_SIZE),
+    ):
+        super().__init__(character_name, "hub", scale, sprite_path)
+        # Start with attack animation for backward compatibility
+        self.set_animation("attack", loop=True)
+
+    @property
+    def attack_frames(self) -> List[pygame.Surface]:
+        """Backward compatibility property."""
+        return self.animations.get("attack", [])

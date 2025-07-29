@@ -4,8 +4,7 @@ import math
 import random
 from datetime import datetime
 from typing import List
-from src.utils.asset_paths import get_character_sprite_path
-from src.utils.attack_character import AttackCharacter
+from src.utils.attack_character import AnimatedCharacter
 from src.utils.high_score_manager import HighScoreManager, ScoreEntry
 from src.entities.powerup import (
     PowerUp,
@@ -42,11 +41,12 @@ class PoolPlayer:
         self.y = y
         self.character_name = character_name
 
-        # Create animated character
-        sprite_path = get_character_sprite_path(character_name.lower())
-        self.sprite = AttackCharacter(
-            character_name, sprite_path, (SPRITE_DISPLAY_SIZE, SPRITE_DISPLAY_SIZE)
+        # Create animated character using new individual file system
+        self.sprite = AnimatedCharacter(
+            character_name.lower(), "pool", (SPRITE_DISPLAY_SIZE, SPRITE_DISPLAY_SIZE)
         )
+        # Set to idle animation for pool game
+        self.sprite.set_animation("idle", loop=True)
 
         # Collision rect
         self.rect = pygame.Rect(x - 32, y - 32, 64, 64)

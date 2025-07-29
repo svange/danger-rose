@@ -37,8 +37,10 @@ help: ## Show this help message
 	@echo "  make security     Run security checks"
 	@echo ""
 	@echo "Asset Management:"
-	@echo "  make assets-check Validate all game assets"
-	@echo "  make sprites      Generate sprite test output"
+	@echo "  make assets-check   Validate all game assets"
+	@echo "  make sprites        Generate sprite test output"
+	@echo "  make audio-download Download high-quality audio"
+	@echo "  make audio-check    Check current audio files"
 	@echo ""
 	@echo "Utility Commands:"
 	@echo "  make clean        Clean all artifacts"
@@ -161,6 +163,20 @@ clean: ## Clean all artifacts
 assets-check: ## Validate all game assets exist
 	@echo "🎨 Checking assets..."
 	poetry run python tools/check_assets.py
+
+.PHONY: audio-download
+audio-download: ## Download high-quality audio files
+	@echo "🎵 Downloading audio files..."
+	python scripts/download_audio.py
+
+.PHONY: audio-check
+audio-check: ## Check current audio file quality
+	@echo "🔊 Checking audio files..."
+	@echo "Music files:"
+	@ls -lh assets/audio/music/*.ogg 2>/dev/null || echo "No music files found"
+	@echo ""
+	@echo "SFX files:"
+	@ls -lh assets/audio/sfx/*.ogg 2>/dev/null || echo "No SFX files found"
 
 .PHONY: test-visual
 test-visual: ## Run visual debug tools

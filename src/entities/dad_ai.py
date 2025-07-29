@@ -2,8 +2,7 @@
 
 import pygame
 from typing import List
-from src.utils.asset_paths import get_character_sprite_path
-from src.utils.attack_character import AttackCharacter
+from src.utils.attack_character import AnimatedCharacter
 from src.config.constants import SPRITE_DISPLAY_SIZE, COLOR_GREEN, COLOR_RED
 
 
@@ -37,11 +36,12 @@ class DadAI:
         # Smooth movement
         self.smooth_factor = 0.15  # How smoothly Dad moves (0-1)
 
-        # Create animated character sprite
-        sprite_path = get_character_sprite_path("dad_kenney")
-        self.sprite = AttackCharacter(
-            "Dad", sprite_path, (SPRITE_DISPLAY_SIZE, SPRITE_DISPLAY_SIZE)
+        # Create animated character sprite using new individual file system
+        self.sprite = AnimatedCharacter(
+            "dad", "ski", (SPRITE_DISPLAY_SIZE, SPRITE_DISPLAY_SIZE)
         )
+        # Set to walk animation for skiing
+        self.sprite.set_animation("walk", loop=True)
 
         # Collision rect - smaller than sprite for forgiving collisions
         self.rect = pygame.Rect(x - 24, y - 24, 48, 48)

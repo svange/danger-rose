@@ -622,7 +622,7 @@ class PoolGame:
 
             # Power-up spawning
             if (
-                self.time_remaining < self.next_powerup_spawn
+                self.time_remaining <= self.next_powerup_spawn
                 and len(self.powerups) < self.max_powerups_on_field
             ):
                 self.spawn_powerup()

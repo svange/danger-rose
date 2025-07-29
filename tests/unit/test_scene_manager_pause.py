@@ -21,14 +21,19 @@ class TestSceneManagerPause:
         """Create a scene manager instance for testing."""
         # Mock the save manager load method
         mock_save_instance = Mock()
-        mock_save_instance.load.return_value = {
+        save_data = {
             "settings": {
                 "master_volume": 0.8,
                 "music_volume": 0.7,
                 "sfx_volume": 0.6,
             },
             "player": {"selected_character": "Danger"},
+            "high_scores": {},  # Add high_scores to prevent HighScoreManager from failing
         }
+        mock_save_instance.load.return_value = save_data
+        mock_save_instance._current_save_data = (
+            save_data  # Set the internal data for HighScoreManager
+        )
         mock_save_manager.return_value = mock_save_instance
 
         # Create scene manager

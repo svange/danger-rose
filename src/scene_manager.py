@@ -5,6 +5,7 @@ from src.scenes.vegas import VegasGame
 from src.scenes.ski import SkiGame
 from src.scenes.pool import PoolGame
 from src.scenes.pause_menu import PauseMenu
+from src.scenes.leaderboard import LeaderboardScene
 from src.config.constants import (
     SCENE_TITLE,
     SCENE_SETTINGS,
@@ -13,6 +14,7 @@ from src.config.constants import (
     SCENE_SKI_GAME,
     SCENE_POOL_GAME,
     SCENE_PAUSE,
+    SCENE_LEADERBOARD,
 )
 from src.managers.sound_manager import SoundManager
 from src.utils.asset_paths import get_music_path
@@ -60,6 +62,7 @@ class SceneManager:
         self.scenes[SCENE_PAUSE] = PauseMenu(
             screen_width, screen_height, self.sound_manager
         )
+        self.scenes[SCENE_LEADERBOARD] = LeaderboardScene()
         self.current_scene = self.scenes[SCENE_TITLE]
 
         # Start title music

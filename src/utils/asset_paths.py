@@ -55,6 +55,11 @@ def get_sfx_path(sfx_name: str) -> str:
     return get_audio_path(f"sfx/{sfx_name}")
 
 
+def get_font_path(font_name: str) -> str:
+    """Get path to a font file."""
+    return get_asset_path(f"fonts/{font_name}")
+
+
 # Convenience functions for common assets
 def get_living_room_bg() -> str:
     """Get path to the living room background."""

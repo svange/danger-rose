@@ -50,7 +50,8 @@ class TestSaveManager:
         assert "selected_character" in default_data["player"]
         assert "master_volume" in default_data["settings"]
         assert "minigames_unlocked" in default_data["progress"]
-        assert "ski" in default_data["high_scores"]
+        # High scores are now initialized empty
+        assert default_data["high_scores"] == {}
 
     def test_load_creates_new_save_when_none_exists(self, save_manager):
         """Test that load creates new save data when no file exists."""
@@ -91,12 +92,12 @@ class TestSaveManager:
         score2 = {"score": 1500, "date": "2025-07-28", "time": 42.1}
         score3 = {"score": 800, "date": "2025-07-28", "time": 48.0}
 
-        save_manager.add_high_score("ski", "danger", score1)
-        save_manager.add_high_score("ski", "danger", score2)
-        save_manager.add_high_score("ski", "danger", score3)
+        save_manager.add_high_score("ski", "danger", score1, "normal")
+        save_manager.add_high_score("ski", "danger", score2, "normal")
+        save_manager.add_high_score("ski", "danger", score3, "normal")
 
         # Check scores are sorted
-        scores = save_manager.get_high_scores("ski", "danger")
+        scores = save_manager.get_high_scores("ski", "danger", "normal")
         assert len(scores) == 3
         assert scores[0]["score"] == 1500
         assert scores[1]["score"] == 1000
@@ -109,9 +110,9 @@ class TestSaveManager:
         # Add 15 scores
         for i in range(15):
             score = {"score": i * 100, "date": "2025-07-28", "time": 50 - i}
-            save_manager.add_high_score("pool", "rose", score)
+            save_manager.add_high_score("pool", "rose", score, "easy")
 
-        scores = save_manager.get_high_scores("pool", "rose")
+        scores = save_manager.get_high_scores("pool", "rose", "easy")
         assert len(scores) == 10
         assert scores[0]["score"] == 1400  # Highest score
         assert scores[9]["score"] == 500  # 10th highest

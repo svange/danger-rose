@@ -7,7 +7,9 @@ from src.config.constants import SCREEN_WIDTH, SCREEN_HEIGHT
 from src.entities.player import Player
 from src.entities.door import Door
 from src.entities.couch import Couch
+from src.entities.trophy_shelf import TrophyShelf
 from src.ui.notification import SaveNotification
+from src.utils.high_score_manager import HighScoreManager
 from datetime import datetime
 
 
@@ -44,6 +46,10 @@ class HubWorld:
             SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, self.selected_character
         )
 
+        # Initialize high score manager and trophy shelf
+        self.high_score_manager = HighScoreManager(self.scene_manager.save_manager)
+        self.trophy_shelf = TrophyShelf(100, 200, self.high_score_manager)
+
     def _setup_boundaries(self):
         """Set up room boundaries and collision areas."""
         # Room boundaries (walls)
@@ -64,8 +70,7 @@ class HubWorld:
         # Track which door is highlighted
         self.highlighted_door = None
 
-        # Other interactive areas
-        self.trophy_shelf_area = pygame.Rect(100, 200, 150, 100)  # Trophy shelf
+        # Other interactive areas - removed since trophy_shelf handles its own rect
 
         # Create couch save point
         self.couch = Couch(350, 400)
@@ -82,8 +87,16 @@ class HubWorld:
             if event.key == pygame.K_ESCAPE:
                 return "settings"
             elif event.key == pygame.K_e:
+                # Check if player is near trophy shelf
+                if self.trophy_shelf.is_highlighted:
+                    if self.trophy_shelf.show_popup:
+                        # Close popup if already showing
+                        self.trophy_shelf.show_popup = False
+                    else:
+                        # Show trophy stats popup
+                        self.trophy_shelf.show_stats_popup(self.selected_character)
                 # Check if player is near couch
-                if self.couch.is_highlighted:
+                elif self.couch.is_highlighted:
                     # Save the game
                     self.scene_manager.save_game()
                     self.couch.trigger_save()
@@ -120,8 +133,16 @@ class HubWorld:
         # Check couch proximity
         self.couch.is_highlighted = self.couch.check_player_proximity(self.player.rect)
 
+        # Check trophy shelf proximity
+        self.trophy_shelf.is_highlighted = self.trophy_shelf.check_player_proximity(
+            self.player.rect
+        )
+
         # Update couch animation
         self.couch.update(dt)
+
+        # Update trophy shelf
+        self.trophy_shelf.update(dt, self.selected_character)
 
         # Update save notification
         self.save_notification.update(dt)
@@ -142,6 +163,11 @@ class HubWorld:
 
         # Draw couch
         self.couch.draw(screen, self.small_font)
+
+        # Draw trophy shelf
+        self.trophy_shelf.draw(
+            screen, self.font, self.small_font, self.selected_character
+        )
 
         # Draw player
         self.player.draw(screen)
@@ -204,6 +230,9 @@ class HubWorld:
             self.player = Player(
                 SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, self.selected_character
             )
+
+            # Update trophy shelf with new character data
+            self.trophy_shelf = TrophyShelf(100, 200, self.high_score_manager)
 
     def on_exit(self) -> Dict[str, Any]:
         """Called when leaving the hub world."""

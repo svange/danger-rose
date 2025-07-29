@@ -71,6 +71,7 @@ SCENE_POOL_GAME = "pool_game"
 SCENE_VEGAS_GAME = "vegas_game"
 SCENE_SETTINGS = "settings"
 SCENE_PAUSE = "pause"
+SCENE_LEADERBOARD = "leaderboard"
 
 # Audio Settings
 DEFAULT_MASTER_VOLUME = 0.7

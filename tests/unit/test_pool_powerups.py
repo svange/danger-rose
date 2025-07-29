@@ -3,7 +3,8 @@ import pygame
 import time
 from unittest.mock import Mock, patch
 
-from src.scenes.pool import PoolGame, WaterBalloon, Target
+from src.scenes.pool import PoolGame, WaterBalloon
+from src.entities.pool_targets import PoolTarget
 from src.entities.powerup import TripleShotPowerUp, RapidFirePowerUp
 
 

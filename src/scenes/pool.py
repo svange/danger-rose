@@ -62,7 +62,6 @@ class PoolPlayer:
         screen.blit(sprite, sprite_rect)
 
 
-
 class WaterBalloon:
     """Water balloon projectile with physics."""
 

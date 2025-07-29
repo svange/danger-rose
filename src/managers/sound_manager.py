@@ -30,12 +30,16 @@ class SoundManager:
         self._initialized = True
 
         # Initialize pygame mixer
-        pygame.mixer.init(
-            frequency=44100,  # CD quality
-            size=-16,  # 16-bit signed samples
-            channels=2,  # Stereo
-            buffer=512,  # Lower buffer for less latency
-        )
+        try:
+            pygame.mixer.init(
+                frequency=44100,  # CD quality
+                size=-16,  # 16-bit signed samples
+                channels=2,  # Stereo
+                buffer=512,  # Lower buffer for less latency
+            )
+        except pygame.error as e:
+            print(f"Warning: Could not initialize audio: {e}")
+            # Continue without audio - useful for CI/testing environments
 
         # Volume settings
         self.master_volume = DEFAULT_MASTER_VOLUME
@@ -58,6 +62,9 @@ class SoundManager:
 
     def _setup_channels(self):
         """Setup dedicated channels for sound effects."""
+        if not pygame.mixer.get_init():
+            return
+
         # Reserve channels 0-7 for sound effects
         pygame.mixer.set_reserved(8)
 
@@ -67,6 +74,8 @@ class SoundManager:
 
     def _apply_music_volume(self):
         """Apply the current music volume setting."""
+        if not pygame.mixer.get_init():
+            return
         effective_volume = self.master_volume * self.music_volume
         pygame.mixer.music.set_volume(effective_volume)
 
@@ -84,6 +93,10 @@ class SoundManager:
             loops: Number of loops (-1 for infinite)
             fade_ms: Fade in duration in milliseconds
         """
+        # Check if mixer is initialized
+        if not pygame.mixer.get_init():
+            return
+
         try:
             # Check if file exists
             if not os.path.exists(music_file):
@@ -114,6 +127,9 @@ class SoundManager:
         Args:
             fade_ms: Fade out duration in milliseconds
         """
+        if not pygame.mixer.get_init():
+            return
+
         if fade_ms > 0:
             pygame.mixer.music.fadeout(fade_ms)
         else:
@@ -124,12 +140,16 @@ class SoundManager:
 
     def pause_music(self):
         """Pause the currently playing music."""
+        if not pygame.mixer.get_init():
+            return
         if self.current_music and not self.music_paused:
             pygame.mixer.music.pause()
             self.music_paused = True
 
     def unpause_music(self):
         """Unpause the music."""
+        if not pygame.mixer.get_init():
+            return
         if self.current_music and self.music_paused:
             pygame.mixer.music.unpause()
             self.music_paused = False
@@ -163,6 +183,9 @@ class SoundManager:
         Returns:
             Channel the sound is playing on, or None if failed
         """
+        if not pygame.mixer.get_init():
+            return None
+
         try:
             # Check cache first
             if sound_file not in self.sfx_cache:
@@ -214,6 +237,9 @@ class SoundManager:
             duck_level: Volume multiplier during duck (0.0-1.0)
             duration_ms: How long to maintain ducked volume
         """
+        if not pygame.mixer.get_init():
+            return
+
         # Store original volumes
         original_music = pygame.mixer.music.get_volume()
 

@@ -20,6 +20,11 @@ class TestObstaclePool:
 
     def test_initialization(self, obstacle_pool):
         """Test pool is initialized with correct number of obstacles."""
+        # Seed random to ensure consistent test results
+        import random
+
+        random.seed(42)
+
         # Force sprite loading to populate the pool
         obstacle_pool._ensure_sprites_loaded()
 
@@ -33,8 +38,9 @@ class TestObstaclePool:
         rock_count = sum(
             1 for o in obstacle_pool.inactive_obstacles if o.obstacle_type == "rock"
         )
-        assert tree_count > 0
-        assert rock_count > 0
+        # With 60% chance of trees, we should get at least one of each type
+        assert tree_count >= 1
+        assert rock_count >= 1
         assert tree_count + rock_count == 10
 
     def test_spawn_obstacle(self, obstacle_pool):

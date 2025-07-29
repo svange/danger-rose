@@ -293,3 +293,16 @@ class SaveManager:
         if self._current_save_data is None:
             self.load()
         return self._current_save_data["player"]["selected_character"]
+
+    def get_last_save_time(self) -> Optional[datetime]:
+        """Get the last save time as a datetime object."""
+        if self._current_save_data is None:
+            self.load()
+
+        last_save = self._current_save_data.get("updated_at")
+        if last_save:
+            try:
+                return datetime.fromisoformat(last_save)
+            except (ValueError, TypeError):
+                return None
+        return None

@@ -20,6 +20,9 @@ class TestHubWorld:
         manager.game_data = {"selected_character": "danger"}
         manager.debug_mode = False
         manager.sound_manager = Mock()  # Add mock sound manager
+        manager.save_manager = Mock()
+        manager.save_manager.get_last_save_time.return_value = None
+        manager.save_game = Mock()
         return manager
 
     @pytest.fixture
@@ -46,14 +49,16 @@ class TestHubWorld:
         # Check boundaries exist
         assert len(hub_world.boundaries) == 4
 
-        # Check door areas
-        assert "ski" in hub_world.door_areas
-        assert "pool" in hub_world.door_areas
-        assert "vegas" in hub_world.door_areas
+        # Check doors exist
+        assert len(hub_world.doors) == 3
+        assert any(door.target_scene == "ski" for door in hub_world.doors)
+        assert any(door.target_scene == "pool" for door in hub_world.doors)
+        assert any(door.target_scene == "vegas" for door in hub_world.doors)
 
         # Check interactive areas
         assert hub_world.trophy_shelf_area is not None
-        assert hub_world.couch_area is not None
+        assert hub_world.couch is not None
+        assert hub_world.save_notification is not None
 
     def test_player_movement_events(self, hub_world):
         """Test that movement events are passed to player."""
@@ -79,21 +84,20 @@ class TestHubWorld:
         result = hub_world.handle_event(event)
         assert result == "settings"
 
-    def test_handle_minigame_keys(self, hub_world):
-        """Test number keys navigate to minigames."""
-        # Test ski game
+    def test_handle_door_interaction(self, hub_world):
+        """Test E key interacts with doors."""
         event = Mock()
         event.type = pygame.KEYDOWN
-        event.key = pygame.K_1
-        assert hub_world.handle_event(event) == "ski"
+        event.key = pygame.K_e
 
-        # Test pool game
-        event.key = pygame.K_2
-        assert hub_world.handle_event(event) == "pool"
+        # Test when not near door
+        assert hub_world.handle_event(event) is None
 
-        # Test vegas game
-        event.key = pygame.K_3
-        assert hub_world.handle_event(event) == "vegas"
+        # Test when near door
+        hub_world.doors[0].is_highlighted = True
+        hub_world.highlighted_door = hub_world.doors[0]
+        result = hub_world.handle_event(event)
+        assert result == hub_world.doors[0].target_scene
 
     def test_handle_other_events(self, hub_world):
         """Test that other events return None."""

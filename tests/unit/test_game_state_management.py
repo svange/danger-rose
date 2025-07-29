@@ -149,14 +149,19 @@ class TestSaveDataIntegration:
         """Loading game data should apply saved settings."""
         # Arrange
         mock_save_instance = Mock()
-        mock_save_instance.load.return_value = {
+        save_data = {
             "settings": {
                 "master_volume": 0.5,
                 "music_volume": 0.7,
                 "sfx_volume": 0.3,
             },
             "player": {"selected_character": "Rose"},
+            "high_scores": {},  # Add high_scores to prevent HighScoreManager from failing
         }
+        mock_save_instance.load.return_value = save_data
+        mock_save_instance._current_save_data = (
+            save_data  # Set the internal data for HighScoreManager
+        )
         mock_save_manager_class.return_value = mock_save_instance
 
         # Act

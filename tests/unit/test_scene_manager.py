@@ -68,10 +68,15 @@ class TestSceneManagerInitialization:
         """SceneManager should initialize game_data with no selected character."""
         # Arrange - Mock save manager to return no selected character
         mock_save_instance = Mock()
-        mock_save_instance.load.return_value = {
+        save_data = {
             "settings": {"master_volume": 1.0, "music_volume": 1.0, "sfx_volume": 1.0},
             "player": {"selected_character": None},
+            "high_scores": {},  # Add high_scores to prevent HighScoreManager from failing
         }
+        mock_save_instance.load.return_value = save_data
+        mock_save_instance._current_save_data = (
+            save_data  # Set the internal data for HighScoreManager
+        )
         mock_save_manager_class.return_value = mock_save_instance
 
         # Act

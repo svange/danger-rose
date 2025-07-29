@@ -3,7 +3,8 @@ import pygame
 import time
 from unittest.mock import Mock, patch
 
-from src.scenes.pool import PoolGame, WaterBalloon, Target
+from src.scenes.pool import PoolGame, WaterBalloon
+from src.entities.pool_targets import DuckTarget
 from src.entities.powerup import TripleShotPowerUp, RapidFirePowerUp
 
 
@@ -215,8 +216,8 @@ class TestHomingMechanic:
         balloon = WaterBalloon(100, 100, 200, 200, is_homing=True)
 
         # Create targets
-        target1 = Target(150, 150)
-        target2 = Target(500, 500)
+        target1 = DuckTarget(150, 150)
+        target2 = DuckTarget(500, 500)
         targets = [target1, target2]
 
         # Store initial velocity
@@ -234,8 +235,8 @@ class TestHomingMechanic:
         balloon = WaterBalloon(100, 100, 200, 200, is_homing=True)
 
         # Create hit target
-        target = Target(150, 150)
-        target.hit = True
+        target = DuckTarget(150, 150)
+        target.active = False
         targets = [target]
 
         # Store initial velocity

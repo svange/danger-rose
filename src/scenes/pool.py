@@ -12,6 +12,13 @@ from src.entities.powerup import (
     HomingPowerUp,
     ActivePowerUp,
 )
+from src.entities.pool_targets import (
+    PoolTarget,
+    DuckTarget,
+    BeachBallTarget,
+    DonutFloatTarget,
+)
+from src.entities.target_particles import TargetDestroyEffect
 from src.config.constants import (
     SPRITE_DISPLAY_SIZE,
     COLOR_WHITE,
@@ -53,58 +60,6 @@ class PoolPlayer:
         sprite = self.sprite.get_current_sprite()
         sprite_rect = sprite.get_rect(center=(self.x, self.y))
         screen.blit(sprite, sprite_rect)
-
-
-class Target:
-    """Target object that can be hit by water balloons."""
-
-    def __init__(self, x: int, y: int, size: int = 40):
-        self.x = x
-        self.y = y
-        self.size = size
-        self.radius = size // 2
-        self.hit = False
-        self.hit_time = 0
-        self.color = COLOR_RED
-        self.point_value = 10
-
-        # Collision rect
-        self.rect = pygame.Rect(x - self.radius, y - self.radius, size, size)
-
-    def update(self, dt: float):
-        """Update target state."""
-        if self.hit:
-            # Fade out effect when hit
-            self.hit_time += dt
-            if self.hit_time > 0.5:  # Reset after half second
-                self.hit = False
-                self.hit_time = 0
-
-    def draw(self, screen):
-        """Draw the target."""
-        if self.hit:
-            # Flash effect when hit
-            alpha = max(0, 255 - int(self.hit_time * 500))
-            color = (*COLOR_GREEN, alpha)
-        else:
-            color = self.color
-
-        # Draw target rings
-        pygame.draw.circle(screen, color, (self.x, self.y), self.radius)
-        pygame.draw.circle(screen, COLOR_WHITE, (self.x, self.y), self.radius - 5, 2)
-        pygame.draw.circle(screen, color, (self.x, self.y), self.radius // 2)
-        pygame.draw.circle(screen, COLOR_WHITE, (self.x, self.y), 5)
-
-    def check_collision(self, balloon: "WaterBalloon") -> bool:
-        """Check if balloon hits this target."""
-        if self.hit:
-            return False
-
-        distance = math.sqrt((balloon.x - self.x) ** 2 + (balloon.y - self.y) ** 2)
-        if distance < self.radius + balloon.radius:
-            self.hit = True
-            return True
-        return False
 
 
 class WaterBalloon:
@@ -160,7 +115,7 @@ class WaterBalloon:
             self.x - self.radius, self.y - self.radius, self.radius * 2, self.radius * 2
         )
 
-    def update(self, dt: float, targets: List[Target] = None):
+    def update(self, dt: float, targets: List[PoolTarget] = None):
         """Update projectile physics."""
         if not self.active:
             return
@@ -179,7 +134,7 @@ class WaterBalloon:
             min_distance = float("inf")
 
             for target in targets:
-                if not target.hit:
+                if target.active:
                     distance = math.sqrt(
                         (target.x - self.x) ** 2 + (target.y - self.y) ** 2
                     )
@@ -232,22 +187,12 @@ class WaterBalloon:
         for i, (tx, ty) in enumerate(self.trail):
             trail_radius = int(self.radius * (i / len(self.trail)))
             if trail_radius > 0:
-                # Draw directly to screen with decreasing opacity
-                color = (*self.color, int(255 * (i / len(self.trail)) * 0.3))
-                # Use gfxdraw for per-pixel alpha if available, otherwise just draw solid
-                try:
-                    import pygame.gfxdraw
-
-                    pygame.gfxdraw.filled_circle(
-                        screen, int(tx), int(ty), trail_radius, color
-                    )
-                except ImportError:
-                    # Fallback to regular circle with fading color
-                    fade_factor = i / len(self.trail)
-                    faded_color = tuple(int(c * fade_factor) for c in self.color)
-                    pygame.draw.circle(
-                        screen, faded_color, (int(tx), int(ty)), trail_radius
-                    )
+                # Simple fading trail without per-pixel alpha
+                fade_factor = i / len(self.trail)
+                faded_color = tuple(int(c * fade_factor) for c in self.color)
+                pygame.draw.circle(
+                    screen, faded_color, (int(tx), int(ty)), trail_radius
+                )
 
         # Draw main balloon
         pygame.draw.circle(screen, self.color, (int(self.x), int(self.y)), self.radius)
@@ -337,10 +282,14 @@ class PoolGame:
         self.projectiles: List[WaterBalloon] = []
 
         # Targets
-        self.targets: List[Target] = []
+        self.targets: List[PoolTarget] = []
+        self.target_spawn_timer = 0
+        self.target_spawn_interval = 3.0  # Spawn new target every 3 seconds
+        self.max_targets = 8  # Maximum targets on screen
 
         # Effects
         self.splash_effects: List[SplashEffect] = []
+        self.particle_effects: List[TargetDestroyEffect] = []
 
         # Power-ups
         self.powerups: List[PowerUp] = []
@@ -395,23 +344,44 @@ class PoolGame:
         self.create_targets()
 
     def create_targets(self):
-        """Create target layout."""
+        """Create initial targets with variety."""
         self.targets.clear()
 
-        # Create a grid of targets
-        rows = 3
-        cols = 5
-        start_x = 300
-        start_y = 150
-        spacing_x = 150
-        spacing_y = 100
+        # Create a few initial targets of different types
+        initial_targets = [
+            (DuckTarget, 400, 200),
+            (BeachBallTarget, 600, 300),
+            (DonutFloatTarget, 800, 250),
+        ]
 
-        for row in range(rows):
-            for col in range(cols):
-                x = start_x + col * spacing_x
-                y = start_y + row * spacing_y
-                target = Target(x, y)
-                self.targets.append(target)
+        for TargetClass, x, y in initial_targets:
+            target = TargetClass(x, y)
+            self.targets.append(target)
+
+    def spawn_target(self):
+        """Spawn a new random target."""
+        if len(self.targets) >= self.max_targets:
+            return
+
+        # Random target type
+        target_types = [DuckTarget, BeachBallTarget, DonutFloatTarget]
+        weights = [0.4, 0.35, 0.25]  # Duck most common, donut least
+        TargetClass = random.choices(target_types, weights=weights)[0]
+
+        # Random spawn position at edges
+        edge = random.choice(["top", "left", "right"])
+        if edge == "top":
+            x = random.randint(200, 1080)
+            y = 150
+        elif edge == "left":
+            x = 200
+            y = random.randint(200, 400)
+        else:  # right
+            x = 1080
+            y = random.randint(200, 400)
+
+        target = TargetClass(x, y)
+        self.targets.append(target)
 
     def handle_event(self, event):
         if event.type == pygame.KEYDOWN:
@@ -461,7 +431,9 @@ class PoolGame:
         self.player.x = self.screen_width // 2
         self.projectiles.clear()
         self.splash_effects.clear()
+        self.particle_effects.clear()  # Clear particle effects
         self.create_targets()  # Reset targets
+        self.target_spawn_timer = 0  # Reset spawn timer
         self.current_ammo = self.ammo_capacity
         self.is_reloading = False
         self.can_shoot = True
@@ -471,7 +443,7 @@ class PoolGame:
         for active in self.active_powerups:
             active.powerup.remove_effect(self)
         self.active_powerups.clear()
-        self.next_powerup_spawn = self.game_duration - 10.0  # Reset spawn timer
+        self.next_powerup_spawn = self.game_duration - 8.0  # Reset spawn timer
 
     def shoot_balloon(self):
         """Shoot a water balloon towards the mouse position."""
@@ -561,7 +533,7 @@ class PoolGame:
 
         # Play collection sound (if sound manager available)
         if hasattr(self.scene_manager, "sound_manager"):
-            self.scene_manager.sound_manager.play_sound("powerup")
+            self.scene_manager.sound_manager.play_sfx("powerup")
 
     def update(self, dt: float):
         if self.state == self.STATE_PLAYING:
@@ -609,16 +581,44 @@ class PoolGame:
                     # Check collisions with targets
                     for target in self.targets:
                         if target.check_collision(balloon):
-                            self.score += target.point_value
+                            self.score += target.get_point_value()
                             balloon.active = False
+
                             # Create splash effect
                             splash = SplashEffect(balloon.x, balloon.y)
                             self.splash_effects.append(splash)
+
+                            # Create target destruction particles
+                            target_type = (
+                                "duck"
+                                if isinstance(target, DuckTarget)
+                                else "beachball"
+                                if isinstance(target, BeachBallTarget)
+                                else "donut"
+                                if isinstance(target, DonutFloatTarget)
+                                else "default"
+                            )
+                            particles = TargetDestroyEffect(
+                                target.x, target.y, target.get_color(), target_type
+                            )
+                            self.particle_effects.append(particles)
+
+                            # Play hit sound
+                            if hasattr(self.scene_manager, "sound_manager"):
+                                self.scene_manager.sound_manager.play_sfx("hit")
                             break
 
             # Update targets
-            for target in self.targets:
+            for target in self.targets[:]:  # Copy to allow removal
                 target.update(dt)
+                if not target.active:
+                    self.targets.remove(target)
+
+            # Spawn new targets periodically
+            self.target_spawn_timer += dt
+            if self.target_spawn_timer >= self.target_spawn_interval:
+                self.spawn_target()
+                self.target_spawn_timer = 0
 
             # Power-up spawning
             if (
@@ -649,6 +649,12 @@ class PoolGame:
                 if not splash.active:
                     self.splash_effects.remove(splash)
 
+            # Update particle effects
+            for effect in self.particle_effects[:]:
+                effect.update(dt)
+                if not effect.active:
+                    self.particle_effects.remove(effect)
+
         # Always update water animation
         self.water_offset += 50 * dt
         if self.water_offset > 20:
@@ -676,6 +682,10 @@ class PoolGame:
         # Draw splash effects
         for splash in self.splash_effects:
             splash.draw(screen)
+
+        # Draw particle effects
+        for effect in self.particle_effects:
+            effect.draw(screen)
 
         # Draw aim line if playing
         if self.state == self.STATE_PLAYING and self.show_aim_line:

@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/svange/danger-rose/compare/v1.3.0...v1.4.0) (2025-07-29)
+
+
+### Features
+
+* implement power-up system for pool game ([#84](https://github.com/svange/danger-rose/issues/84)) ([4941658](https://github.com/svange/danger-rose/commit/49416587d8d5a93c7a09d2a02cb9f8faad63dbc3)), closes [#29](https://github.com/svange/danger-rose/issues/29) [#29](https://github.com/svange/danger-rose/issues/29)
+
 # [1.3.0](https://github.com/svange/danger-rose/compare/v1.2.0...v1.3.0) (2025-07-29)
 
 

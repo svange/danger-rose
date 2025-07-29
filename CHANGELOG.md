@@ -1,3 +1,10 @@
+# [1.8.0](https://github.com/svange/danger-rose/compare/v1.7.0...v1.8.0) (2025-07-29)
+
+
+### Features
+
+* implement Vegas Sphere boss with phases ([#89](https://github.com/svange/danger-rose/issues/89)) ([aad45e9](https://github.com/svange/danger-rose/commit/aad45e9f8a6d9e4e8e2199d8c9a133fda930deb6)), closes [#25](https://github.com/svange/danger-rose/issues/25) [#31](https://github.com/svange/danger-rose/issues/31)
+
 # [1.7.0](https://github.com/svange/danger-rose/compare/v1.6.0...v1.7.0) (2025-07-29)
 
 

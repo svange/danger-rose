@@ -2,6 +2,7 @@ import pygame
 import os
 import json
 from typing import Optional, Dict, List
+from src.config.constants import COLOR_PLACEHOLDER
 
 
 def load_image(path: str, scale: Optional[tuple] = None) -> pygame.Surface:
@@ -9,7 +10,7 @@ def load_image(path: str, scale: Optional[tuple] = None) -> pygame.Surface:
     if not os.path.exists(path):
         # Create a placeholder surface if image doesn't exist
         surface = pygame.Surface((64, 64))
-        surface.fill((255, 0, 255))  # Magenta placeholder
+        surface.fill(COLOR_PLACEHOLDER)  # Magenta placeholder
         return surface
 
     try:
@@ -20,7 +21,7 @@ def load_image(path: str, scale: Optional[tuple] = None) -> pygame.Surface:
     except pygame.error:
         # Create a placeholder surface if loading fails
         surface = pygame.Surface((64, 64))
-        surface.fill((255, 0, 255))  # Magenta placeholder
+        surface.fill(COLOR_PLACEHOLDER)  # Magenta placeholder
         return surface
 
 
@@ -117,7 +118,7 @@ def load_sprite_sheet(
     if not os.path.exists(path):
         # Create placeholder frames if sprite sheet doesn't exist
         placeholder = pygame.Surface((frame_width, frame_height))
-        placeholder.fill((255, 0, 255))  # Magenta placeholder
+        placeholder.fill(COLOR_PLACEHOLDER)  # Magenta placeholder
         return [placeholder]
 
     try:
@@ -142,7 +143,7 @@ def load_sprite_sheet(
     except pygame.error:
         # Create placeholder frame if loading fails
         placeholder = pygame.Surface((frame_width, frame_height))
-        placeholder.fill((255, 0, 255))  # Magenta placeholder
+        placeholder.fill(COLOR_PLACEHOLDER)  # Magenta placeholder
         return [placeholder]
 
 
@@ -156,7 +157,7 @@ def load_character_animations(
     if not os.path.exists(path):
         # Create placeholder animations if sprite sheet doesn't exist
         placeholder = pygame.Surface((frame_width, frame_height))
-        placeholder.fill((255, 0, 255))  # Magenta placeholder
+        placeholder.fill(COLOR_PLACEHOLDER)  # Magenta placeholder
         return {
             "walking": [placeholder] * 4,
             "jumping": [placeholder] * 4,
@@ -196,7 +197,7 @@ def load_character_animations(
     except pygame.error:
         # Create placeholder animations if loading fails
         placeholder = pygame.Surface((frame_width, frame_height))
-        placeholder.fill((255, 0, 255))  # Magenta placeholder
+        placeholder.fill(COLOR_PLACEHOLDER)  # Magenta placeholder
         return {
             "walking": [placeholder] * 4,
             "jumping": [placeholder] * 4,

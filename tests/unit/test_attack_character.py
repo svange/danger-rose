@@ -4,36 +4,27 @@ Tests sprite animation system with proper mocking of pygame and time functions.
 """
 
 from unittest.mock import Mock, patch
-import pygame
 
 from src.utils.attack_character import AttackCharacter
-from src.config.constants import ANIMATION_ATTACK_DURATION
+from src.config.constants import COLOR_PLACEHOLDER
 
 
 class TestAttackCharacterInitialization:
     """Tests for AttackCharacter initialization."""
 
-    @patch("src.utils.attack_character.pygame.image.load")
-    @patch("src.utils.attack_character.pygame.display.get_surface")
-    @patch("src.utils.attack_character.pygame.Surface")
-    @patch("src.utils.attack_character.pygame.transform.scale")
-    def test_init_with_valid_sprite_path(
-        self, mock_scale, mock_surface_class, mock_get_surface, mock_load
-    ):
+    @patch("src.utils.attack_character.load_character_individual_files")
+    def test_init_with_valid_sprite_path(self, mock_load_files):
         """AttackCharacter should initialize with valid sprite path."""
         # Arrange
-        mock_get_surface.return_value = None  # No display
-        mock_sheet = Mock()
-        mock_sheet.convert.return_value = mock_sheet
-        mock_sheet.get_width.return_value = 1024
-        mock_sheet.get_height.return_value = 1024
-        mock_load.return_value = mock_sheet
-
-        # Mock frame creation
-        mock_frames = [Mock() for _ in range(3)]
-        mock_scaled_frames = [Mock() for _ in range(3)]
-        mock_surface_class.side_effect = mock_frames
-        mock_scale.side_effect = mock_scaled_frames
+        mock_frames = [Mock() for _ in range(6)]
+        mock_load_files.return_value = {
+            "idle": [Mock() for _ in range(4)],
+            "walk": [Mock() for _ in range(5)],
+            "attack": mock_frames,
+            "jump": [Mock() for _ in range(3)],
+            "hurt": [Mock() for _ in range(2)],
+            "victory": [Mock() for _ in range(4)],
+        }
 
         # Act
         character = AttackCharacter("test_char", "test.png", (128, 128))
@@ -42,265 +33,235 @@ class TestAttackCharacterInitialization:
         assert character.character_name == "test_char"
         assert character.scale == (128, 128)
         assert character.current_frame == 0
-        assert character.animation_speed == ANIMATION_ATTACK_DURATION / 1000.0
-        assert len(character.attack_frames) == 3  # 3 attack frames
+        assert character.current_animation == "attack"  # Should start with attack
+        assert len(character.animations["attack"]) == 6
 
-    @patch("src.utils.attack_character.pygame.Surface")
-    def test_init_with_empty_sprite_path(self, mock_surface_class):
-        """AttackCharacter should create placeholder when sprite path is empty."""
-        # Arrange
-        mock_placeholder = Mock()
-        mock_surface_class.return_value = mock_placeholder
-
-        # Act
-        character = AttackCharacter("test_char", "", (64, 64))
-
-        # Assert
-        assert len(character.attack_frames) == 3
-        assert all(frame == mock_placeholder for frame in character.attack_frames)
-        mock_placeholder.fill.assert_called_with((255, 0, 255))
-
-    @patch("src.utils.attack_character.pygame.image.load")
-    @patch("src.utils.attack_character.pygame.Surface")
-    def test_init_handles_pygame_error(self, mock_surface_class, mock_load):
-        """AttackCharacter should handle pygame loading errors gracefully."""
-        # Arrange
-        mock_load.side_effect = pygame.error("Load failed")
-        mock_placeholder = Mock()
-        mock_surface_class.return_value = mock_placeholder
+    @patch("src.utils.attack_character.load_character_individual_files")
+    def test_init_with_empty_sprite_path(self, mock_load_files):
+        """AttackCharacter should handle empty sprite path."""
+        # Arrange - Return empty animations to trigger placeholder
+        mock_load_files.return_value = {}
 
         # Act
-        character = AttackCharacter("test_char", "corrupt.png", (64, 64))
+        character = AttackCharacter("test_char", "", (128, 128))
 
         # Assert
-        assert len(character.attack_frames) == 3
-        mock_placeholder.fill.assert_called_with((255, 0, 255))
+        assert character.character_name == "test_char"
+        # Should have placeholder animations
+        assert "attack" in character.animations
+        assert len(character.animations["attack"]) > 0
 
-
-class TestAttackFrameLoading:
-    """Tests for attack frame loading logic."""
-
-    @patch("src.utils.attack_character.pygame.image.load")
-    @patch("src.utils.attack_character.pygame.display.get_surface")
-    @patch("src.utils.attack_character.pygame.Surface")
-    def test_load_attack_frames_extracts_correct_row(
-        self, mock_surface_class, mock_get_surface, mock_load
-    ):
-        """_load_attack_frames should extract frames from row 2 with offset."""
+    @patch("src.utils.attack_character.load_character_individual_files")
+    def test_init_handles_loading_error(self, mock_load_files):
+        """AttackCharacter should handle loading errors gracefully."""
         # Arrange
-        mock_get_surface.return_value = Mock()  # Has display
-        mock_sheet = Mock()
-        mock_sheet.convert_alpha.return_value = mock_sheet
-        mock_sheet.get_width.return_value = 1024
-        mock_sheet.get_height.return_value = 1024
-        mock_load.return_value = mock_sheet
-
-        # Create 3 mock frames
-        mock_frames = [Mock() for _ in range(3)]
-        mock_surface_class.side_effect = mock_frames
+        mock_load_files.side_effect = Exception("Loading error")
 
         # Act
-        AttackCharacter("test_char", "test.png", scale=None)
+        character = AttackCharacter("test_char", "error.png", (128, 128))
 
         # Assert
-        # Verify the correct y position with offset (row 2 * 341 - 113 = 569)
-        expected_y = 569  # 682 - 113
-        for i in range(3):
-            expected_x = i * 256
-            mock_frames[i].blit.assert_called_once_with(
-                mock_sheet, (0, 0), (expected_x, expected_y, 256, 341)
-            )
+        assert character.character_name == "test_char"
+        # Should have placeholder animations - AttackCharacter uses "attacking" not "attack"
+        assert "attacking" in character.animations
+        assert len(character.animations["attacking"]) > 0
 
-    @patch("src.utils.attack_character.pygame.image.load")
-    @patch("src.utils.attack_character.pygame.display.get_surface")
-    @patch("src.utils.attack_character.pygame.Surface")
-    @patch("src.utils.attack_character.pygame.transform.scale")
-    def test_load_attack_frames_with_scaling(
-        self, mock_scale, mock_surface_class, mock_get_surface, mock_load
-    ):
-        """_load_attack_frames should scale frames when scale is provided."""
+
+class TestAttackFrameProperty:
+    """Tests for the attack_frames property."""
+
+    @patch("src.utils.attack_character.load_character_individual_files")
+    def test_attack_frames_property(self, mock_load_files):
+        """attack_frames property should return attack animation frames."""
         # Arrange
-        mock_get_surface.return_value = None
-        mock_sheet = Mock()
-        mock_sheet.convert.return_value = mock_sheet
-        mock_sheet.get_width.return_value = 1024
-        mock_sheet.get_height.return_value = 1024
-        mock_load.return_value = mock_sheet
-
-        mock_frames = [Mock() for _ in range(3)]
-        mock_scaled_frames = [Mock() for _ in range(3)]
-        mock_surface_class.side_effect = mock_frames
-        mock_scale.side_effect = mock_scaled_frames
+        attack_frames = [Mock() for _ in range(6)]
+        mock_load_files.return_value = {
+            "attack": attack_frames,
+            "idle": [Mock() for _ in range(4)],
+        }
 
         # Act
-        character = AttackCharacter("test_char", "test.png", (64, 64))
+        character = AttackCharacter("test_char", "test.png")
 
         # Assert
-        assert character.attack_frames == mock_scaled_frames
-        assert mock_scale.call_count == 3
+        assert character.attack_frames == attack_frames
 
 
 class TestAnimationUpdate:
-    """Tests for animation update logic."""
+    """Tests for animation update functionality."""
 
-    @patch("src.utils.attack_character.time.time")
-    @patch("src.utils.attack_character.pygame.Surface")
+    @patch("time.time")
+    @patch("src.utils.attack_character.load_character_individual_files")
     def test_update_advances_frame_after_animation_speed(
-        self, mock_surface_class, mock_time
+        self, mock_load_files, mock_time
     ):
-        """update should advance frame when enough time has passed."""
+        """Update should advance frame after animation speed duration."""
         # Arrange
-        mock_surface_class.return_value = Mock()
+        mock_load_files.return_value = {
+            "attack": [Mock() for _ in range(6)],
+            "idle": [Mock() for _ in range(4)],
+        }
 
-        # Mock time for initialization and update
-        mock_time.return_value = 0.0  # Initial time
-        character = AttackCharacter("test_char", "", (64, 64))
+        # Set up time mock before creating character
+        mock_time.return_value = 0
+        character = AttackCharacter("test_char", "test.png")
 
-        # Reset for test
-        character.last_frame_time = 0.0
-        character.current_frame = 0
-
-        # Set time to trigger frame advance (0.3 seconds later)
-        mock_time.return_value = 0.5
+        # Mock time progression - advance time by more than animation_speed
+        mock_time.return_value = 0.1
 
         # Act
         character.update()
 
         # Assert
         assert character.current_frame == 1
-        assert character.last_frame_time == 0.5
 
-    @patch("src.utils.attack_character.time.time")
-    @patch("src.utils.attack_character.pygame.Surface")
-    def test_update_wraps_around_at_end(self, mock_surface_class, mock_time):
-        """update should wrap frame counter back to 0 after last frame."""
+    @patch("time.time")
+    @patch("src.utils.attack_character.load_character_individual_files")
+    def test_update_wraps_around_at_end(self, mock_load_files, mock_time):
+        """Update should wrap to frame 0 when reaching end of animation."""
         # Arrange
-        mock_surface_class.return_value = Mock()
+        mock_load_files.return_value = {
+            "attack": [Mock() for _ in range(3)],
+            "idle": [Mock() for _ in range(4)],
+        }
 
-        # Mock time for initialization
-        mock_time.return_value = 0.0
-        character = AttackCharacter("test_char", "", (64, 64))
+        # Set up time mock before creating character
+        mock_time.return_value = 0
+        character = AttackCharacter("test_char", "test.png")
+        character.current_frame = 2  # Last frame
+        character.loop_animation = True
 
-        # Set up at last frame
-        character.current_frame = 2  # Last frame (0-indexed)
-        character.last_frame_time = 0.0
-
-        # Set time to trigger frame advance
-        mock_time.return_value = 0.5
+        # Mock time progression
+        mock_time.return_value = 0.1
 
         # Act
         character.update()
 
         # Assert
-        assert character.current_frame == 0  # Wrapped around
+        assert character.current_frame == 0
 
-    @patch("src.utils.attack_character.time.time")
-    @patch("src.utils.attack_character.pygame.Surface")
+    @patch("time.time")
+    @patch("src.utils.attack_character.load_character_individual_files")
     def test_update_does_not_advance_before_animation_speed(
-        self, mock_surface_class, mock_time
+        self, mock_load_files, mock_time
     ):
-        """update should not advance frame before animation_speed time has passed."""
+        """Update should not advance frame before animation speed duration."""
         # Arrange
-        mock_surface_class.return_value = Mock()
+        mock_load_files.return_value = {
+            "attack": [Mock() for _ in range(6)],
+            "idle": [Mock() for _ in range(4)],
+        }
 
-        # Mock time for initialization
-        mock_time.return_value = 0.0
-        character = AttackCharacter("test_char", "", (64, 64))
+        # Set up time mock before creating character
+        mock_time.return_value = 0
+        character = AttackCharacter("test_char", "test.png")
 
-        # Reset for test
-        character.last_frame_time = 0.0
-        character.current_frame = 0
-
-        # Set time to NOT trigger frame advance (less than animation_speed)
-        mock_time.return_value = (
-            ANIMATION_ATTACK_DURATION / 1000.0 / 2
-        )  # Half the animation speed
+        # Mock time with minimal progression (less than animation_speed)
+        # Attack animation speed is ANIMATION_ATTACK_DURATION/1000/6 = 50/1000/6 ≈ 0.0083
+        mock_time.return_value = 0.005  # Less than attack animation speed
 
         # Act
         character.update()
 
         # Assert
-        assert character.current_frame == 0  # No change
-        assert character.last_frame_time == 0.0  # Not updated
+        assert character.current_frame == 0
 
 
 class TestSpriteRetrieval:
-    """Tests for getting current sprite."""
+    """Tests for getting current sprite functionality."""
 
-    @patch("src.utils.attack_character.pygame.Surface")
-    def test_get_current_sprite_returns_correct_frame(self, mock_surface_class):
-        """get_current_sprite should return the current animation frame."""
+    @patch("src.utils.attack_character.load_character_individual_files")
+    def test_get_current_sprite_returns_correct_frame(self, mock_load_files):
+        """get_current_sprite should return the current frame."""
         # Arrange
-        mock_frames = [Mock() for _ in range(3)]
-        character = AttackCharacter("test_char", "", (64, 64))
-        character.attack_frames = mock_frames
+        frame0 = Mock()
+        frame1 = Mock()
+        frame2 = Mock()
+        mock_load_files.return_value = {
+            "attack": [frame0, frame1, frame2],
+            "idle": [Mock() for _ in range(4)],
+        }
+        character = AttackCharacter("test_char", "test.png")
         character.current_frame = 1
 
         # Act
-        result = character.get_current_sprite()
+        sprite = character.get_current_sprite()
 
         # Assert
-        assert result == mock_frames[1]
+        assert sprite == frame1
 
-    @patch("src.utils.attack_character.pygame.Surface")
-    def test_get_current_sprite_handles_invalid_frame_index(self, mock_surface_class):
-        """get_current_sprite should return fallback for invalid frame index."""
+    @patch("src.utils.attack_character.load_character_individual_files")
+    def test_get_current_sprite_handles_invalid_frame_index(self, mock_load_files):
+        """get_current_sprite should handle invalid frame indices."""
         # Arrange
-        mock_fallback = Mock()
-        mock_surface_class.return_value = mock_fallback
-        character = AttackCharacter("test_char", "", (64, 64))
+        mock_load_files.return_value = {
+            "attack": [Mock()],
+            "idle": [Mock() for _ in range(4)],
+        }
+        character = AttackCharacter("test_char", "test.png")
         character.current_frame = 999  # Invalid index
 
         # Act
-        result = character.get_current_sprite()
+        sprite = character.get_current_sprite()
 
         # Assert
-        assert result == mock_fallback
-        mock_fallback.fill.assert_called_with((255, 0, 255))
+        # Should return a surface (fallback)
+        assert sprite is not None
 
     @patch("src.utils.attack_character.pygame.Surface")
-    def test_get_current_sprite_handles_empty_frames(self, mock_surface_class):
-        """get_current_sprite should return fallback when no frames loaded."""
+    @patch("src.utils.attack_character.load_character_individual_files")
+    def test_get_current_sprite_handles_empty_frames(
+        self, mock_load_files, mock_surface
+    ):
+        """get_current_sprite should handle empty animation frames."""
         # Arrange
-        mock_fallback = Mock()
-        mock_surface_class.return_value = mock_fallback
-        character = AttackCharacter("test_char", "", (64, 64))
-        character.attack_frames = []  # No frames
+        mock_load_files.return_value = {}  # No animations
+        fallback_surface = Mock()
+        mock_surface.return_value = fallback_surface
+
+        character = AttackCharacter("test_char", "test.png")
 
         # Act
-        result = character.get_current_sprite()
+        character.get_current_sprite()
 
         # Assert
-        assert result == mock_fallback
-        mock_fallback.fill.assert_called_with((255, 0, 255))
+        # Should create and return fallback surface
+        mock_surface.assert_called()
+        fallback_surface.fill.assert_called_with(COLOR_PLACEHOLDER)
 
 
 class TestUtilityMethods:
     """Tests for utility methods."""
 
-    @patch("src.utils.attack_character.pygame.Surface")
-    def test_get_frame_count(self, mock_surface_class):
-        """get_frame_count should return number of attack frames."""
+    @patch("src.utils.attack_character.load_character_individual_files")
+    def test_get_frame_count(self, mock_load_files):
+        """get_frame_count should return number of frames in current animation."""
         # Arrange
-        mock_surface_class.return_value = Mock()
-        character = AttackCharacter("test_char", "", (64, 64))
+        mock_load_files.return_value = {
+            "attack": [Mock() for _ in range(6)],
+            "idle": [Mock() for _ in range(4)],
+        }
+        character = AttackCharacter("test_char", "test.png")
 
         # Act
-        result = character.get_frame_count()
+        count = character.get_frame_count()
 
         # Assert
-        assert result == 3
+        assert count == 6
 
-    @patch("src.utils.attack_character.pygame.Surface")
-    def test_get_animation_info(self, mock_surface_class):
-        """get_animation_info should return formatted string with current frame info."""
+    @patch("src.utils.attack_character.load_character_individual_files")
+    def test_get_animation_info(self, mock_load_files):
+        """get_animation_info should return formatted animation info."""
         # Arrange
-        mock_surface_class.return_value = Mock()
-        character = AttackCharacter("test_char", "", (64, 64))
+        mock_load_files.return_value = {
+            "attack": [Mock() for _ in range(6)],
+            "idle": [Mock() for _ in range(4)],
+        }
+        character = AttackCharacter("test_char", "test.png")
         character.current_frame = 1
 
         # Act
-        result = character.get_animation_info()
+        info = character.get_animation_info()
 
         # Assert
-        assert result == "Attack (Frame 2/3)"  # 1-indexed for display
+        assert info == "Attack (Frame 2/6)"

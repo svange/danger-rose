@@ -4,6 +4,7 @@ from typing import List, Dict, Optional
 from src.config.constants import (
     SPRITE_DISPLAY_SIZE,
     ANIMATION_ATTACK_DURATION,
+    COLOR_PLACEHOLDER,
 )
 from src.utils.sprite_loader import load_character_individual_files
 
@@ -78,7 +79,7 @@ class AnimatedCharacter:
     def _create_placeholder_animations(self) -> Dict[str, List[pygame.Surface]]:
         """Create placeholder animations if loading fails."""
         placeholder = pygame.Surface(self.scale)
-        placeholder.fill((255, 0, 255))  # Magenta placeholder
+        placeholder.fill(COLOR_PLACEHOLDER)  # Magenta placeholder
 
         return {
             "idle": [placeholder] * 4,

@@ -9,7 +9,42 @@ from src.config.constants import (
     COLOR_WHITE,
     COLOR_BLACK,
     COLOR_RED,
+    COLOR_GOLD,
+    COLOR_NIGHT_SKY,
+    COLOR_NIGHT_PURPLE,
+    COLOR_BUILDING_DARK,
+    COLOR_STREET_GRAY,
+    COLOR_STREET_LINE,
+    COLOR_PLACEHOLDER,
     SCENE_HUB_WORLD,
+    PLAYER_VEGAS_JUMP_POWER,
+    PLAYER_VEGAS_GRAVITY,
+    PLAYER_VEGAS_MAX_FALL_SPEED,
+    PLAYER_INVINCIBILITY_DURATION,
+    PLAYER_HIT_FLASH_DURATION,
+    PLAYER_ATTACK_COOLDOWN,
+    PLAYER_VEGAS_COLLISION_WIDTH,
+    PLAYER_VEGAS_COLLISION_HEIGHT,
+    VEGAS_LEVEL_WIDTH,
+    VEGAS_GROUND_OFFSET,
+    VEGAS_BOSS_ARENA_OFFSET,
+    VEGAS_BOSS_START_Y,
+    VEGAS_BOSS_ATTACK_RANGE,
+    VEGAS_BOSS_DAMAGE,
+    VEGAS_FAR_BG_PARALLAX,
+    VEGAS_NEAR_BG_PARALLAX,
+    VEGAS_STAR_COUNT,
+    VEGAS_BUILDING_WIDTHS,
+    VEGAS_BUILDING_HEIGHTS,
+    VEGAS_BUILDING_SPACING,
+    VEGAS_VICTORY_SCORE_BASE,
+    VEGAS_VICTORY_HEALTH_BONUS,
+    FONT_SMALL,
+    FONT_LARGE,
+    FLASH_HIT_RATE,
+    FLASH_INVINCIBILITY_RATE,
+    OVERLAY_PAUSE_ALPHA,
+    OVERLAY_GAME_OVER_ALPHA,
 )
 
 
@@ -45,9 +80,9 @@ class Player:
 
         # Player physics constants
         self.speed = 5
-        self.jump_power = -15
-        self.gravity = 0.8
-        self.max_fall_speed = 12
+        self.jump_power = PLAYER_VEGAS_JUMP_POWER
+        self.gravity = PLAYER_VEGAS_GRAVITY
+        self.max_fall_speed = PLAYER_VEGAS_MAX_FALL_SPEED
 
         # Create animated character using new individual file system
         self.sprite = AnimatedCharacter(
@@ -58,7 +93,9 @@ class Player:
         self.facing_right = True
 
         # Collision rect (smaller than sprite for better feel)
-        self.rect = pygame.Rect(x, y, 64, 100)
+        self.rect = pygame.Rect(
+            x, y, PLAYER_VEGAS_COLLISION_WIDTH, PLAYER_VEGAS_COLLISION_HEIGHT
+        )
 
         # Player state
         self.health = 3  # 3 hits
@@ -139,14 +176,20 @@ class Player:
         screen_x, screen_y = camera.apply_to_pos(self.x, self.y)
 
         # Apply flash effect when hit
-        if self.hit_flash_timer > 0 and int(self.hit_flash_timer * 20) % 2 == 0:
+        if (
+            self.hit_flash_timer > 0
+            and int(self.hit_flash_timer * FLASH_HIT_RATE) % 2 == 0
+        ):
             # Flash white
             flash_sprite = sprite.copy()
             flash_sprite.fill((255, 255, 255), special_flags=pygame.BLEND_ADD)
             sprite = flash_sprite
 
         # Blink when invulnerable
-        if self.invulnerable and int(self.invuln_timer * 10) % 2 == 0:
+        if (
+            self.invulnerable
+            and int(self.invuln_timer * FLASH_INVINCIBILITY_RATE) % 2 == 0
+        ):
             return  # Don't draw every other frame
 
         # Center sprite on player rect
@@ -160,8 +203,8 @@ class Player:
         if not self.invulnerable and self.health > 0:
             self.health -= 1
             self.invulnerable = True
-            self.invuln_timer = 2.0  # 2 seconds of invulnerability
-            self.hit_flash_timer = 0.5
+            self.invuln_timer = PLAYER_INVINCIBILITY_DURATION
+            self.hit_flash_timer = PLAYER_HIT_FLASH_DURATION
 
             # Play hurt sound
             sound_manager = SoundManager()
@@ -175,22 +218,22 @@ class VegasGame:
         self.screen_height = scene_manager.screen_height
 
         # Level dimensions
-        self.level_width = 3000  # Extended level width for side-scrolling
-        self.ground_y = self.screen_height - 100
+        self.level_width = VEGAS_LEVEL_WIDTH  # Extended level width for side-scrolling
+        self.ground_y = self.screen_height - VEGAS_GROUND_OFFSET
 
         # Initialize camera
         self.camera = Camera(self.screen_width, self.screen_height)
 
         # Initialize player
         character_name = scene_manager.game_data.get("selected_character") or "Danger"
-        self.player = Player(100, self.ground_y - 100, character_name)
+        self.player = Player(100, self.ground_y - VEGAS_GROUND_OFFSET, character_name)
 
         # Background layers for parallax
         self.init_backgrounds()
 
         # UI elements
-        self.font = pygame.font.Font(None, 36)
-        self.big_font = pygame.font.Font(None, 72)
+        self.font = pygame.font.Font(None, FONT_SMALL)
+        self.big_font = pygame.font.Font(None, FONT_LARGE)
 
         # Game state
         self.reached_boss = False
@@ -201,7 +244,9 @@ class VegasGame:
 
         # Boss
         self.boss = None
-        self.boss_arena_x = self.level_width - 640  # Boss arena center
+        self.boss_arena_x = (
+            self.level_width - VEGAS_BOSS_ARENA_OFFSET
+        )  # Boss arena center
 
         # Sound manager
         self.sound_manager = SoundManager()
@@ -215,44 +260,44 @@ class VegasGame:
         bg_image = load_image(get_vegas_bg(), (self.screen_width, self.screen_height))
 
         # Check if it's a placeholder (magenta color)
-        if bg_image.get_at((0, 0))[:3] == (255, 0, 255):
+        if bg_image.get_at((0, 0))[:3] == COLOR_PLACEHOLDER:
             # Create custom backgrounds
             self.bg_far = pygame.Surface((self.screen_width, self.screen_height))
-            self.bg_far.fill((20, 10, 40))  # Dark purple night sky
+            self.bg_far.fill(COLOR_NIGHT_SKY)  # Dark purple night sky
 
             # Add some "stars" to the far background
             import random
 
-            for _ in range(100):
+            for _ in range(VEGAS_STAR_COUNT):
                 x = random.randint(0, self.screen_width)
                 y = random.randint(0, self.screen_height)
                 pygame.draw.circle(self.bg_far, (255, 255, 255), (x, y), 1)
 
             self.bg_near = pygame.Surface((self.screen_width, self.screen_height))
-            self.bg_near.fill((40, 20, 60))  # Lighter purple for buildings
+            self.bg_near.fill(COLOR_NIGHT_PURPLE)  # Lighter purple for buildings
 
             # Add simple building silhouettes
-            building_heights = [200, 300, 250, 280, 320, 240]
+            building_heights = VEGAS_BUILDING_HEIGHTS
             x = 0
-            for height in building_heights:
-                width = 150
+            for i, height in enumerate(building_heights):
+                width = VEGAS_BUILDING_WIDTHS[i]
                 pygame.draw.rect(
                     self.bg_near,
-                    (30, 15, 50),
+                    COLOR_BUILDING_DARK,
                     (x, self.screen_height - height, width, height),
                 )
-                x += width + 20
+                x += width + VEGAS_BUILDING_SPACING
         else:
             self.bg_far = bg_image
             self.bg_near = bg_image.copy()
 
         # Ground/street layer
         self.ground_surface = pygame.Surface((self.level_width, 100))
-        self.ground_surface.fill((50, 50, 50))  # Dark gray street
+        self.ground_surface.fill(COLOR_STREET_GRAY)  # Dark gray street
 
         # Add some street lines
         for x in range(0, self.level_width, 200):
-            pygame.draw.rect(self.ground_surface, (200, 200, 0), (x, 45, 100, 10))
+            pygame.draw.rect(self.ground_surface, COLOR_STREET_LINE, (x, 45, 100, 10))
 
     def handle_event(self, event):
         if event.type == pygame.KEYDOWN:
@@ -323,9 +368,11 @@ class VegasGame:
             # Simple attack: damage boss if close enough
             dx = abs(self.player.x - self.boss.x)
             dy = abs(self.player.y - self.boss.y)
-            if dx < 150 and dy < 150:  # Close range attack
-                self.boss.take_damage(1)  # Small damage per hit
-                self.player.attack_cooldown = 0.5  # Half second cooldown
+            if (
+                dx < VEGAS_BOSS_ATTACK_RANGE and dy < VEGAS_BOSS_ATTACK_RANGE
+            ):  # Close range attack
+                self.boss.take_damage(VEGAS_BOSS_DAMAGE)  # Small damage per hit
+                self.player.attack_cooldown = PLAYER_ATTACK_COOLDOWN
                 # Play attack sound
                 self.sound_manager.play_sfx("assets/audio/sfx/attack.ogg")
 
@@ -334,7 +381,7 @@ class VegasGame:
         self.boss_fight_started = True
 
         # Create boss
-        self.boss = VegasBoss(self.boss_arena_x, 300)
+        self.boss = VegasBoss(self.boss_arena_x, VEGAS_BOSS_START_Y)
 
         # Lock camera on boss arena
         self.camera.x = self.boss_arena_x - self.screen_width // 2
@@ -351,14 +398,14 @@ class VegasGame:
 
         # Draw parallax backgrounds
         # Far background (moves slower)
-        far_offset = -self.camera.x * 0.3
+        far_offset = -self.camera.x * VEGAS_FAR_BG_PARALLAX
         screen.blit(self.bg_far, (far_offset % self.screen_width, 0))
         screen.blit(
             self.bg_far, ((far_offset % self.screen_width) - self.screen_width, 0)
         )
 
         # Near background (moves medium speed)
-        near_offset = -self.camera.x * 0.6
+        near_offset = -self.camera.x * VEGAS_NEAR_BG_PARALLAX
         screen.blit(self.bg_near, (near_offset % self.screen_width, 0))
         screen.blit(
             self.bg_near, ((near_offset % self.screen_width) - self.screen_width, 0)
@@ -389,7 +436,11 @@ class VegasGame:
             # Draw attack indicator if in range
             dx = abs(self.player.x - self.boss.x)
             dy = abs(self.player.y - self.boss.y)
-            if dx < 150 and dy < 150 and self.player.attack_cooldown <= 0:
+            if (
+                dx < VEGAS_BOSS_ATTACK_RANGE
+                and dy < VEGAS_BOSS_ATTACK_RANGE
+                and self.player.attack_cooldown <= 0
+            ):
                 # Draw "Press SPACE to attack!" text
                 attack_text = self.font.render(
                     "Press SPACE to attack!", True, COLOR_WHITE
@@ -454,7 +505,7 @@ class VegasGame:
     def draw_pause_overlay(self, screen):
         # Semi-transparent overlay
         overlay = pygame.Surface((self.screen_width, self.screen_height))
-        overlay.set_alpha(128)
+        overlay.set_alpha(OVERLAY_PAUSE_ALPHA)
         overlay.fill(COLOR_BLACK)
         screen.blit(overlay, (0, 0))
 
@@ -482,13 +533,13 @@ class VegasGame:
         """Draw game over or victory screen."""
         # Semi-transparent overlay
         overlay = pygame.Surface((self.screen_width, self.screen_height))
-        overlay.set_alpha(180)
+        overlay.set_alpha(OVERLAY_GAME_OVER_ALPHA)
         overlay.fill(COLOR_BLACK)
         screen.blit(overlay, (0, 0))
 
         if self.victory:
             # Victory screen
-            title_text = self.big_font.render("VICTORY!", True, (255, 215, 0))  # Gold
+            title_text = self.big_font.render("VICTORY!", True, COLOR_GOLD)  # Gold
             title_rect = title_text.get_rect(
                 center=(self.screen_width // 2, self.screen_height // 2 - 50)
             )
@@ -503,7 +554,9 @@ class VegasGame:
             screen.blit(sub_text, sub_rect)
 
             # Score
-            score = 1000 + (self.player.health * 500)  # Bonus for remaining health
+            score = VEGAS_VICTORY_SCORE_BASE + (
+                self.player.health * VEGAS_VICTORY_HEALTH_BONUS
+            )  # Bonus for remaining health
             score_text = self.font.render(f"Score: {score}", True, COLOR_WHITE)
             score_rect = score_text.get_rect(
                 center=(self.screen_width // 2, self.screen_height // 2 + 40)

@@ -15,6 +15,7 @@ from src.utils.sprite_loader import (
     load_sprite_sheet,
     load_character_animations,
 )
+from src.config.constants import COLOR_PLACEHOLDER
 
 
 class TestLoadImage:
@@ -54,7 +55,7 @@ class TestLoadImage:
 
         # Assert
         mock_surface_class.assert_called_once_with((64, 64))
-        mock_placeholder.fill.assert_called_once_with((255, 0, 255))
+        mock_placeholder.fill.assert_called_once_with(COLOR_PLACEHOLDER)
         assert result == mock_placeholder
 
     @patch("src.utils.sprite_loader.os.path.exists")
@@ -94,7 +95,7 @@ class TestLoadImage:
         result = load_image("corrupt.png")
 
         # Assert
-        mock_placeholder.fill.assert_called_once_with((255, 0, 255))
+        mock_placeholder.fill.assert_called_once_with(COLOR_PLACEHOLDER)
         assert result == mock_placeholder
 
 
@@ -118,7 +119,7 @@ class TestLoadSpriteSheet:
         # Assert
         assert len(result) == 1
         assert result[0] == mock_placeholder
-        mock_placeholder.fill.assert_called_once_with((255, 0, 255))
+        mock_placeholder.fill.assert_called_once_with(COLOR_PLACEHOLDER)
 
     @patch("src.utils.sprite_loader.os.path.exists")
     @patch("src.utils.sprite_loader.pygame.image.load")
@@ -206,7 +207,7 @@ class TestLoadSpriteSheet:
         # Assert
         assert len(result) == 1
         assert result[0] == mock_placeholder
-        mock_placeholder.fill.assert_called_once_with((255, 0, 255))
+        mock_placeholder.fill.assert_called_once_with(COLOR_PLACEHOLDER)
 
 
 class TestLoadCharacterAnimations:
@@ -233,7 +234,7 @@ class TestLoadCharacterAnimations:
         assert len(result["walking"]) == 4
         assert len(result["jumping"]) == 4
         assert len(result["attacking"]) == 3
-        mock_placeholder.fill.assert_called_once_with((255, 0, 255))
+        mock_placeholder.fill.assert_called_once_with(COLOR_PLACEHOLDER)
 
     @patch("src.utils.sprite_loader.os.path.exists")
     @patch("src.utils.sprite_loader.pygame.image.load")
@@ -258,7 +259,7 @@ class TestLoadCharacterAnimations:
         assert len(result["walking"]) == 4
         assert len(result["jumping"]) == 4
         assert len(result["attacking"]) == 3
-        mock_placeholder.fill.assert_called_once_with((255, 0, 255))
+        mock_placeholder.fill.assert_called_once_with(COLOR_PLACEHOLDER)
 
     @patch("src.utils.sprite_loader.os.path.exists")
     @patch("src.utils.sprite_loader.pygame.image.load")

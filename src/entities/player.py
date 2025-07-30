@@ -35,6 +35,8 @@ class Player:
         self.facing_right = True
 
         # Load character sprite using new individual file system
+        # Default to "danger" if no character name provided
+        character_name = character_name or "danger"
         self.sprite = AnimatedCharacter(
             character_name.lower(),
             "hub",

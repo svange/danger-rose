@@ -7,6 +7,12 @@ from src.scenes.slope_generator import SlopeGenerator
 from src.entities.snowflake import SnowflakeEffect
 from src.entities.dad_ai import DadAI
 from src.utils.high_score_manager import HighScoreManager, ScoreEntry
+from src.utils.asset_paths import get_sfx_path
+from src.ui.drawing_helpers import (
+    draw_lives,
+    draw_text_with_background,
+    draw_instructions,
+)
 from src.config.constants import (
     SPRITE_DISPLAY_SIZE,
     COLOR_WHITE,
@@ -16,6 +22,33 @@ from src.config.constants import (
     COLOR_BLUE,
     SCENE_HUB_WORLD,
     SCENE_LEADERBOARD,
+    PLAYER_SKI_SPEED,
+    PLAYER_SKI_DIAGONAL_SPEED,
+    PLAYER_COLLISION_WIDTH,
+    PLAYER_COLLISION_HEIGHT,
+    PLAYER_COLLISION_OFFSET,
+    PLAYER_INVINCIBILITY_DURATION,
+    SKI_CRASH_DURATION,
+    GAME_DURATION,
+    SKI_SCROLL_SPEED,
+    SKI_SNOWFLAKE_POINTS,
+    SKI_MAX_LIVES,
+    FONT_SMALL,
+    FONT_LARGE,
+    FONT_HUGE,
+    COLOR_SKY_BLUE,
+    COLOR_SNOW_WHITE,
+    COLOR_SNOW_ALT,
+    SKI_SNOW_PARTICLE_COUNT,
+    SKI_DAD_OFFSET_X,
+    SKI_PLAYER_Y_OFFSET,
+    OVERLAY_GAME_OVER_ALPHA,
+    UI_TIMER_BORDER,
+    UI_SCORE_PADDING,
+    UI_INSTRUCTION_LINE_HEIGHT,
+    UI_INSTRUCTION_START_Y,
+    UI_BIG_TEXT_Y,
+    FLASH_INVINCIBILITY_RATE,
 )
 
 
@@ -26,8 +59,8 @@ class SkiPlayer:
         self.character_name = character_name
 
         # Movement
-        self.speed = 5
-        self.diagonal_speed = 3.5  # Slower when moving diagonally
+        self.speed = PLAYER_SKI_SPEED
+        self.diagonal_speed = PLAYER_SKI_DIAGONAL_SPEED  # Slower when moving diagonally
 
         # Create animated character using new individual file system
         self.sprite = AnimatedCharacter(
@@ -37,7 +70,12 @@ class SkiPlayer:
         self.sprite.set_animation("walk", loop=True)
 
         # Collision rect - smaller than sprite for more forgiving collisions
-        self.rect = pygame.Rect(x - 24, y - 24, 48, 48)
+        self.rect = pygame.Rect(
+            x - PLAYER_COLLISION_OFFSET,
+            y - PLAYER_COLLISION_OFFSET,
+            PLAYER_COLLISION_WIDTH,
+            PLAYER_COLLISION_HEIGHT,
+        )
 
         # Crash state
         self.is_crashing = False
@@ -74,7 +112,7 @@ class SkiPlayer:
             if self.crash_time <= 0:
                 self.is_crashing = False
                 self.invincible = True
-                self.invincible_time = 2.0  # 2 seconds of invincibility
+                self.invincible_time = PLAYER_INVINCIBILITY_DURATION
 
         # Update invincibility
         if self.invincible:
@@ -89,7 +127,7 @@ class SkiPlayer:
         """Trigger crash state."""
         if not self.invincible and not self.is_crashing:
             self.is_crashing = True
-            self.crash_time = 0.5  # Crash animation duration
+            self.crash_time = SKI_CRASH_DURATION
             return True
         return False
 
@@ -97,7 +135,10 @@ class SkiPlayer:
         sprite = self.sprite.get_current_sprite()
 
         # Flash during invincibility
-        if self.invincible and int(self.invincible_time * 10) % 2 == 0:
+        if (
+            self.invincible
+            and int(self.invincible_time * FLASH_INVINCIBILITY_RATE) % 2 == 0
+        ):
             # Make sprite semi-transparent
             sprite = sprite.copy()
             sprite.set_alpha(128)
@@ -126,31 +167,34 @@ class SkiGame:
 
         # Game state
         self.state = self.STATE_READY
-        self.game_duration = 60.0  # 60 seconds
+        self.game_duration = GAME_DURATION
         self.time_remaining = self.game_duration
         self.start_time = None
 
         # Initialize player
         character_name = scene_manager.game_data.get("selected_character") or "Danger"
         self.player = SkiPlayer(
-            self.screen_width // 2, self.screen_height - 200, character_name
+            self.screen_width // 2,
+            self.screen_height - SKI_PLAYER_Y_OFFSET,
+            character_name,
         )
 
         # Initialize Dad AI
         self.dad = DadAI(
-            self.screen_width // 2 - 150,  # Start slightly to the left of player
-            self.screen_height - 200,
+            self.screen_width // 2
+            - SKI_DAD_OFFSET_X,  # Start slightly to the left of player
+            self.screen_height - SKI_PLAYER_Y_OFFSET,
             self.screen_width,
         )
 
         # Lives system
-        self.lives = 3
-        self.max_lives = 3
+        self.lives = SKI_MAX_LIVES
+        self.max_lives = SKI_MAX_LIVES
 
         # Score system
         self.score = 0
         self.snowflakes_collected = 0
-        self.points_per_snowflake = 10
+        self.points_per_snowflake = SKI_SNOWFLAKE_POINTS
 
         # High score tracking
         self.high_score_manager = HighScoreManager()
@@ -159,16 +203,16 @@ class SkiGame:
         self.difficulty = "normal"  # Could be set based on game settings
 
         # Visual elements
-        self.scroll_speed = 200  # Base scrolling speed
+        self.scroll_speed = SKI_SCROLL_SPEED  # Base scrolling speed
         self.scroll_offset = 0
 
         # Effects
         self.active_effects = []
 
         # UI fonts
-        self.font = pygame.font.Font(None, 36)
-        self.big_font = pygame.font.Font(None, 72)
-        self.huge_font = pygame.font.Font(None, 96)
+        self.font = pygame.font.Font(None, FONT_SMALL)
+        self.big_font = pygame.font.Font(None, FONT_LARGE)
+        self.huge_font = pygame.font.Font(None, FONT_HUGE)
 
         # Create slope generator
         self.slope_generator = SlopeGenerator(self.screen_width, self.screen_height)
@@ -185,11 +229,11 @@ class SkiGame:
         self.snow_surface.fill(COLOR_WHITE)
 
         # Add some snow texture details
-        for _ in range(200):
+        for _ in range(SKI_SNOW_PARTICLE_COUNT):
             x = random.randint(0, self.screen_width)
             y = random.randint(0, self.screen_height * 2)
             radius = random.randint(1, 3)
-            color = (240, 240, 255) if random.random() > 0.5 else (230, 230, 250)
+            color = COLOR_SNOW_WHITE if random.random() > 0.5 else COLOR_SNOW_ALT
             pygame.draw.circle(self.snow_surface, color, (x, y), radius)
 
     def handle_event(self, event):
@@ -240,7 +284,7 @@ class SkiGame:
         self.slope_generator.reset()
 
         # Reset Dad position
-        self.dad.x = self.screen_width // 2 - 150
+        self.dad.x = self.screen_width // 2 - SKI_DAD_OFFSET_X
         self.dad.is_celebrating = False
 
     def update(self, dt: float):
@@ -300,7 +344,7 @@ class SkiGame:
 
                     # Play crash sound (if available)
                     try:
-                        self.sound_manager.play_sfx("assets/sounds/crash.ogg")
+                        self.sound_manager.play_sfx(get_sfx_path("collision.ogg"))
                     except Exception:
                         pass  # Sound file not available yet
 
@@ -330,7 +374,9 @@ class SkiGame:
 
             # Play collection sound
             try:
-                self.sound_manager.play_sfx("assets/sounds/collect.ogg", volume=0.5)
+                self.sound_manager.play_sfx(
+                    get_sfx_path("collect_item.ogg"), volume=0.5
+                )
             except Exception:
                 pass  # Sound file not available yet
 
@@ -345,7 +391,7 @@ class SkiGame:
 
     def draw(self, screen):
         # Clear screen with sky color
-        screen.fill((135, 206, 235))  # Sky blue
+        screen.fill(COLOR_SKY_BLUE)
 
         # Draw scrolling slope
         self.draw_slope(screen)
@@ -382,7 +428,7 @@ class SkiGame:
         """Draw the ready state UI."""
         # Title
         title_text = self.huge_font.render("SKI GAME", True, COLOR_BLACK)
-        title_rect = title_text.get_rect(center=(self.screen_width // 2, 200))
+        title_rect = title_text.get_rect(center=(self.screen_width // 2, UI_BIG_TEXT_Y))
         screen.blit(title_text, title_rect)
 
         # Instructions
@@ -395,26 +441,29 @@ class SkiGame:
             "Press ESC to return to hub",
         ]
 
-        y = 350
-        for instruction in instructions:
-            text = self.font.render(instruction, True, COLOR_BLACK)
-            text_rect = text.get_rect(center=(self.screen_width // 2, y))
-            screen.blit(text, text_rect)
-            y += 40
+        draw_instructions(
+            screen,
+            instructions,
+            self.font,
+            self.screen_width // 2,
+            UI_INSTRUCTION_START_Y,
+            UI_INSTRUCTION_LINE_HEIGHT,
+            COLOR_BLACK,
+        )
 
     def draw_game_ui(self, screen):
         """Draw the playing state UI."""
         # Timer
         timer_text = f"Time: {int(self.time_remaining)}"
-        timer_surface = self.big_font.render(timer_text, True, COLOR_BLACK)
-        timer_rect = timer_surface.get_rect(center=(self.screen_width // 2, 50))
-
-        # Timer background
-        bg_rect = timer_rect.inflate(20, 10)
-        pygame.draw.rect(screen, COLOR_WHITE, bg_rect)
-        pygame.draw.rect(screen, COLOR_BLACK, bg_rect, 3)
-
-        screen.blit(timer_surface, timer_rect)
+        draw_text_with_background(
+            screen,
+            timer_text,
+            self.big_font,
+            (self.screen_width // 2, 50),
+            COLOR_BLACK,
+            COLOR_WHITE,
+            COLOR_BLACK,
+        )
 
         # Score display
         self.draw_score(screen)
@@ -428,73 +477,7 @@ class SkiGame:
 
     def draw_lives(self, screen):
         """Draw the lives indicator."""
-        heart_size = 40
-        heart_spacing = 10
-        start_x = self.screen_width - (self.max_lives * (heart_size + heart_spacing))
-        y = 20
-
-        for i in range(self.max_lives):
-            x = start_x + i * (heart_size + heart_spacing)
-
-            # Draw heart shape
-            if i < self.lives:
-                color = COLOR_RED
-                fill = True
-            else:
-                color = COLOR_BLACK
-                fill = False
-
-            # Simple heart using circles and polygon
-            if fill:
-                # Filled heart
-                pygame.draw.circle(
-                    screen,
-                    color,
-                    (x + heart_size // 4, y + heart_size // 4),
-                    heart_size // 4,
-                )
-                pygame.draw.circle(
-                    screen,
-                    color,
-                    (x + 3 * heart_size // 4, y + heart_size // 4),
-                    heart_size // 4,
-                )
-                pygame.draw.polygon(
-                    screen,
-                    color,
-                    [
-                        (x, y + heart_size // 3),
-                        (x + heart_size // 2, y + heart_size),
-                        (x + heart_size, y + heart_size // 3),
-                    ],
-                )
-            else:
-                # Outline heart
-                pygame.draw.circle(
-                    screen,
-                    color,
-                    (x + heart_size // 4, y + heart_size // 4),
-                    heart_size // 4,
-                    2,
-                )
-                pygame.draw.circle(
-                    screen,
-                    color,
-                    (x + 3 * heart_size // 4, y + heart_size // 4),
-                    heart_size // 4,
-                    2,
-                )
-                pygame.draw.lines(
-                    screen,
-                    color,
-                    False,
-                    [
-                        (x, y + heart_size // 3),
-                        (x + heart_size // 2, y + heart_size),
-                        (x + heart_size, y + heart_size // 3),
-                    ],
-                    2,
-                )
+        draw_lives(screen, self.lives, self.max_lives)
 
     def draw_score(self, screen):
         """Draw the score display."""
@@ -504,7 +487,7 @@ class SkiGame:
         score_rect = score_surface.get_rect(left=20, top=50)
 
         # Score background
-        bg_rect = score_rect.inflate(20, 10)
+        bg_rect = score_rect.inflate(UI_SCORE_PADDING, UI_TIMER_BORDER)
         pygame.draw.rect(screen, COLOR_WHITE, bg_rect)
         pygame.draw.rect(screen, COLOR_BLACK, bg_rect, 2)
 
@@ -516,7 +499,7 @@ class SkiGame:
         snowflake_rect = snowflake_surface.get_rect(left=20, top=100)
 
         # Snowflake background
-        bg_rect = snowflake_rect.inflate(20, 10)
+        bg_rect = snowflake_rect.inflate(UI_SCORE_PADDING, UI_TIMER_BORDER)
         pygame.draw.rect(screen, COLOR_WHITE, bg_rect)
         pygame.draw.rect(screen, COLOR_BLUE, bg_rect, 2)
 
@@ -526,7 +509,7 @@ class SkiGame:
         """Draw the game over state UI."""
         # Overlay
         overlay = pygame.Surface((self.screen_width, self.screen_height))
-        overlay.set_alpha(180)
+        overlay.set_alpha(OVERLAY_GAME_OVER_ALPHA)
         overlay.fill(COLOR_BLACK)
         screen.blit(overlay, (0, 0))
 
@@ -574,12 +557,15 @@ class SkiGame:
             "Press ESC to return to hub",
         ]
 
-        y = y_start
-        for option in options:
-            text = self.font.render(option, True, COLOR_WHITE)
-            text_rect = text.get_rect(center=(self.screen_width // 2, y))
-            screen.blit(text, text_rect)
-            y += 35
+        draw_instructions(
+            screen,
+            options,
+            self.font,
+            self.screen_width // 2,
+            y_start,
+            35,
+            COLOR_WHITE,
+        )
 
     def on_enter(self, previous_scene, data):
         """Called when entering this scene."""

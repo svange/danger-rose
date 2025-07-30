@@ -68,7 +68,7 @@ class TestGameStateManagement:
         # Assert
         manager.sound_manager.crossfade_music.assert_called()
         args = manager.sound_manager.crossfade_music.call_args[0]
-        assert "ski_theme.wav" in args[0]
+        assert "ski_theme.ogg" in args[0]
 
     def test_scene_on_enter_receives_previous_scene_data(self):
         """Scenes should receive data from previous scene on enter."""

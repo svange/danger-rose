@@ -102,7 +102,7 @@ class HubWorld:
                     self.couch.trigger_save()
                     self.save_notification.show()
                     self.scene_manager.sound_manager.play_sfx(
-                        get_sfx_path("save_game.wav")
+                        get_sfx_path("collect_item.ogg")
                     )
                 # Check if player is near any door
                 elif self.highlighted_door:

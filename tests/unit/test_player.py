@@ -10,11 +10,9 @@ class TestPlayerInitialization:
     """Test Player initialization."""
 
     @patch("src.entities.player.AnimatedCharacter")
-    @patch("src.entities.player.get_character_sprite_path")
-    def test_player_init_basic(self, mock_get_sprite_path, mock_animated_character):
+    def test_player_init_basic(self, mock_animated_character):
         """Player should initialize with correct default values."""
         # Arrange
-        mock_get_sprite_path.return_value = "path/to/danger.png"
         mock_animated_character.return_value = Mock()
 
         # Act
@@ -32,30 +30,26 @@ class TestPlayerInitialization:
         assert player.facing_right is True
 
     @patch("src.entities.player.AnimatedCharacter")
-    @patch("src.entities.player.get_character_sprite_path")
-    def test_player_init_with_character(
-        self, mock_get_sprite_path, mock_animated_character
-    ):
-        """Player should create AnimatedCharacter with correct sprite path."""
+    def test_player_init_with_character(self, mock_animated_character):
+        """Player should create AnimatedCharacter with correct parameters."""
         # Arrange
         mock_sprite = Mock()
         mock_animated_character.return_value = mock_sprite
-        mock_get_sprite_path.return_value = "path/to/rose.png"
 
         # Act
         Player(x=0, y=0, character_name="rose")
 
         # Assert
-        mock_get_sprite_path.assert_called_once_with("rose")
-        mock_animated_character.assert_called_once_with("rose", "path/to/rose.png")
+        mock_animated_character.assert_called_once_with(
+            "rose", "hub", scale=(SPRITE_DISPLAY_SIZE, SPRITE_DISPLAY_SIZE)
+        )
 
 
 class TestPlayerMovement:
     """Test player movement mechanics."""
 
     @patch("src.entities.player.AnimatedCharacter")
-    @patch("src.entities.player.get_character_sprite_path")
-    def test_handle_movement_keys(self, mock_get_sprite_path, mock_animated_character):
+    def test_handle_movement_keys(self, mock_animated_character):
         """Player should respond to movement key events."""
         # Arrange
         mock_animated_character.return_value = Mock()
@@ -77,8 +71,7 @@ class TestPlayerMovement:
         assert player.move_left is False
 
     @patch("src.entities.player.AnimatedCharacter")
-    @patch("src.entities.player.get_character_sprite_path")
-    def test_update_movement(self, mock_get_sprite_path, mock_animated_character):
+    def test_update_movement(self, mock_animated_character):
         """Player should update position based on movement flags."""
         # Arrange
         mock_sprite = Mock()
@@ -96,8 +89,7 @@ class TestPlayerMovement:
         mock_sprite.update.assert_called()
 
     @patch("src.entities.player.AnimatedCharacter")
-    @patch("src.entities.player.get_character_sprite_path")
-    def test_boundary_collision(self, mock_get_sprite_path, mock_animated_character):
+    def test_boundary_collision(self, mock_animated_character):
         """Player should stop at boundaries."""
         # Arrange
         mock_animated_character.return_value = Mock()
@@ -119,8 +111,7 @@ class TestPlayerRendering:
     """Test player rendering."""
 
     @patch("src.entities.player.AnimatedCharacter")
-    @patch("src.entities.player.get_character_sprite_path")
-    def test_draw_player(self, mock_get_sprite_path, mock_animated_character):
+    def test_draw_player(self, mock_animated_character):
         """Player should draw sprite at correct position."""
         # Arrange
         mock_sprite_manager = Mock()
@@ -139,10 +130,7 @@ class TestPlayerRendering:
         mock_screen.blit.assert_called_once()
 
     @patch("src.entities.player.AnimatedCharacter")
-    @patch("src.entities.player.get_character_sprite_path")
-    def test_rect_updates_with_position(
-        self, mock_get_sprite_path, mock_animated_character
-    ):
+    def test_rect_updates_with_position(self, mock_animated_character):
         """Player rect should update when position changes."""
         # Arrange
         mock_animated_character.return_value = Mock()
@@ -155,5 +143,5 @@ class TestPlayerRendering:
         player.update(0.016, [])
 
         # Assert
-        assert player.rect.x == 200 - SPRITE_DISPLAY_SIZE // 2
-        assert player.rect.y == 150 - SPRITE_DISPLAY_SIZE // 2
+        assert player.rect.centerx == 200
+        assert player.rect.centery == 150

@@ -1,6 +1,8 @@
 import pygame
 import os
-from typing import Optional
+import json
+from typing import Optional, Dict, List
+from src.config.constants import COLOR_PLACEHOLDER
 
 
 def load_image(path: str, scale: Optional[tuple] = None) -> pygame.Surface:
@@ -8,7 +10,7 @@ def load_image(path: str, scale: Optional[tuple] = None) -> pygame.Surface:
     if not os.path.exists(path):
         # Create a placeholder surface if image doesn't exist
         surface = pygame.Surface((64, 64))
-        surface.fill((255, 0, 255))  # Magenta placeholder
+        surface.fill(COLOR_PLACEHOLDER)  # Magenta placeholder
         return surface
 
     try:
@@ -19,8 +21,94 @@ def load_image(path: str, scale: Optional[tuple] = None) -> pygame.Surface:
     except pygame.error:
         # Create a placeholder surface if loading fails
         surface = pygame.Surface((64, 64))
-        surface.fill((255, 0, 255))  # Magenta placeholder
+        surface.fill(COLOR_PLACEHOLDER)  # Magenta placeholder
         return surface
+
+
+def load_character_individual_files(
+    character_name: str,
+    scene: str = "hub",
+    scale: Optional[tuple] = None,
+    base_path: str = None,
+) -> Dict[str, List[pygame.Surface]]:
+    """Load character animations from individual PNG files organized by scene.
+
+    Args:
+        character_name: Name of character (danger, rose, dad)
+        scene: Scene name (hub, pool, vegas, ski)
+        scale: Optional scaling tuple (width, height)
+        base_path: Base path to character assets (auto-detected if None)
+
+    Returns:
+        Dictionary mapping animation names to lists of Surface objects
+    """
+    if base_path is None:
+        # Auto-detect base path relative to this file
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        project_root = os.path.dirname(os.path.dirname(current_dir))
+        base_path = os.path.join(
+            project_root, "assets", "images", "characters", "new_sprites"
+        )
+
+    character_path = os.path.join(base_path, character_name, scene)
+    metadata_path = os.path.join(
+        base_path, character_name, "hub", "animation_metadata.json"
+    )
+
+    # Load animation metadata if available
+    animation_config = {
+        "idle": {"frames": 4},
+        "walk": {"frames": 5},  # Using walk instead of walk_extra for now
+        "jump": {"frames": 3},
+        "victory": {"frames": 4},
+        "hurt": {"frames": 2},
+        "action": {"frames": 6},  # Map to attack
+    }
+
+    if os.path.exists(metadata_path):
+        try:
+            with open(metadata_path, "r") as f:
+                metadata = json.load(f)
+                if "animations" in metadata:
+                    animation_config.update(
+                        {
+                            name: {"frames": info["frames"]}
+                            for name, info in metadata["animations"].items()
+                        }
+                    )
+        except (json.JSONDecodeError, KeyError):
+            pass  # Use default config if metadata is invalid
+
+    animations = {}
+
+    for animation_name, config in animation_config.items():
+        frames = []
+        frame_count = config["frames"]
+
+        for i in range(1, frame_count + 1):
+            frame_path = os.path.join(character_path, f"{animation_name}_{i:02d}.png")
+
+            if os.path.exists(frame_path):
+                frame = load_image(frame_path, scale)
+                frames.append(frame)
+            else:
+                # Create placeholder frame
+                placeholder = pygame.Surface((80, 110))
+                placeholder.fill((255, 0, 255))
+                frames.append(placeholder)
+
+        if frames:
+            animations[animation_name] = frames
+
+    # Map some animations to expected names for backward compatibility
+    if "action" in animations:
+        animations["attack"] = animations["action"]
+    if "walk" in animations:
+        animations["walking"] = animations["walk"]
+    if "jump" in animations:
+        animations["jumping"] = animations["jump"]
+
+    return animations
 
 
 def load_sprite_sheet(
@@ -30,7 +118,7 @@ def load_sprite_sheet(
     if not os.path.exists(path):
         # Create placeholder frames if sprite sheet doesn't exist
         placeholder = pygame.Surface((frame_width, frame_height))
-        placeholder.fill((255, 0, 255))  # Magenta placeholder
+        placeholder.fill(COLOR_PLACEHOLDER)  # Magenta placeholder
         return [placeholder]
 
     try:
@@ -55,7 +143,7 @@ def load_sprite_sheet(
     except pygame.error:
         # Create placeholder frame if loading fails
         placeholder = pygame.Surface((frame_width, frame_height))
-        placeholder.fill((255, 0, 255))  # Magenta placeholder
+        placeholder.fill(COLOR_PLACEHOLDER)  # Magenta placeholder
         return [placeholder]
 
 
@@ -69,7 +157,7 @@ def load_character_animations(
     if not os.path.exists(path):
         # Create placeholder animations if sprite sheet doesn't exist
         placeholder = pygame.Surface((frame_width, frame_height))
-        placeholder.fill((255, 0, 255))  # Magenta placeholder
+        placeholder.fill(COLOR_PLACEHOLDER)  # Magenta placeholder
         return {
             "walking": [placeholder] * 4,
             "jumping": [placeholder] * 4,
@@ -109,7 +197,7 @@ def load_character_animations(
     except pygame.error:
         # Create placeholder animations if loading fails
         placeholder = pygame.Surface((frame_width, frame_height))
-        placeholder.fill((255, 0, 255))  # Magenta placeholder
+        placeholder.fill(COLOR_PLACEHOLDER)  # Magenta placeholder
         return {
             "walking": [placeholder] * 4,
             "jumping": [placeholder] * 4,

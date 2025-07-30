@@ -4,9 +4,14 @@ import math
 import random
 from datetime import datetime
 from typing import List
-from src.utils.asset_paths import get_character_sprite_path
-from src.utils.attack_character import AttackCharacter
+from src.utils.attack_character import AnimatedCharacter
 from src.utils.high_score_manager import HighScoreManager, ScoreEntry
+from src.utils.asset_paths import get_sfx_path
+from src.ui.drawing_helpers import (
+    draw_text_with_background,
+    draw_instructions,
+    draw_progress_bar,
+)
 from src.entities.powerup import (
     PowerUp,
     TripleShotPowerUp,
@@ -28,9 +33,14 @@ from src.config.constants import (
     COLOR_BLUE,
     COLOR_GREEN,
     COLOR_RED,
+    COLOR_WATER_SPLASH,
     SCENE_HUB_WORLD,
     SCENE_NAME_ENTRY,
     GRAVITY,
+    UI_INSTRUCTION_START_Y,
+    FONT_SMALL,
+    FONT_LARGE,
+    FONT_HUGE,
 )
 
 
@@ -42,11 +52,12 @@ class PoolPlayer:
         self.y = y
         self.character_name = character_name
 
-        # Create animated character
-        sprite_path = get_character_sprite_path(character_name.lower())
-        self.sprite = AttackCharacter(
-            character_name, sprite_path, (SPRITE_DISPLAY_SIZE, SPRITE_DISPLAY_SIZE)
+        # Create animated character using new individual file system
+        self.sprite = AnimatedCharacter(
+            character_name.lower(), "pool", (SPRITE_DISPLAY_SIZE, SPRITE_DISPLAY_SIZE)
         )
+        # Set to idle animation for pool game
+        self.sprite.set_animation("idle", loop=True)
 
         # Collision rect
         self.rect = pygame.Rect(x - 32, y - 32, 64, 64)
@@ -331,9 +342,9 @@ class PoolGame:
         self.reload_progress = 0
 
         # UI fonts
-        self.font = pygame.font.Font(None, 36)
-        self.big_font = pygame.font.Font(None, 72)
-        self.huge_font = pygame.font.Font(None, 96)
+        self.font = pygame.font.Font(None, FONT_SMALL)
+        self.big_font = pygame.font.Font(None, FONT_LARGE)
+        self.huge_font = pygame.font.Font(None, FONT_HUGE)
 
         # Pool visual elements
         self.create_pool_visual()
@@ -549,7 +560,7 @@ class PoolGame:
 
         # Play collection sound (if sound manager available)
         if hasattr(self.scene_manager, "sound_manager"):
-            self.scene_manager.sound_manager.play_sfx("powerup")
+            self.scene_manager.sound_manager.play_sfx(get_sfx_path("collect_item.ogg"))
 
     def update(self, dt: float):
         if self.state == self.STATE_PLAYING:
@@ -622,7 +633,9 @@ class PoolGame:
 
                             # Play hit sound
                             if hasattr(self.scene_manager, "sound_manager"):
-                                self.scene_manager.sound_manager.play_sfx("hit")
+                                self.scene_manager.sound_manager.play_sfx(
+                                    get_sfx_path("splash.wav")
+                                )
                             break
 
             # Update targets
@@ -734,7 +747,7 @@ class PoolGame:
             wave_y = int(math.sin((x + self.water_offset) * 0.05) * 5)
             pygame.draw.line(
                 water_surface,
-                (100, 150, 255),
+                COLOR_WATER_SPLASH,
                 (x, wave_y + 10),
                 (x + 20, wave_y + 10),
                 2,
@@ -778,26 +791,29 @@ class PoolGame:
             "Press ESC to return to hub",
         ]
 
-        y = 350
-        for instruction in instructions:
-            text = self.font.render(instruction, True, COLOR_BLACK)
-            text_rect = text.get_rect(center=(self.screen_width // 2, y))
-            screen.blit(text, text_rect)
-            y += 40
+        draw_instructions(
+            screen,
+            instructions,
+            self.font,
+            self.screen_width // 2,
+            UI_INSTRUCTION_START_Y,
+            40,
+            COLOR_BLACK,
+        )
 
     def draw_game_ui(self, screen):
         """Draw the playing state UI."""
         # Timer
         timer_text = f"Time: {int(self.time_remaining)}"
-        timer_surface = self.big_font.render(timer_text, True, COLOR_BLACK)
-        timer_rect = timer_surface.get_rect(center=(self.screen_width // 2, 50))
-
-        # Timer background
-        bg_rect = timer_rect.inflate(20, 10)
-        pygame.draw.rect(screen, COLOR_WHITE, bg_rect)
-        pygame.draw.rect(screen, COLOR_BLACK, bg_rect, 3)
-
-        screen.blit(timer_surface, timer_rect)
+        draw_text_with_background(
+            screen,
+            timer_text,
+            self.big_font,
+            (self.screen_width // 2, 50),
+            COLOR_BLACK,
+            COLOR_WHITE,
+            COLOR_BLACK,
+        )
 
         # Score
         score_text = f"Score: {self.score}"
@@ -828,17 +844,18 @@ class PoolGame:
             bar_x = self.screen_width // 2 - bar_width // 2
             bar_y = ammo_y - 10
 
-            # Background
-            pygame.draw.rect(
-                screen, COLOR_BLACK, (bar_x, bar_y, bar_width, bar_height), 2
-            )
-
-            # Progress
-            progress_width = int(
-                bar_width * (self.reload_progress / self.reload_duration)
-            )
-            pygame.draw.rect(
-                screen, COLOR_GREEN, (bar_x, bar_y, progress_width, bar_height)
+            # Draw reload progress bar
+            draw_progress_bar(
+                screen,
+                bar_x,
+                bar_y,
+                bar_width,
+                bar_height,
+                self.reload_progress / self.reload_duration,
+                None,  # No background fill
+                COLOR_GREEN,
+                COLOR_BLACK,
+                2,
             )
         else:
             # Show ammo count

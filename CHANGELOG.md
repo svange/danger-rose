@@ -1,3 +1,10 @@
+# [1.9.0](https://github.com/svange/danger-rose/compare/v1.8.0...v1.9.0) (2025-07-31)
+
+
+### Features
+
+* add comprehensive Docker development environment ([#93](https://github.com/svange/danger-rose/issues/93)) ([29b646d](https://github.com/svange/danger-rose/commit/29b646d14c88edb047f1395d041ad44d3c6f69f4))
+
 # [1.8.0](https://github.com/svange/danger-rose/compare/v1.7.0...v1.8.0) (2025-07-29)
 
 

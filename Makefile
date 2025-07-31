@@ -47,6 +47,13 @@ help: ## Show this help message
 	@echo "  make profile      Profile game performance"
 	@echo "  make celebrate    Celebrate achievements!"
 	@echo ""
+	@echo "Docker:"
+	@echo "  make claude       Launch Claude Code in Docker"
+	@echo "  make join-claude  Open bash shell in Docker container"
+	@echo "  make docker-build Build Docker images"
+	@echo "  make docker-stop  Stop Docker containers"
+	@echo "  make docker-clean Clean up Docker resources"
+	@echo ""
 
 # ========== GAME COMMANDS ==========
 
@@ -201,3 +208,31 @@ profile: ## Profile game performance
 celebrate: ## Celebrate achievements!
 	@echo "🎉 Celebration time!"
 	poetry run python tools/celebrate.py
+
+
+# Docker targets
+claude:
+	@echo "Preparing Claude Code environment..."
+	@docker-compose build dev
+	@docker-compose up -d dev
+	@echo "Waiting for container to be ready..."
+	@powershell -Command "Start-Sleep -Seconds 3"
+	@echo "Launching Claude Code inside container..."
+	@docker-compose exec -it dev bash -l -c "claude"
+
+join-claude:
+	@echo "Joining Claude container with bash shell..."
+	@docker-compose exec -it dev /bin/bash
+
+docker-build:
+	@echo "Building Docker images..."
+	docker-compose build
+
+docker-stop:
+	@echo "Stopping Docker containers..."
+	docker-compose down
+
+docker-clean:
+	@echo "Cleaning up Docker resources..."
+	docker-compose down -v --remove-orphans
+	docker system prune -f

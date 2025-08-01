@@ -1,3 +1,15 @@
+# [1.10.0](https://github.com/svange/danger-rose/compare/v1.9.0...v1.10.0) (2025-08-01)
+
+
+### Bug Fixes
+
+* consolidate pre-commit and ruff configurations (closes [#97](https://github.com/svange/danger-rose/issues/97)) ([#98](https://github.com/svange/danger-rose/issues/98)) ([f7dfe70](https://github.com/svange/danger-rose/commit/f7dfe70c5f827efe93693260cecf456cef847b24))
+
+
+### Features
+
+* add pygame-game-developer Claude subagent ([#96](https://github.com/svange/danger-rose/issues/96)) ([b7fa540](https://github.com/svange/danger-rose/commit/b7fa5407e2f17624cd75e3f3f18ad270e38cd81b)), closes [#95](https://github.com/svange/danger-rose/issues/95)
+
 # [1.9.0](https://github.com/svange/danger-rose/compare/v1.8.0...v1.9.0) (2025-07-31)
 
 

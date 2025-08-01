@@ -3,22 +3,22 @@
 Tests path construction utilities without file system dependencies.
 """
 
-from unittest.mock import patch
 from pathlib import Path
+from unittest.mock import patch
 
 from src.utils.asset_paths import (
-    get_project_root,
     get_asset_path,
-    get_image_path,
     get_audio_path,
     get_character_sprite_path,
-    get_tileset_path,
-    get_icon_path,
-    get_music_path,
-    get_sfx_path,
-    get_living_room_bg,
     get_danger_sprite,
+    get_icon_path,
+    get_image_path,
+    get_living_room_bg,
+    get_music_path,
+    get_project_root,
     get_rose_sprite,
+    get_sfx_path,
+    get_tileset_path,
 )
 
 
@@ -230,4 +230,4 @@ class TestPathConstructionIntegration:
         assert "player.png" in sprite_path
 
 
-import src.utils.asset_paths as asset_paths  # noqa: E402
+from src.utils import asset_paths  # noqa: E402

@@ -1,10 +1,11 @@
-import pygame
-import random
 import math
-from typing import List, Optional
+import random
 from dataclasses import dataclass
-from src.utils.sprite_loader import load_image
+
+import pygame
+
 from src.utils.asset_paths import get_item_path
+from src.utils.sprite_loader import load_image
 
 
 @dataclass
@@ -16,8 +17,8 @@ class Snowflake:
     width: int = 32
     height: int = 32
     collected: bool = False
-    sprite: Optional[pygame.Surface] = None
-    rect: Optional[pygame.Rect] = None
+    sprite: pygame.Surface | None = None
+    rect: pygame.Rect | None = None
     # Animation properties
     float_offset: float = 0.0
     float_speed: float = 2.0
@@ -31,8 +32,8 @@ class SnowflakePool:
 
     def __init__(self, max_snowflakes: int = 30):
         self.max_snowflakes = max_snowflakes
-        self.active_snowflakes: List[Snowflake] = []
-        self.inactive_snowflakes: List[Snowflake] = []
+        self.active_snowflakes: list[Snowflake] = []
+        self.inactive_snowflakes: list[Snowflake] = []
 
         # Sprite will be loaded on first use
         self.snowflake_sprite = None
@@ -62,7 +63,7 @@ class SnowflakePool:
 
         self.sprites_loaded = True
 
-    def spawn_snowflake(self, x: float, y: float) -> Optional[Snowflake]:
+    def spawn_snowflake(self, x: float, y: float) -> Snowflake | None:
         """Spawn a snowflake from the pool."""
         self._ensure_sprites_loaded()
 
@@ -128,7 +129,7 @@ class SnowflakePool:
                 rotated_sprite.set_alpha(230)
                 screen.blit(rotated_sprite, sprite_rect)
 
-    def check_collection(self, player_rect: pygame.Rect) -> List[Snowflake]:
+    def check_collection(self, player_rect: pygame.Rect) -> list[Snowflake]:
         """Check which snowflakes are collected by the player."""
         collected = []
 

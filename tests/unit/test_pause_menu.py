@@ -1,8 +1,10 @@
-import pytest
-import pygame
 from unittest.mock import Mock, patch
+
+import pygame
+import pytest
+
+from src.config.constants import SCENE_SETTINGS, SCENE_TITLE
 from src.scenes.pause_menu import PauseMenu
-from src.config.constants import SCENE_TITLE, SCENE_SETTINGS
 
 
 class TestPauseMenu:

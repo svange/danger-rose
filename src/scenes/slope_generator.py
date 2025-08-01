@@ -1,10 +1,11 @@
-import pygame
 import random
-from typing import List, Tuple, Optional
 from dataclasses import dataclass
-from src.utils.sprite_loader import load_image
-from src.utils.asset_paths import get_tileset_path
+
+import pygame
+
 from src.entities.snowflake import SnowflakePool
+from src.utils.asset_paths import get_tileset_path
+from src.utils.sprite_loader import load_image
 
 
 @dataclass
@@ -25,8 +26,8 @@ class ObstaclePool:
 
     def __init__(self, max_obstacles: int = 50):
         self.max_obstacles = max_obstacles
-        self.active_obstacles: List[Obstacle] = []
-        self.inactive_obstacles: List[Obstacle] = []
+        self.active_obstacles: list[Obstacle] = []
+        self.inactive_obstacles: list[Obstacle] = []
 
         # Sprites will be loaded on first use
         self.tree_sprite = None
@@ -70,8 +71,8 @@ class ObstaclePool:
         self.sprites_loaded = True
 
     def spawn_obstacle(
-        self, x: float, y: float, obstacle_type: Optional[str] = None
-    ) -> Optional[Obstacle]:
+        self, x: float, y: float, obstacle_type: str | None = None
+    ) -> Obstacle | None:
         """Spawn an obstacle from the pool."""
         self._ensure_sprites_loaded()
 
@@ -134,8 +135,8 @@ class TerrainChunk:
         self.chunk_height = chunk_height
         self.chunk_y = chunk_y
         self.screen_width = screen_width
-        self.obstacles: List[Tuple[float, float, str]] = []
-        self.snowflakes: List[Tuple[float, float]] = []
+        self.obstacles: list[tuple[float, float, str]] = []
+        self.snowflakes: list[tuple[float, float]] = []
         self.is_active = True
 
     def generate_obstacles(
@@ -188,7 +189,7 @@ class SlopeGenerator:
 
         # Chunk system
         self.chunk_height = 300
-        self.chunks: List[TerrainChunk] = []
+        self.chunks: list[TerrainChunk] = []
         self.next_chunk_y = -self.chunk_height
 
         # Difficulty scaling
@@ -292,7 +293,7 @@ class SlopeGenerator:
             sprite_rect.bottom = int(obstacle.y + obstacle.height)
             screen.blit(obstacle.sprite, sprite_rect)
 
-    def get_obstacles(self) -> List[Obstacle]:
+    def get_obstacles(self) -> list[Obstacle]:
         """Get all active obstacles for collision detection."""
         return self.obstacle_pool.active_obstacles
 

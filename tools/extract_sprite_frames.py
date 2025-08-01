@@ -4,10 +4,11 @@ Sprite Frame Extraction Tool for Danger Rose
 Extracts individual animation frames from sprite sheets and organizes them properly.
 """
 
-import sys
-from PIL import Image
 import json
+import sys
 from pathlib import Path
+
+from PIL import Image
 
 # Add project root to path
 project_root = Path(__file__).parent.parent

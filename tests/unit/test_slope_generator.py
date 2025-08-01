@@ -1,10 +1,12 @@
-import pytest
-import pygame
 from unittest.mock import Mock, patch
+
+import pygame
+import pytest
+
 from src.scenes.slope_generator import (
+    ObstaclePool,
     SlopeGenerator,
     TerrainChunk,
-    ObstaclePool,
 )
 
 

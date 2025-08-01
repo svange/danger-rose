@@ -4,14 +4,16 @@ This scene allows players to adjust game settings including
 audio, display, controls, and accessibility options.
 """
 
+from typing import Any
+
 import pygame
-from typing import Optional, Dict, Any
+
 from src.config.constants import (
-    COLOR_WHITE,
+    BUTTON_HEIGHT,
+    BUTTON_WIDTH,
     COLOR_BLACK,
     COLOR_BLUE,
-    BUTTON_WIDTH,
-    BUTTON_HEIGHT,
+    COLOR_WHITE,
     SCENE_TITLE,
 )
 from src.config.game_config import get_config
@@ -57,8 +59,8 @@ class SettingsScene:
             self.key_binding_rects[self.key_configs[i]] = rect
 
         # State
-        self.dragging_slider: Optional[str] = None
-        self.rebinding_key: Optional[str] = None  # Which key is being rebound
+        self.dragging_slider: str | None = None
+        self.rebinding_key: str | None = None  # Which key is being rebound
         self.waiting_for_key = False  # Are we waiting for a key press?
         self.selected_player = "player1"  # Currently selected player for rebinding
 
@@ -78,7 +80,7 @@ class SettingsScene:
         ]
         self.focused_element_index = 0
 
-    def handle_event(self, event: pygame.event.Event) -> Optional[str]:
+    def handle_event(self, event: pygame.event.Event) -> str | None:
         """Handle input events.
 
         Args:
@@ -162,66 +164,65 @@ class SettingsScene:
                     self.config.set(control_path, key_name)
                     self.waiting_for_key = False
                     self.rebinding_key = None
-            else:
-                if event.key == pygame.K_ESCAPE:
+            elif event.key == pygame.K_ESCAPE:
+                self.config.save()
+                return SCENE_TITLE
+            elif event.key == pygame.K_TAB:
+                # Navigate through focusable elements
+                if pygame.key.get_mods() & pygame.KMOD_SHIFT:
+                    self.focused_element_index = (self.focused_element_index - 1) % len(
+                        self.focusable_elements
+                    )
+                else:
+                    self.focused_element_index = (self.focused_element_index + 1) % len(
+                        self.focusable_elements
+                    )
+            elif event.key in [pygame.K_UP, pygame.K_DOWN]:
+                # Navigate vertically
+                if event.key == pygame.K_UP:
+                    self.focused_element_index = (self.focused_element_index - 1) % len(
+                        self.focusable_elements
+                    )
+                else:
+                    self.focused_element_index = (self.focused_element_index + 1) % len(
+                        self.focusable_elements
+                    )
+            elif event.key in [pygame.K_LEFT, pygame.K_RIGHT]:
+                # Adjust volume sliders or toggle fullscreen
+                focused = self.focusable_elements[self.focused_element_index]
+                if focused == "master_volume":
+                    delta = 0.05 if event.key == pygame.K_RIGHT else -0.05
+                    self.config.master_volume = max(
+                        0.0, min(1.0, self.config.master_volume + delta)
+                    )
+                    self.sound_manager.set_master_volume(self.config.master_volume)
+                elif focused == "music_volume":
+                    delta = 0.05 if event.key == pygame.K_RIGHT else -0.05
+                    self.config.music_volume = max(
+                        0.0, min(1.0, self.config.music_volume + delta)
+                    )
+                    self.sound_manager.set_music_volume(self.config.music_volume)
+                elif focused == "sfx_volume":
+                    delta = 0.05 if event.key == pygame.K_RIGHT else -0.05
+                    self.config.sfx_volume = max(
+                        0.0, min(1.0, self.config.sfx_volume + delta)
+                    )
+                    self.sound_manager.set_sfx_volume(self.config.sfx_volume)
+            elif event.key in [pygame.K_RETURN, pygame.K_SPACE]:
+                # Activate focused element
+                focused = self.focusable_elements[self.focused_element_index]
+                if focused == "fullscreen":
+                    self.config.fullscreen = not self.config.fullscreen
+                elif focused in self.key_configs:
+                    self.rebinding_key = focused
+                    self.waiting_for_key = True
+                elif focused == "back":
                     self.config.save()
+                    if self.paused_scene:
+                        return_scene = self.paused_scene
+                        self.paused_scene = None
+                        return return_scene
                     return SCENE_TITLE
-                elif event.key == pygame.K_TAB:
-                    # Navigate through focusable elements
-                    if pygame.key.get_mods() & pygame.KMOD_SHIFT:
-                        self.focused_element_index = (
-                            self.focused_element_index - 1
-                        ) % len(self.focusable_elements)
-                    else:
-                        self.focused_element_index = (
-                            self.focused_element_index + 1
-                        ) % len(self.focusable_elements)
-                elif event.key in [pygame.K_UP, pygame.K_DOWN]:
-                    # Navigate vertically
-                    if event.key == pygame.K_UP:
-                        self.focused_element_index = (
-                            self.focused_element_index - 1
-                        ) % len(self.focusable_elements)
-                    else:
-                        self.focused_element_index = (
-                            self.focused_element_index + 1
-                        ) % len(self.focusable_elements)
-                elif event.key in [pygame.K_LEFT, pygame.K_RIGHT]:
-                    # Adjust volume sliders or toggle fullscreen
-                    focused = self.focusable_elements[self.focused_element_index]
-                    if focused == "master_volume":
-                        delta = 0.05 if event.key == pygame.K_RIGHT else -0.05
-                        self.config.master_volume = max(
-                            0.0, min(1.0, self.config.master_volume + delta)
-                        )
-                        self.sound_manager.set_master_volume(self.config.master_volume)
-                    elif focused == "music_volume":
-                        delta = 0.05 if event.key == pygame.K_RIGHT else -0.05
-                        self.config.music_volume = max(
-                            0.0, min(1.0, self.config.music_volume + delta)
-                        )
-                        self.sound_manager.set_music_volume(self.config.music_volume)
-                    elif focused == "sfx_volume":
-                        delta = 0.05 if event.key == pygame.K_RIGHT else -0.05
-                        self.config.sfx_volume = max(
-                            0.0, min(1.0, self.config.sfx_volume + delta)
-                        )
-                        self.sound_manager.set_sfx_volume(self.config.sfx_volume)
-                elif event.key in [pygame.K_RETURN, pygame.K_SPACE]:
-                    # Activate focused element
-                    focused = self.focusable_elements[self.focused_element_index]
-                    if focused == "fullscreen":
-                        self.config.fullscreen = not self.config.fullscreen
-                    elif focused in self.key_configs:
-                        self.rebinding_key = focused
-                        self.waiting_for_key = True
-                    elif focused == "back":
-                        self.config.save()
-                        if self.paused_scene:
-                            return_scene = self.paused_scene
-                            self.paused_scene = None
-                            return return_scene
-                        return SCENE_TITLE
 
         return None
 
@@ -300,7 +301,9 @@ class SettingsScene:
         screen.blit(controls_title, controls_rect)
 
         # Draw key binding buttons
-        for i, (key, label) in enumerate(zip(self.key_configs, self.key_labels)):
+        for i, (key, label) in enumerate(
+            zip(self.key_configs, self.key_labels, strict=False)
+        ):
             rect = self.key_binding_rects[key]
 
             # Highlight if this key is being rebound
@@ -386,7 +389,7 @@ class SettingsScene:
         screen.blit(value_surface, value_rect)
 
     def on_enter(
-        self, previous_scene: Optional[str], data: Optional[Dict[str, Any]] = None
+        self, previous_scene: str | None, data: dict[str, Any] | None = None
     ) -> None:
         """Called when entering this scene.
 
@@ -397,7 +400,7 @@ class SettingsScene:
         # Reload config in case it was changed elsewhere
         self.config = get_config()
 
-    def on_exit(self) -> Dict[str, Any]:
+    def on_exit(self) -> dict[str, Any]:
         """Called when leaving this scene.
 
         Returns:

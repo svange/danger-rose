@@ -1,11 +1,12 @@
 """Interactive couch entity for save point functionality."""
 
 import pygame
+
 from src.config.constants import (
-    COLOR_WHITE,
     COLOR_BLACK,
-    COLOR_GREEN,
     COLOR_BROWN,
+    COLOR_GREEN,
+    COLOR_WHITE,
 )
 
 

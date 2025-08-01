@@ -4,12 +4,13 @@ Tests focus on behavior verification with proper mocking and isolation.
 Follows AAA (Arrange-Act-Assert) pattern for clarity.
 """
 
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import MagicMock, Mock, patch
+
 import pygame
 import pytest
 
-from src.scenes.settings import SettingsScene
 from src.config.constants import SCENE_TITLE
+from src.scenes.settings import SettingsScene
 
 
 class TestSettingsSceneInitialization:

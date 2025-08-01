@@ -1,13 +1,14 @@
-import pytest
-import pygame
 import time
 from unittest.mock import Mock
 
+import pygame
+import pytest
+
 from src.entities.powerup import (
-    TripleShotPowerUp,
-    RapidFirePowerUp,
-    HomingPowerUp,
     ActivePowerUp,
+    HomingPowerUp,
+    RapidFirePowerUp,
+    TripleShotPowerUp,
 )
 
 

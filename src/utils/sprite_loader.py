@@ -1,11 +1,12 @@
-import pygame
-import os
 import json
-from typing import Optional, Dict, List
+import os
+
+import pygame
+
 from src.config.constants import COLOR_PLACEHOLDER
 
 
-def load_image(path: str, scale: Optional[tuple] = None) -> pygame.Surface:
+def load_image(path: str, scale: tuple | None = None) -> pygame.Surface:
     """Load an image from an absolute path."""
     if not os.path.exists(path):
         # Create a placeholder surface if image doesn't exist
@@ -28,9 +29,9 @@ def load_image(path: str, scale: Optional[tuple] = None) -> pygame.Surface:
 def load_character_individual_files(
     character_name: str,
     scene: str = "hub",
-    scale: Optional[tuple] = None,
+    scale: tuple | None = None,
     base_path: str = None,
-) -> Dict[str, List[pygame.Surface]]:
+) -> dict[str, list[pygame.Surface]]:
     """Load character animations from individual PNG files organized by scene.
 
     Args:
@@ -67,7 +68,7 @@ def load_character_individual_files(
 
     if os.path.exists(metadata_path):
         try:
-            with open(metadata_path, "r") as f:
+            with open(metadata_path) as f:
                 metadata = json.load(f)
                 if "animations" in metadata:
                     animation_config.update(
@@ -112,7 +113,7 @@ def load_character_individual_files(
 
 
 def load_sprite_sheet(
-    path: str, frame_width: int, frame_height: int, scale: Optional[tuple] = None
+    path: str, frame_width: int, frame_height: int, scale: tuple | None = None
 ) -> list:
     """Load a sprite sheet and return a list of individual frames."""
     if not os.path.exists(path):
@@ -151,7 +152,7 @@ def load_character_animations(
     path: str,
     frame_width: int = 256,
     frame_height: int = 256,
-    scale: Optional[tuple] = None,
+    scale: tuple | None = None,
 ) -> dict:
     """Load a character sprite sheet and return animations organized by type."""
     if not os.path.exists(path):

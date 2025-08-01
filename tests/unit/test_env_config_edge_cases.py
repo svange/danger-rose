@@ -2,7 +2,8 @@
 
 import os
 from unittest.mock import patch
-from src.config.env_config import get_env, load_env_config, is_development, is_debug
+
+from src.config.env_config import get_env, is_debug, is_development, load_env_config
 
 
 class TestEnvConfigEdgeCases:

@@ -1,8 +1,10 @@
 """Tests for the Snowflake entity and related classes."""
 
-import pytest
 from unittest.mock import Mock, patch
-from src.entities.snowflake import Snowflake, SnowflakePool, SnowflakeEffect
+
+import pytest
+
+from src.entities.snowflake import Snowflake, SnowflakeEffect, SnowflakePool
 
 
 class TestSnowflake:

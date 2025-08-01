@@ -1,15 +1,16 @@
 """Tests for game state management in SceneManager."""
 
-import pytest
 from unittest.mock import Mock, patch
-from src.scene_manager import SceneManager
+
+import pytest
+
 from src.config.constants import (
     SCENE_HUB_WORLD,
-    SCENE_SKI_GAME,
     SCENE_POOL_GAME,
+    SCENE_SKI_GAME,
     SCENE_VEGAS_GAME,
 )
-
+from src.scene_manager import SceneManager
 
 pytestmark = pytest.mark.usefixtures("mock_sound_manager")
 

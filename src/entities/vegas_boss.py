@@ -1,8 +1,9 @@
-import pygame
 import math
 import random
 from enum import Enum
-from typing import List, Tuple
+
+import pygame
+
 from src.managers.sound_manager import SoundManager
 
 
@@ -22,7 +23,7 @@ class Projectile:
         y: float,
         vx: float,
         vy: float,
-        color: Tuple[int, int, int],
+        color: tuple[int, int, int],
         size: int = 10,
     ):
         self.x = x
@@ -100,7 +101,7 @@ class VegasBoss:
         # Attack patterns
         self.attack_timer = 0
         self.attack_cooldown = 2.0  # Seconds between attacks
-        self.projectiles: List[Projectile] = []
+        self.projectiles: list[Projectile] = []
         self.pattern_timer = 0
 
         # Visual effects
@@ -115,16 +116,15 @@ class VegasBoss:
         # Sound manager
         self.sound_manager = SoundManager()
 
-    def get_phase_color(self) -> Tuple[int, int, int]:
+    def get_phase_color(self) -> tuple[int, int, int]:
         """Get color based on current phase."""
         if self.phase == BossPhase.PHASE_1_HAPPY:
             return (255, 200, 50)  # Golden yellow
-        elif self.phase == BossPhase.PHASE_2_ANGRY:
+        if self.phase == BossPhase.PHASE_2_ANGRY:
             return (255, 50, 50)  # Angry red
-        elif self.phase == BossPhase.PHASE_3_DIZZY:
+        if self.phase == BossPhase.PHASE_3_DIZZY:
             return (150, 50, 255)  # Purple chaos
-        else:
-            return (100, 100, 100)  # Gray when defeated
+        return (100, 100, 100)  # Gray when defeated
 
     def update_phase(self):
         """Check and update boss phase based on health."""

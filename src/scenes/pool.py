@@ -1,47 +1,48 @@
-import pygame
-import time
 import math
 import random
+import time
 from datetime import datetime
-from typing import List
-from src.utils.attack_character import AnimatedCharacter
-from src.utils.high_score_manager import HighScoreManager, ScoreEntry
-from src.utils.asset_paths import get_sfx_path
-from src.ui.drawing_helpers import (
-    draw_text_with_background,
-    draw_instructions,
-    draw_progress_bar,
-)
-from src.entities.powerup import (
-    PowerUp,
-    TripleShotPowerUp,
-    RapidFirePowerUp,
-    HomingPowerUp,
-    ActivePowerUp,
-)
-from src.entities.pool_targets import (
-    PoolTarget,
-    DuckTarget,
-    BeachBallTarget,
-    DonutFloatTarget,
-)
-from src.entities.target_particles import TargetDestroyEffect
+
+import pygame
+
 from src.config.constants import (
-    SPRITE_DISPLAY_SIZE,
-    COLOR_WHITE,
     COLOR_BLACK,
     COLOR_BLUE,
     COLOR_GREEN,
     COLOR_RED,
     COLOR_WATER_SPLASH,
+    COLOR_WHITE,
+    FONT_HUGE,
+    FONT_LARGE,
+    FONT_SMALL,
+    GRAVITY,
     SCENE_HUB_WORLD,
     SCENE_NAME_ENTRY,
-    GRAVITY,
+    SPRITE_DISPLAY_SIZE,
     UI_INSTRUCTION_START_Y,
-    FONT_SMALL,
-    FONT_LARGE,
-    FONT_HUGE,
 )
+from src.entities.pool_targets import (
+    BeachBallTarget,
+    DonutFloatTarget,
+    DuckTarget,
+    PoolTarget,
+)
+from src.entities.powerup import (
+    ActivePowerUp,
+    HomingPowerUp,
+    PowerUp,
+    RapidFirePowerUp,
+    TripleShotPowerUp,
+)
+from src.entities.target_particles import TargetDestroyEffect
+from src.ui.drawing_helpers import (
+    draw_instructions,
+    draw_progress_bar,
+    draw_text_with_background,
+)
+from src.utils.asset_paths import get_sfx_path
+from src.utils.attack_character import AnimatedCharacter
+from src.utils.high_score_manager import HighScoreManager, ScoreEntry
 
 
 class PoolPlayer:
@@ -129,7 +130,7 @@ class WaterBalloon:
             self.x - self.radius, self.y - self.radius, self.radius * 2, self.radius * 2
         )
 
-    def update(self, dt: float, targets: List[PoolTarget] = None):
+    def update(self, dt: float, targets: list[PoolTarget] = None):
         """Update projectile physics."""
         if not self.active:
             return
@@ -298,21 +299,21 @@ class PoolGame:
         )
 
         # Projectiles
-        self.projectiles: List[WaterBalloon] = []
+        self.projectiles: list[WaterBalloon] = []
 
         # Targets
-        self.targets: List[PoolTarget] = []
+        self.targets: list[PoolTarget] = []
         self.target_spawn_timer = 0
         self.target_spawn_interval = 3.0  # Spawn new target every 3 seconds
         self.max_targets = 8  # Maximum targets on screen
 
         # Effects
-        self.splash_effects: List[SplashEffect] = []
-        self.particle_effects: List[TargetDestroyEffect] = []
+        self.splash_effects: list[SplashEffect] = []
+        self.particle_effects: list[TargetDestroyEffect] = []
 
         # Power-ups
-        self.powerups: List[PowerUp] = []
-        self.active_powerups: List[ActivePowerUp] = []
+        self.powerups: list[PowerUp] = []
+        self.active_powerups: list[ActivePowerUp] = []
         self.next_powerup_spawn = (
             self.game_duration - 8.0
         )  # First power-up after 8 seconds (52s remaining)
@@ -413,7 +414,7 @@ class PoolGame:
             elif self.state == self.STATE_PLAYING:
                 if event.key == pygame.K_ESCAPE:
                     return SCENE_HUB_WORLD
-                elif event.key == pygame.K_r:
+                if event.key == pygame.K_r:
                     # Manual reload
                     if self.current_ammo < self.ammo_capacity and not self.is_reloading:
                         self.start_reload()
@@ -423,8 +424,7 @@ class PoolGame:
                     if self.is_new_high_score and not self.score_submitted:
                         # Go to name entry for new high score
                         return SCENE_NAME_ENTRY
-                    else:
-                        self.reset_game()
+                    self.reset_game()
                 elif event.key == pygame.K_ESCAPE:
                     return SCENE_HUB_WORLD
 

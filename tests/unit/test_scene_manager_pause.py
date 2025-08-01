@@ -1,14 +1,16 @@
-import pytest
-import pygame
 from unittest.mock import Mock, patch
-from src.scene_manager import SceneManager
+
+import pygame
+import pytest
+
 from src.config.constants import (
     SCENE_HUB_WORLD,
-    SCENE_SKI_GAME,
     SCENE_PAUSE,
-    SCENE_TITLE,
     SCENE_SETTINGS,
+    SCENE_SKI_GAME,
+    SCENE_TITLE,
 )
+from src.scene_manager import SceneManager
 
 
 class TestSceneManagerPause:

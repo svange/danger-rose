@@ -4,10 +4,11 @@ Celebration tool for Danger Rose
 Shows animated celebrations for achievements and milestones
 """
 
-import pygame
-import random
 import math
+import random
 import sys
+
+import pygame
 
 
 class Celebration:
@@ -120,10 +121,9 @@ class Celebration:
                 particle["life"] -= 1
                 if particle["life"] > 0:
                     new_particles.append(particle)
-            else:
-                # Keep particle if on screen
-                if 0 <= particle["x"] <= 800 and particle["y"] <= 650:
-                    new_particles.append(particle)
+            # Keep particle if on screen
+            elif 0 <= particle["x"] <= 800 and particle["y"] <= 650:
+                new_particles.append(particle)
 
         self.particles = new_particles
 
@@ -231,9 +231,7 @@ class Celebration:
             current_time = pygame.time.get_ticks()
 
             for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    running = False
-                elif event.type == pygame.KEYDOWN:
+                if event.type == pygame.QUIT or event.type == pygame.KEYDOWN:
                     running = False
 
             # Auto-close after duration

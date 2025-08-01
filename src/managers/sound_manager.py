@@ -1,13 +1,14 @@
 """Centralized sound manager for music and sound effects."""
 
-import pygame
 import os
-from typing import Optional, Dict
+
+import pygame
+
 from src.config.constants import (
+    AUDIO_FADE_TIME,
     DEFAULT_MASTER_VOLUME,
     DEFAULT_MUSIC_VOLUME,
     DEFAULT_SFX_VOLUME,
-    AUDIO_FADE_TIME,
 )
 
 
@@ -52,7 +53,7 @@ class SoundManager:
 
         # Sound effect channels and cache
         self.sfx_channels = []
-        self.sfx_cache: Dict[str, pygame.mixer.Sound] = {}
+        self.sfx_cache: dict[str, pygame.mixer.Sound] = {}
 
         # Setup channels for sound effects
         self._setup_channels()
@@ -172,7 +173,7 @@ class SoundManager:
 
     def play_sfx(
         self, sound_file: str, loops: int = 0, maxtime: int = 0
-    ) -> Optional[pygame.mixer.Channel]:
+    ) -> pygame.mixer.Channel | None:
         """Play a sound effect.
 
         Args:
@@ -217,7 +218,7 @@ class SoundManager:
             print(f"Error playing sound {sound_file}: {e}")
             return None
 
-    def stop_sfx(self, channel: Optional[pygame.mixer.Channel] = None):
+    def stop_sfx(self, channel: pygame.mixer.Channel | None = None):
         """Stop sound effects.
 
         Args:
@@ -275,7 +276,7 @@ class SoundManager:
         for sound in self.sfx_cache.values():
             self._apply_sfx_volume(sound)
 
-    def get_volumes(self) -> Dict[str, float]:
+    def get_volumes(self) -> dict[str, float]:
         """Get current volume settings."""
         return {
             "master": self.master_volume,

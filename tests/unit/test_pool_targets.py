@@ -2,14 +2,14 @@ import math
 from unittest.mock import Mock, patch
 
 from src.entities.pool_targets import (
-    PoolTarget,
-    DuckTarget,
     BeachBallTarget,
     DonutFloatTarget,
+    DuckTarget,
+    PoolTarget,
 )
 from src.entities.target_particles import (
-    TargetDestroyParticle,
     TargetDestroyEffect,
+    TargetDestroyParticle,
 )
 
 

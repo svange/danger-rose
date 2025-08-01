@@ -93,16 +93,16 @@ class NewScene(Scene):
         super().__init__()
         self.sprites = pygame.sprite.Group()
         self.ui_elements = []
-        
+
     def handle_event(self, event):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 return "previous_scene"
         return None
-        
+
     def update(self, dt):
         self.sprites.update(dt)
-        
+
     def draw(self, screen):
         screen.fill(BACKGROUND_COLOR)
         self.sprites.draw(screen)
@@ -116,7 +116,7 @@ class GameSprite(pygame.sprite.Sprite):
         self.image = load_sprite("sprite_name")
         self.rect = self.image.get_rect(center=(x, y))
         self.velocity = pygame.Vector2(0, 0)
-        
+
     def update(self, dt):
         self.rect.center += self.velocity * dt
 ```

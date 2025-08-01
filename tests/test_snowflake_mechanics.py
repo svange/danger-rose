@@ -1,6 +1,7 @@
-import pytest
 import pygame
-from src.entities.snowflake import Snowflake, SnowflakePool, SnowflakeEffect
+import pytest
+
+from src.entities.snowflake import Snowflake, SnowflakeEffect, SnowflakePool
 
 
 class TestSnowflake:

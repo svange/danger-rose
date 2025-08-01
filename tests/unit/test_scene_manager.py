@@ -4,7 +4,8 @@ Tests focus on behavior verification with proper mocking and isolation.
 Follows AAA (Arrange-Act-Assert) pattern for clarity.
 """
 
-from unittest.mock import Mock, patch, ANY
+from unittest.mock import ANY, Mock, patch
+
 import pygame
 import pytest
 

@@ -1,12 +1,13 @@
-import pygame
 import math
 import time
 from abc import ABC, abstractmethod
-from typing import Tuple
+
+import pygame
+
 from src.config.constants import (
-    COLOR_YELLOW,
     COLOR_RED,
     COLOR_WHITE,
+    COLOR_YELLOW,
 )
 
 
@@ -34,7 +35,7 @@ class PowerUp(ABC):
         )
 
     @abstractmethod
-    def get_color(self) -> Tuple[int, int, int]:
+    def get_color(self) -> tuple[int, int, int]:
         """Get the color of the power-up."""
         pass
 
@@ -170,7 +171,7 @@ class PowerUp(ABC):
 class TripleShotPowerUp(PowerUp):
     """Fires 3 water balloons at once in a spread pattern."""
 
-    def get_color(self) -> Tuple[int, int, int]:
+    def get_color(self) -> tuple[int, int, int]:
         return (0, 255, 255)  # Cyan
 
     def get_icon_type(self) -> str:
@@ -194,7 +195,7 @@ class TripleShotPowerUp(PowerUp):
 class RapidFirePowerUp(PowerUp):
     """Reduces cooldown between shots for faster firing."""
 
-    def get_color(self) -> Tuple[int, int, int]:
+    def get_color(self) -> tuple[int, int, int]:
         return COLOR_YELLOW
 
     def get_icon_type(self) -> str:
@@ -224,7 +225,7 @@ class RapidFirePowerUp(PowerUp):
 class HomingPowerUp(PowerUp):
     """Water balloons curve towards the nearest target."""
 
-    def get_color(self) -> Tuple[int, int, int]:
+    def get_color(self) -> tuple[int, int, int]:
         return COLOR_RED
 
     def get_icon_type(self) -> str:

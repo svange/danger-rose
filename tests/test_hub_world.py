@@ -1,10 +1,12 @@
 """Tests for the HubWorld scene."""
 
-import pytest
-import pygame
 from unittest.mock import Mock, patch
+
+import pygame
+import pytest
+
+from src.config.constants import SCREEN_HEIGHT, SCREEN_WIDTH
 from src.scenes.hub import HubWorld
-from src.config.constants import SCREEN_WIDTH, SCREEN_HEIGHT
 
 # Use the mock_sound_manager fixture for all tests
 pytestmark = pytest.mark.usefixtures("mock_sound_manager")

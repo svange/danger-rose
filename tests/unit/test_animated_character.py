@@ -5,8 +5,8 @@ Tests character animation system with multiple animation states.
 
 from unittest.mock import Mock, patch
 
-from src.utils.animated_character import AnimatedCharacter
 from src.config.constants import ANIMATION_DEFAULT_DURATION
+from src.utils.animated_character import AnimatedCharacter
 
 
 class TestAnimatedCharacterInitialization:

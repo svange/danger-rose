@@ -1,12 +1,13 @@
 """Leaderboard scene for displaying high scores."""
 
-import pygame
-from typing import Optional, Dict, Any, Tuple
+from typing import Any
 
+import pygame
+
+from src.config.constants import SCREEN_HEIGHT, SCREEN_WIDTH
 from src.scenes.base_scene import Scene
-from src.config.constants import SCREEN_WIDTH, SCREEN_HEIGHT
-from src.utils.high_score_manager import HighScoreManager
 from src.utils.asset_paths import get_font_path
+from src.utils.high_score_manager import HighScoreManager
 
 
 class LeaderboardScene(Scene):
@@ -58,8 +59,8 @@ class LeaderboardScene(Scene):
 
     def on_enter(
         self,
-        previous_scene: Optional[str] = None,
-        data: Optional[Dict[str, Any]] = None,
+        previous_scene: str | None = None,
+        data: dict[str, Any] | None = None,
     ) -> None:
         """Enter the leaderboard scene.
 
@@ -132,7 +133,7 @@ class LeaderboardScene(Scene):
         # Back button
         self.back_button = pygame.Rect(self.MARGIN, SCREEN_HEIGHT - 60, 150, 40)
 
-    def handle_event(self, event: pygame.event.Event) -> Optional[str]:
+    def handle_event(self, event: pygame.event.Event) -> str | None:
         """Handle input events.
 
         Args:
@@ -342,8 +343,8 @@ class LeaderboardScene(Scene):
         self.score_animations.append({"type": "highlight", "time": 0, "duration": 2.0})
 
     def _blend_colors(
-        self, color1: Tuple[int, int, int], color2: Tuple[int, int, int], factor: float
-    ) -> Tuple[int, int, int]:
+        self, color1: tuple[int, int, int], color2: tuple[int, int, int], factor: float
+    ) -> tuple[int, int, int]:
         """Blend two colors together.
 
         Args:
@@ -355,10 +356,11 @@ class LeaderboardScene(Scene):
             Blended color
         """
         return tuple(
-            int(c1 * (1 - factor) + c2 * factor) for c1, c2 in zip(color1, color2)
+            int(c1 * (1 - factor) + c2 * factor)
+            for c1, c2 in zip(color1, color2, strict=False)
         )
 
-    def on_exit(self) -> Dict[str, Any]:
+    def on_exit(self) -> dict[str, Any]:
         """Clean up when leaving the scene.
 
         Returns:

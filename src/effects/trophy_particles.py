@@ -1,9 +1,9 @@
 """Particle effects for trophy achievements."""
 
-import pygame
-import random
 import math
-from typing import List, Tuple
+import random
+
+import pygame
 
 
 class Particle:
@@ -13,7 +13,7 @@ class Particle:
         self,
         x: float,
         y: float,
-        color: Tuple[int, int, int],
+        color: tuple[int, int, int],
         velocity_x: float,
         velocity_y: float,
         lifetime: float,
@@ -77,7 +77,7 @@ class TrophyParticleEffect:
     }
 
     def __init__(self):
-        self.particles: List[Particle] = []
+        self.particles: list[Particle] = []
 
     def create_trophy_celebration(self, x: float, y: float, trophy_level: str) -> None:
         """Create celebration particles for a trophy achievement.

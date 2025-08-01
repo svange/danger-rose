@@ -1,7 +1,8 @@
 """Tests for Dad AI character in ski minigame."""
 
-import pytest
 import pygame
+import pytest
+
 from src.entities.dad_ai import DadAI
 from src.scenes.slope_generator import Obstacle
 

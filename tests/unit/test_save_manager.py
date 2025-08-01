@@ -2,12 +2,13 @@
 
 import json
 import os
-import pytest
-from pathlib import Path
-from datetime import datetime
-from unittest.mock import patch
-import tempfile
 import shutil
+import tempfile
+from datetime import datetime
+from pathlib import Path
+from unittest.mock import patch
+
+import pytest
 
 from src.utils.save_manager import SaveManager
 
@@ -140,7 +141,7 @@ class TestSaveManager:
         save_manager.save()
 
         # Mock write failure
-        with patch("builtins.open", side_effect=IOError("Write failed")):
+        with patch("builtins.open", side_effect=OSError("Write failed")):
             result = save_manager.save()
 
         assert result is False

@@ -1,8 +1,9 @@
 """Tests for the HighScoreManager class."""
 
-import pytest
 from datetime import datetime
 from unittest.mock import Mock
+
+import pytest
 
 from src.utils.high_score_manager import HighScoreManager, ScoreEntry
 

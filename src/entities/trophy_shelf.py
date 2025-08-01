@@ -1,11 +1,13 @@
 """Trophy shelf entity for displaying achievements and high scores."""
 
+from typing import Any
+
 import pygame
-from typing import Optional, Dict, Any
+
+from src.config.constants import SCREEN_HEIGHT, SCREEN_WIDTH
+from src.effects.trophy_particles import TrophyParticleEffect
 from src.utils.high_score_manager import HighScoreManager
 from src.utils.sprite_loader import load_image
-from src.config.constants import SCREEN_WIDTH, SCREEN_HEIGHT
-from src.effects.trophy_particles import TrophyParticleEffect
 
 
 class TrophyLevel:
@@ -102,7 +104,7 @@ class TrophyShelf:
         """
         return self.rect.colliderect(player_rect.inflate(20, 20))
 
-    def get_trophy_level(self, game_mode: str, character: str) -> Optional[str]:
+    def get_trophy_level(self, game_mode: str, character: str) -> str | None:
         """Get the highest trophy level achieved for a game/character.
 
         Args:
@@ -131,14 +133,13 @@ class TrophyShelf:
                 # Lower time is better
                 if best_score <= threshold:
                     return level
-            else:
-                # Higher score is better
-                if best_score >= threshold:
-                    return level
+            # Higher score is better
+            elif best_score >= threshold:
+                return level
 
         return None
 
-    def get_trophy_stats(self, game_mode: str, character: str) -> Dict[str, Any]:
+    def get_trophy_stats(self, game_mode: str, character: str) -> dict[str, Any]:
         """Get detailed statistics for a game/character combination.
 
         Args:

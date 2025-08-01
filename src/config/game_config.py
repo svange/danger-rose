@@ -6,17 +6,17 @@ including loading/saving preferences and handling runtime configuration.
 
 import json
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
 from .constants import (
     CONFIG_FILE,
+    DEBUG_SHOW_FPS,
+    DEBUG_SHOW_GRID,
+    DEBUG_SHOW_HITBOXES,
     DEFAULT_MASTER_VOLUME,
     DEFAULT_MUSIC_VOLUME,
     DEFAULT_SFX_VOLUME,
     FULLSCREEN_DEFAULT,
-    DEBUG_SHOW_FPS,
-    DEBUG_SHOW_HITBOXES,
-    DEBUG_SHOW_GRID,
 )
 from .env_config import load_env_config
 
@@ -28,7 +28,7 @@ class GameConfig:
     It provides default values and ensures settings persistence across sessions.
     """
 
-    def __init__(self, config_dir: Optional[Path] = None):
+    def __init__(self, config_dir: Path | None = None):
         """Initialize GameConfig with optional custom config directory.
 
         Args:
@@ -53,7 +53,7 @@ class GameConfig:
         # Apply environment variable overrides (after resetting modified flag)
         self._apply_env_overrides()
 
-    def _get_default_settings(self) -> Dict[str, Any]:
+    def _get_default_settings(self) -> dict[str, Any]:
         """Return default game settings.
 
         Returns:
@@ -114,7 +114,7 @@ class GameConfig:
             },
         }
 
-    def _load_settings(self) -> Dict[str, Any]:
+    def _load_settings(self) -> dict[str, Any]:
         """Load settings from file or return defaults.
 
         Returns:
@@ -122,22 +122,22 @@ class GameConfig:
         """
         if self.config_file.exists():
             try:
-                with open(self.config_file, "r") as f:
+                with open(self.config_file) as f:
                     loaded_settings = json.load(f)
 
                 # Merge with defaults to handle missing keys
                 default_settings = self._get_default_settings()
                 return self._deep_merge(default_settings, loaded_settings)
 
-            except (json.JSONDecodeError, IOError) as e:
+            except (OSError, json.JSONDecodeError) as e:
                 print(f"Error loading settings: {e}")
                 print("Using default settings instead.")
 
         return self._get_default_settings()
 
     def _deep_merge(
-        self, base: Dict[str, Any], override: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        self, base: dict[str, Any], override: dict[str, Any]
+    ) -> dict[str, Any]:
         """Deep merge two dictionaries, with override taking precedence.
 
         Args:
@@ -201,7 +201,7 @@ class GameConfig:
             self._modified = False
             return True
 
-        except IOError as e:
+        except OSError as e:
             print(f"Error saving settings: {e}")
             return False
 
@@ -270,7 +270,7 @@ class GameConfig:
         """
         return self._modified
 
-    def get_all_settings(self) -> Dict[str, Any]:
+    def get_all_settings(self) -> dict[str, Any]:
         """Get a copy of all settings.
 
         Returns:
@@ -331,7 +331,7 @@ class GameConfig:
 
 
 # Global config instance
-_config_instance: Optional[GameConfig] = None
+_config_instance: GameConfig | None = None
 
 
 def get_config() -> GameConfig:

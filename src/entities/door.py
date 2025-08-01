@@ -1,12 +1,12 @@
 """Interactive door entity for scene transitions."""
 
 import pygame
-from typing import Tuple
+
 from src.config.constants import (
-    COLOR_WHITE,
     COLOR_BLACK,
-    COLOR_GREEN,
     COLOR_BLUE,
+    COLOR_GREEN,
+    COLOR_WHITE,
 )
 
 
@@ -21,7 +21,7 @@ class Door:
         height: int,
         target_scene: str,
         label: str,
-        color: Tuple[int, int, int] = COLOR_BLUE,
+        color: tuple[int, int, int] = COLOR_BLUE,
     ):
         """Initialize a door with position and target scene.
 

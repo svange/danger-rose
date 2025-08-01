@@ -1,9 +1,11 @@
 """Name entry scene for high score submissions."""
 
+from typing import Any
+
 import pygame
-from typing import Optional, Dict, Any
+
+from src.config.constants import SCREEN_HEIGHT, SCREEN_WIDTH
 from src.scenes.base_scene import Scene
-from src.config.constants import SCREEN_WIDTH, SCREEN_HEIGHT
 from src.utils.asset_paths import get_font_path
 
 
@@ -54,8 +56,8 @@ class NameEntryScene(Scene):
 
     def on_enter(
         self,
-        previous_scene: Optional[str] = None,
-        data: Optional[Dict[str, Any]] = None,
+        previous_scene: str | None = None,
+        data: dict[str, Any] | None = None,
     ) -> None:
         """Enter the name entry scene.
 
@@ -90,7 +92,7 @@ class NameEntryScene(Scene):
         self.cursor_visible = True
         self.cursor_timer = 0
 
-    def handle_event(self, event: pygame.event.Event) -> Optional[str]:
+    def handle_event(self, event: pygame.event.Event) -> str | None:
         """Handle input events.
 
         Args:
@@ -104,11 +106,11 @@ class NameEntryScene(Scene):
                 # Cancel and go back
                 return self.callback_scene
 
-            elif event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
+            if event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
                 # Submit name
                 return self._submit_name()
 
-            elif event.key == pygame.K_BACKSPACE:
+            if event.key == pygame.K_BACKSPACE:
                 # Remove last character
                 if self.player_name:
                     self.player_name = self.player_name[:-1]
@@ -124,7 +126,7 @@ class NameEntryScene(Scene):
 
                 if self.submit_button.collidepoint(mouse_pos):
                     return self._submit_name()
-                elif self.cancel_button.collidepoint(mouse_pos):
+                if self.cancel_button.collidepoint(mouse_pos):
                     return self.callback_scene
 
         return None
@@ -240,7 +242,7 @@ class NameEntryScene(Scene):
         # Return to callback scene with name data
         return self.callback_scene
 
-    def on_exit(self) -> Dict[str, Any]:
+    def on_exit(self) -> dict[str, Any]:
         """Clean up when leaving the scene.
 
         Returns:

@@ -1,20 +1,21 @@
 """Unit tests for UI drawing helper functions."""
 
 from unittest.mock import Mock, patch
-from src.ui.drawing_helpers import (
-    draw_heart,
-    draw_lives,
-    draw_text_with_background,
-    draw_progress_bar,
-    draw_instructions,
-)
+
 from src.config.constants import (
     COLOR_BLACK,
     COLOR_RED,
     COLOR_WHITE,
     UI_HEART_SIZE,
-    UI_TIMER_PADDING,
     UI_TIMER_BORDER,
+    UI_TIMER_PADDING,
+)
+from src.ui.drawing_helpers import (
+    draw_heart,
+    draw_instructions,
+    draw_lives,
+    draw_progress_bar,
+    draw_text_with_background,
 )
 
 

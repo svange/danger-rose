@@ -1,9 +1,11 @@
 """Tests for the Player entity."""
 
-import pygame
 from unittest.mock import Mock, patch
-from src.entities.player import Player
+
+import pygame
+
 from src.config.constants import PLAYER_SPEED, SPRITE_DISPLAY_SIZE
+from src.entities.player import Player
 
 
 class TestPlayerInitialization:

@@ -1,14 +1,16 @@
 """Tests for the sound manager system."""
 
+from unittest.mock import Mock, patch
+
 import pygame
 import pytest
-from unittest.mock import Mock, patch
-from src.managers.sound_manager import SoundManager
+
 from src.config.constants import (
     DEFAULT_MASTER_VOLUME,
     DEFAULT_MUSIC_VOLUME,
     DEFAULT_SFX_VOLUME,
 )
+from src.managers.sound_manager import SoundManager
 
 
 class TestSoundManager:

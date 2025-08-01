@@ -1,14 +1,15 @@
-import pygame
 import math
 import random
 from abc import ABC, abstractmethod
-from typing import Tuple
+
+import pygame
+
 from src.config.constants import (
-    COLOR_WHITE,
-    COLOR_RED,
-    COLOR_YELLOW,
     COLOR_BLUE,
     COLOR_GREEN,
+    COLOR_RED,
+    COLOR_WHITE,
+    COLOR_YELLOW,
 )
 
 
@@ -49,7 +50,7 @@ class PoolTarget(ABC):
         pass
 
     @abstractmethod
-    def get_color(self) -> Tuple[int, int, int]:
+    def get_color(self) -> tuple[int, int, int]:
         """Get the primary color of the target."""
         pass
 
@@ -60,7 +61,7 @@ class PoolTarget(ABC):
 
     @abstractmethod
     def draw_shape(
-        self, screen, x: int, y: int, size: int, color: Tuple[int, int, int]
+        self, screen, x: int, y: int, size: int, color: tuple[int, int, int]
     ):
         """Draw the specific shape of this target."""
         pass
@@ -158,7 +159,7 @@ class DuckTarget(PoolTarget):
     def get_point_value(self) -> int:
         return 25  # Medium points
 
-    def get_color(self) -> Tuple[int, int, int]:
+    def get_color(self) -> tuple[int, int, int]:
         return COLOR_YELLOW
 
     def update_movement(self, dt: float):
@@ -174,7 +175,7 @@ class DuckTarget(PoolTarget):
             self.direction *= -1
 
     def draw_shape(
-        self, screen, x: int, y: int, size: int, color: Tuple[int, int, int]
+        self, screen, x: int, y: int, size: int, color: tuple[int, int, int]
     ):
         """Draw a rubber duck shape."""
         # Body
@@ -220,7 +221,7 @@ class BeachBallTarget(PoolTarget):
     def get_point_value(self) -> int:
         return 30  # Higher points for harder target
 
-    def get_color(self) -> Tuple[int, int, int]:
+    def get_color(self) -> tuple[int, int, int]:
         return COLOR_RED
 
     def update_movement(self, dt: float):
@@ -243,7 +244,7 @@ class BeachBallTarget(PoolTarget):
             self.y = max(150 + margin, min(self.y, 500 - margin))
 
     def draw_shape(
-        self, screen, x: int, y: int, size: int, color: Tuple[int, int, int]
+        self, screen, x: int, y: int, size: int, color: tuple[int, int, int]
     ):
         """Draw a beach ball with colored segments."""
         # Draw main circle
@@ -294,7 +295,7 @@ class DonutFloatTarget(PoolTarget):
     def get_point_value(self) -> int:
         return 15  # Lower points for easier target
 
-    def get_color(self) -> Tuple[int, int, int]:
+    def get_color(self) -> tuple[int, int, int]:
         return (255, 192, 203)  # Pink
 
     def update_movement(self, dt: float):
@@ -320,7 +321,7 @@ class DonutFloatTarget(PoolTarget):
             self.y = max(150 + margin, min(self.y, 500 - margin))
 
     def draw_shape(
-        self, screen, x: int, y: int, size: int, color: Tuple[int, int, int]
+        self, screen, x: int, y: int, size: int, color: tuple[int, int, int]
     ):
         """Draw a donut float shape."""
         # Outer circle

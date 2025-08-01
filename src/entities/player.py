@@ -1,12 +1,12 @@
 """Player entity class for Danger Rose game."""
 
 import pygame
-from typing import List, Tuple
-from src.utils.attack_character import AnimatedCharacter
+
 from src.config.constants import (
     PLAYER_SPEED,
     SPRITE_DISPLAY_SIZE,
 )
+from src.utils.attack_character import AnimatedCharacter
 
 
 class Player:
@@ -77,7 +77,7 @@ class Player:
             elif event.key in (pygame.K_DOWN, pygame.K_s):
                 self.move_down = False
 
-    def update(self, dt: float, boundaries: List[pygame.Rect]) -> None:
+    def update(self, dt: float, boundaries: list[pygame.Rect]) -> None:
         """Update player physics and position.
 
         Args:
@@ -178,7 +178,7 @@ class Player:
         sprite_rect = sprite.get_rect(center=(int(self.x), int(self.y)))
         screen.blit(sprite, sprite_rect)
 
-    def get_position(self) -> Tuple[float, float]:
+    def get_position(self) -> tuple[float, float]:
         """Get current player position.
 
         Returns:
@@ -186,7 +186,7 @@ class Player:
         """
         return (self.x, self.y)
 
-    def get_velocity(self) -> Tuple[float, float]:
+    def get_velocity(self) -> tuple[float, float]:
         """Get current player velocity.
 
         Returns:

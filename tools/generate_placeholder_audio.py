@@ -1,8 +1,8 @@
 """Generate placeholder audio files for testing."""
 
-import wave
-import struct
 import math
+import struct
+import wave
 from pathlib import Path
 
 

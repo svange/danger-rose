@@ -1,9 +1,9 @@
 """Dad AI character for the ski minigame with rubber-band movement."""
 
 import pygame
-from typing import List
+
+from src.config.constants import COLOR_GREEN, COLOR_RED, SPRITE_DISPLAY_SIZE
 from src.utils.attack_character import AnimatedCharacter
-from src.config.constants import SPRITE_DISPLAY_SIZE, COLOR_GREEN, COLOR_RED
 
 
 class DadAI:
@@ -55,7 +55,7 @@ class DadAI:
         self.is_too_far = False
         self.is_too_close = False
 
-    def update(self, dt: float, player_x: int, obstacles: List) -> None:
+    def update(self, dt: float, player_x: int, obstacles: list) -> None:
         """Update Dad's position and state.
 
         Args:
@@ -126,7 +126,7 @@ class DadAI:
             if self.celebration_time <= 0:
                 self.is_celebrating = False
 
-    def _check_obstacle_avoidance(self, obstacles: List) -> int:
+    def _check_obstacle_avoidance(self, obstacles: list) -> int:
         """Check if Dad needs to avoid obstacles.
 
         Args:
@@ -149,9 +149,8 @@ class DadAI:
                     if obstacle_distance > 0:
                         # Obstacle is to the right, move left
                         return -avoidance_radius
-                    else:
-                        # Obstacle is to the left, move right
-                        return avoidance_radius
+                    # Obstacle is to the left, move right
+                    return avoidance_radius
 
         return 0
 

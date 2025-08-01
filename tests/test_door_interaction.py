@@ -2,10 +2,11 @@
 
 import pygame
 import pytest
-from src.entities.door import Door
-from src.scenes.hub import HubWorld
-from src.scene_manager import SceneManager
+
 from src.config.constants import COLOR_BLUE, COLOR_GREEN
+from src.entities.door import Door
+from src.scene_manager import SceneManager
+from src.scenes.hub import HubWorld
 
 
 class TestDoorEntity:

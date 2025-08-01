@@ -3,19 +3,20 @@
 Tests image loading functionality with proper mocking to avoid pygame display requirements.
 """
 
-from unittest.mock import Mock, patch
-import pygame
 import os
+from unittest.mock import Mock, patch
+
+import pygame
 
 # Set up headless environment for tests
 os.environ["SDL_VIDEODRIVER"] = "dummy"
 
+from src.config.constants import COLOR_PLACEHOLDER
 from src.utils.sprite_loader import (
+    load_character_animations,
     load_image,
     load_sprite_sheet,
-    load_character_animations,
 )
-from src.config.constants import COLOR_PLACEHOLDER
 
 
 class TestLoadImage:

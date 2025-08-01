@@ -1,21 +1,22 @@
 import pygame
-from src.utils.sprite_loader import load_image
-from src.utils.attack_character import AnimatedCharacter
+
+from src.config.constants import (
+    BUTTON_HEIGHT,
+    BUTTON_WIDTH,
+    COLOR_BLUE,
+    COLOR_WHITE,
+    SCENE_LEADERBOARD,
+    SCENE_SETTINGS,
+    SPRITE_DISPLAY_SIZE,
+)
 from src.utils.asset_paths import (
-    get_living_room_bg,
     get_danger_sprite,
+    get_living_room_bg,
     get_rose_sprite,
     get_sfx_path,
 )
-from src.config.constants import (
-    SPRITE_DISPLAY_SIZE,
-    COLOR_BLUE,
-    COLOR_WHITE,
-    BUTTON_WIDTH,
-    BUTTON_HEIGHT,
-    SCENE_SETTINGS,
-    SCENE_LEADERBOARD,
-)
+from src.utils.attack_character import AnimatedCharacter
+from src.utils.sprite_loader import load_image
 
 
 class CharacterButton:

@@ -5,8 +5,8 @@ Tests sprite animation system with proper mocking of pygame and time functions.
 
 from unittest.mock import Mock, patch
 
-from src.utils.attack_character import AttackCharacter
 from src.config.constants import COLOR_PLACEHOLDER
+from src.utils.attack_character import AttackCharacter
 
 
 class TestAttackCharacterInitialization:

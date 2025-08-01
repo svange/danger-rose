@@ -1,12 +1,13 @@
 """Integration tests for high score system."""
 
-import pytest
-from datetime import datetime
 import tempfile
+from datetime import datetime
 from pathlib import Path
 
-from src.utils.save_manager import SaveManager
+import pytest
+
 from src.utils.high_score_manager import HighScoreManager, ScoreEntry
+from src.utils.save_manager import SaveManager
 
 
 class TestHighScoreIntegration:

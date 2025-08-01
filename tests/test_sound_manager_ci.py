@@ -1,7 +1,9 @@
 """Tests for SoundManager in CI environments without audio."""
 
+from unittest.mock import Mock, patch
+
 import pygame
-from unittest.mock import patch, Mock
+
 from src.managers.sound_manager import SoundManager
 
 

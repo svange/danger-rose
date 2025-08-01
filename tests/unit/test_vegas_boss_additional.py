@@ -2,7 +2,8 @@
 
 import pygame
 import pytest
-from src.entities.vegas_boss import VegasBoss, BossPhase, Projectile
+
+from src.entities.vegas_boss import BossPhase, Projectile, VegasBoss
 
 
 class TestVegasBossAdditional:

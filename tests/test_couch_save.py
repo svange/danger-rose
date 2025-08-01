@@ -1,9 +1,11 @@
 """Tests for the couch save point system."""
 
-import pytest
-import pygame
-from unittest.mock import Mock, patch
 from datetime import datetime
+from unittest.mock import Mock, patch
+
+import pygame
+import pytest
+
 from src.entities.couch import Couch
 from src.ui.notification import SaveNotification
 

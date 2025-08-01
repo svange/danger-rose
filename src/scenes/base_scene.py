@@ -1,7 +1,8 @@
 """Base Scene class for all game scenes."""
 
 from abc import ABC, abstractmethod
-from typing import Optional, Dict, Any
+from typing import Any
+
 import pygame
 
 
@@ -9,7 +10,7 @@ class Scene(ABC):
     """Abstract base class for all game scenes."""
 
     @abstractmethod
-    def handle_event(self, event: pygame.event.Event) -> Optional[str]:
+    def handle_event(self, event: pygame.event.Event) -> str | None:
         """Handle input events.
 
         Args:
@@ -40,8 +41,8 @@ class Scene(ABC):
 
     def on_enter(
         self,
-        previous_scene: Optional[str] = None,
-        data: Optional[Dict[str, Any]] = None,
+        previous_scene: str | None = None,
+        data: dict[str, Any] | None = None,
     ) -> None:
         """Called when entering this scene.
 
@@ -51,7 +52,7 @@ class Scene(ABC):
         """
         pass
 
-    def on_exit(self) -> Dict[str, Any]:
+    def on_exit(self) -> dict[str, Any]:
         """Called when leaving this scene.
 
         Returns:

@@ -1,12 +1,13 @@
 """Notification system for game messages."""
 
-import pygame
-from typing import Optional, Tuple
 from datetime import datetime
+
+import pygame
+
 from src.config.constants import (
-    COLOR_WHITE,
     COLOR_BLACK,
     COLOR_GREEN,
+    COLOR_WHITE,
     SCREEN_WIDTH,
 )
 
@@ -18,7 +19,7 @@ class SaveNotification:
         self,
         font: pygame.font.Font,
         small_font: pygame.font.Font,
-        position: Optional[Tuple[int, int]] = None,
+        position: tuple[int, int] | None = None,
     ):
         """Initialize save notification.
 
@@ -32,7 +33,7 @@ class SaveNotification:
         self.active = False
         self.timer = 0.0
         self.alpha = 0
-        self.last_save_time: Optional[datetime] = None
+        self.last_save_time: datetime | None = None
 
         # Animation settings
         self.fade_in_duration = 0.3
@@ -54,7 +55,7 @@ class SaveNotification:
         self.text_color = COLOR_WHITE
         self.accent_color = COLOR_GREEN
 
-    def show(self, save_time: Optional[datetime] = None) -> None:
+    def show(self, save_time: datetime | None = None) -> None:
         """Show the save notification.
 
         Args:

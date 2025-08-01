@@ -4,7 +4,6 @@
 import os
 import sys
 from pathlib import Path
-from typing import List, Tuple
 
 # Get project root
 PROJECT_ROOT = Path(__file__).parent.parent
@@ -66,7 +65,7 @@ REQUIRED_ASSETS = {
 }
 
 
-def check_assets() -> Tuple[List[str], List[str]]:
+def check_assets() -> tuple[list[str], list[str]]:
     """Check for missing and extra assets."""
     missing = []
     found = []

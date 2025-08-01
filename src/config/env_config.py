@@ -5,10 +5,10 @@ variables, supporting both development and production environments.
 """
 
 import os
-from typing import Any, Optional
+from typing import Any
 
 
-def get_env(key: str, default: Any = None, cast: Optional[type] = None) -> Any:
+def get_env(key: str, default: Any = None, cast: type | None = None) -> Any:
     """Get an environment variable with optional type casting.
 
     Args:

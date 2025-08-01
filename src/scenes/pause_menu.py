@@ -1,13 +1,13 @@
 import pygame
-from typing import Optional
+
 from src.config.constants import (
-    COLOR_WHITE,
+    BUTTON_HEIGHT,
+    BUTTON_WIDTH,
     COLOR_BLACK,
     COLOR_BLUE,
-    BUTTON_WIDTH,
-    BUTTON_HEIGHT,
-    SCENE_TITLE,
+    COLOR_WHITE,
     SCENE_SETTINGS,
+    SCENE_TITLE,
 )
 from src.utils.asset_paths import get_sfx_path
 
@@ -91,7 +91,7 @@ class PauseMenu:
                 button["text"], True, COLOR_WHITE
             )
 
-    def handle_event(self, event) -> Optional[str]:
+    def handle_event(self, event) -> str | None:
         """Handle pause menu events."""
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:

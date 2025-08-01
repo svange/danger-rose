@@ -1,8 +1,9 @@
 """Tests for trophy particle effects."""
 
-import pytest
 import math
 from unittest.mock import Mock
+
+import pytest
 
 from src.effects.trophy_particles import Particle, TrophyParticleEffect
 

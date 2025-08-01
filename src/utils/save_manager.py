@@ -1,12 +1,12 @@
 """Save/Load system for Danger Rose game with JSON persistence."""
 
 import json
+import logging
 import os
 import platform
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Optional
-import logging
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +17,7 @@ class SaveManager:
     SAVE_VERSION = "1.0.0"
     SAVE_FILE_NAME = "danger_rose_save.json"
 
-    def __init__(self, save_directory: Optional[Path] = None):
+    def __init__(self, save_directory: Path | None = None):
         """Initialize SaveManager.
 
         Args:
@@ -72,22 +72,19 @@ class SaveManager:
             app_data = os.environ.get("APPDATA")
             if app_data:
                 return Path(app_data) / "DangerRose"
-            else:
-                return home_path / "AppData" / "Roaming" / "DangerRose"
-        elif os.name == "posix":  # macOS and Linux
+            return home_path / "AppData" / "Roaming" / "DangerRose"
+        if os.name == "posix":  # macOS and Linux
             if platform.system() == "Darwin":  # macOS
                 return home_path / "Library" / "Application Support" / "DangerRose"
-            else:  # Linux
-                config_home = os.environ.get("XDG_CONFIG_HOME")
-                if config_home:
-                    return Path(config_home) / "danger-rose"
-                else:
-                    return home_path / ".config" / "danger-rose"
-        else:
-            # Fallback to home directory
-            return home_path / ".danger-rose"
+            # Linux
+            config_home = os.environ.get("XDG_CONFIG_HOME")
+            if config_home:
+                return Path(config_home) / "danger-rose"
+            return home_path / ".config" / "danger-rose"
+        # Fallback to home directory
+        return home_path / ".danger-rose"
 
-    def load(self) -> Dict[str, Any]:
+    def load(self) -> dict[str, Any]:
         """Load save data from file.
 
         Returns:
@@ -100,7 +97,7 @@ class SaveManager:
             return self._current_save_data
 
         try:
-            with open(self.save_file_path, "r", encoding="utf-8") as f:
+            with open(self.save_file_path, encoding="utf-8") as f:
                 loaded_data = json.load(f)
 
             # Validate and migrate save data if needed
@@ -109,11 +106,11 @@ class SaveManager:
             logger.info("Save data loaded successfully.")
             return validated_data
 
-        except (json.JSONDecodeError, IOError) as e:
+        except (OSError, json.JSONDecodeError) as e:
             logger.error(f"Error loading save file: {e}")
             return self._handle_corrupted_save()
 
-    def save(self, save_data: Optional[Dict[str, Any]] = None) -> bool:
+    def save(self, save_data: dict[str, Any] | None = None) -> bool:
         """Save game data to file.
 
         Args:
@@ -144,7 +141,7 @@ class SaveManager:
             logger.info("Game saved successfully.")
             return True
 
-        except IOError as e:
+        except OSError as e:
             logger.error(f"Error saving game: {e}")
             # Restore backup if save failed
             backup_path = self.save_directory / f"{self.SAVE_FILE_NAME}.backup"
@@ -153,8 +150,8 @@ class SaveManager:
             return False
 
     def _validate_and_migrate_save_data(
-        self, loaded_data: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        self, loaded_data: dict[str, Any]
+    ) -> dict[str, Any]:
         """Validate loaded save data and migrate if from older version.
 
         Args:
@@ -225,8 +222,8 @@ class SaveManager:
         return validated_data
 
     def _deep_merge_dicts(
-        self, base: Dict[str, Any], update: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        self, base: dict[str, Any], update: dict[str, Any]
+    ) -> dict[str, Any]:
         """Deep merge two dictionaries, preserving values from update.
 
         Args:
@@ -250,7 +247,7 @@ class SaveManager:
 
         return base
 
-    def _handle_corrupted_save(self) -> Dict[str, Any]:
+    def _handle_corrupted_save(self) -> dict[str, Any]:
         """Handle corrupted save file by backing it up and creating new save.
 
         Returns:
@@ -302,7 +299,7 @@ class SaveManager:
         self,
         game: str,
         character: str,
-        score: Dict[str, Any],
+        score: dict[str, Any],
         difficulty: str = "normal",
     ) -> None:
         """Add a high score for a specific game and character.
@@ -357,13 +354,13 @@ class SaveManager:
             self.load()
         self._current_save_data["player"]["selected_character"] = character
 
-    def get_selected_character(self) -> Optional[str]:
+    def get_selected_character(self) -> str | None:
         """Get the selected character."""
         if self._current_save_data is None:
             self.load()
         return self._current_save_data["player"]["selected_character"]
 
-    def get_last_save_time(self) -> Optional[datetime]:
+    def get_last_save_time(self) -> datetime | None:
         """Get the last save time as a datetime object."""
         if self._current_save_data is None:
             self.load()

@@ -1,9 +1,11 @@
 """Tests for the Door entity."""
 
-import pygame
 from unittest.mock import Mock, patch
-from src.entities.door import Door
+
+import pygame
+
 from src.config.constants import COLOR_BLUE, COLOR_GREEN, COLOR_WHITE
+from src.entities.door import Door
 
 
 class TestDoorInitialization:

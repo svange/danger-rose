@@ -1,15 +1,15 @@
 """Common UI drawing helper functions to reduce code duplication."""
 
 import pygame
-from typing import Tuple, Optional
+
 from src.config.constants import (
     COLOR_BLACK,
     COLOR_RED,
     COLOR_WHITE,
     UI_HEART_SIZE,
     UI_HEART_SPACING,
-    UI_TIMER_PADDING,
     UI_TIMER_BORDER,
+    UI_TIMER_PADDING,
 )
 
 
@@ -19,7 +19,7 @@ def draw_heart(
     y: int,
     size: int = UI_HEART_SIZE,
     filled: bool = True,
-    color: Tuple[int, int, int] = COLOR_RED,
+    color: tuple[int, int, int] = COLOR_RED,
 ) -> None:
     """Draw a heart shape at the specified position.
 
@@ -87,7 +87,7 @@ def draw_lives(
     screen: pygame.Surface,
     current_lives: int,
     max_lives: int,
-    x: Optional[int] = None,
+    x: int | None = None,
     y: int = 20,
     right_align: bool = True,
 ) -> None:
@@ -118,10 +118,10 @@ def draw_text_with_background(
     screen: pygame.Surface,
     text: str,
     font: pygame.font.Font,
-    position: Tuple[int, int],
-    text_color: Tuple[int, int, int] = COLOR_BLACK,
-    bg_color: Tuple[int, int, int] = COLOR_WHITE,
-    border_color: Tuple[int, int, int] = COLOR_BLACK,
+    position: tuple[int, int],
+    text_color: tuple[int, int, int] = COLOR_BLACK,
+    bg_color: tuple[int, int, int] = COLOR_WHITE,
+    border_color: tuple[int, int, int] = COLOR_BLACK,
     padding: int = UI_TIMER_PADDING,
     border_width: int = 3,
     center: bool = True,
@@ -173,9 +173,9 @@ def draw_progress_bar(
     width: int,
     height: int,
     progress: float,
-    bg_color: Tuple[int, int, int] = COLOR_BLACK,
-    fill_color: Tuple[int, int, int] = COLOR_RED,
-    border_color: Tuple[int, int, int] = COLOR_BLACK,
+    bg_color: tuple[int, int, int] = COLOR_BLACK,
+    fill_color: tuple[int, int, int] = COLOR_RED,
+    border_color: tuple[int, int, int] = COLOR_BLACK,
     border_width: int = 2,
 ) -> None:
     """Draw a progress bar.
@@ -216,7 +216,7 @@ def draw_instructions(
     start_x: int,
     start_y: int,
     line_spacing: int = 40,
-    color: Tuple[int, int, int] = COLOR_BLACK,
+    color: tuple[int, int, int] = COLOR_BLACK,
     center: bool = True,
 ) -> None:
     """Draw a list of instruction text lines.

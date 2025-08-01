@@ -6,7 +6,6 @@ This shows how to load and use the extracted Kenney-style sprites.
 
 import json
 from pathlib import Path
-from typing import Dict, List
 
 
 class CharacterSpriteLoader:
@@ -16,7 +15,7 @@ class CharacterSpriteLoader:
         self.assets_root = assets_root
         self.sprite_cache = {}
 
-    def load_character_scene(self, character: str, scene: str) -> Dict:
+    def load_character_scene(self, character: str, scene: str) -> dict:
         """Load all sprites for a character in a specific scene"""
         cache_key = f"{character}_{scene}"
 
@@ -33,7 +32,7 @@ class CharacterSpriteLoader:
         metadata_path = scene_path / "animation_metadata.json"
         metadata = {}
         if metadata_path.exists():
-            with open(metadata_path, "r") as f:
+            with open(metadata_path) as f:
                 metadata = json.load(f)
 
         # Load sprite frames
@@ -50,8 +49,8 @@ class CharacterSpriteLoader:
         return self.sprite_cache[cache_key]
 
     def _load_animation_frames(
-        self, scene_path: Path, animation: str, anim_metadata: Dict
-    ) -> List:
+        self, scene_path: Path, animation: str, anim_metadata: dict
+    ) -> list:
         """Load all frames for a specific animation"""
         frames = []
         frame_count = anim_metadata.get("frames", 4)

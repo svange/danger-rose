@@ -1,10 +1,10 @@
 """High score tracking and leaderboard management for Danger Rose game."""
 
-from dataclasses import dataclass, asdict
+import logging
+from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
-from typing import List, Optional, Dict, Any
-import logging
+from typing import Any
 
 from src.utils.save_manager import SaveManager
 
@@ -32,14 +32,14 @@ class ScoreEntry:
     time_elapsed: float
     combo_multiplier: float = 1.0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for serialization."""
         data = asdict(self)
         data["date"] = self.date.isoformat()
         return data
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "ScoreEntry":
+    def from_dict(cls, data: dict[str, Any]) -> "ScoreEntry":
         """Create from dictionary."""
         data = data.copy()
         data["date"] = datetime.fromisoformat(data["date"])
@@ -64,7 +64,7 @@ class HighScoreManager:
     # Maximum scores to keep per category
     MAX_SCORES_PER_CATEGORY = 10
 
-    def __init__(self, save_manager: Optional[SaveManager] = None):
+    def __init__(self, save_manager: SaveManager | None = None):
         """Initialize HighScoreManager.
 
         Args:
@@ -166,8 +166,8 @@ class HighScoreManager:
         return is_high_score
 
     def get_leaderboard(
-        self, game_mode: str, character: str, difficulty: Optional[str] = None
-    ) -> List[ScoreEntry]:
+        self, game_mode: str, character: str, difficulty: str | None = None
+    ) -> list[ScoreEntry]:
         """Get leaderboard for specific category.
 
         Args:
@@ -221,10 +221,9 @@ class HighScoreManager:
             # Lower is better
             worst_score = max(s["score"] for s in scores)
             return score < worst_score
-        else:
-            # Higher is better
-            worst_score = min(s["score"] for s in scores)
-            return score > worst_score
+        # Higher is better
+        worst_score = min(s["score"] for s in scores)
+        return score > worst_score
 
     def get_rank(
         self, score: float, game_mode: str, character: str, difficulty: str
@@ -250,15 +249,14 @@ class HighScoreManager:
             if score_type == ScoreType.TIME_BASED:
                 if score >= existing_score:
                     rank += 1
-            else:
-                if score <= existing_score:
-                    rank += 1
+            elif score <= existing_score:
+                rank += 1
 
         return rank
 
     def get_personal_best(
         self, player_name: str, game_mode: str, character: str, difficulty: str
-    ) -> Optional[ScoreEntry]:
+    ) -> ScoreEntry | None:
         """Get personal best score for a player.
 
         Args:
@@ -293,7 +291,7 @@ class HighScoreManager:
 
     def get_statistics(
         self, game_mode: str, character: str, difficulty: str
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Get statistics for a category.
 
         Args:
@@ -325,7 +323,7 @@ class HighScoreManager:
 
     def export_leaderboard(
         self, game_mode: str, character: str, difficulty: str
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """Export leaderboard data for external use.
 
         Args:
@@ -343,7 +341,7 @@ class HighScoreManager:
         game_mode: str,
         character: str,
         difficulty: str,
-        scores: List[Dict[str, Any]],
+        scores: list[dict[str, Any]],
     ) -> None:
         """Import leaderboard data.
 
@@ -392,7 +390,7 @@ class HighScoreManager:
 
     def _get_score_list(
         self, game_mode: str, character: str, difficulty: str
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """Get score list for specific category."""
         return (
             self.save_manager._current_save_data.get("high_scores", {})
@@ -406,7 +404,7 @@ class HighScoreManager:
         game_mode: str,
         character: str,
         difficulty: str,
-        scores: List[Dict[str, Any]],
+        scores: list[dict[str, Any]],
     ) -> None:
         """Set score list for specific category."""
         self._ensure_score_structure()
@@ -415,8 +413,8 @@ class HighScoreManager:
         ] = scores
 
     def _sort_scores(
-        self, scores: List[Dict[str, Any]], game_mode: str
-    ) -> List[Dict[str, Any]]:
+        self, scores: list[dict[str, Any]], game_mode: str
+    ) -> list[dict[str, Any]]:
         """Sort scores based on game type.
 
         Args:
@@ -431,6 +429,5 @@ class HighScoreManager:
         if score_type == ScoreType.TIME_BASED:
             # Lower is better
             return sorted(scores, key=lambda x: x["score"])
-        else:
-            # Higher is better (POINTS_BASED and COMBINED)
-            return sorted(scores, key=lambda x: x["score"], reverse=True)
+        # Higher is better (POINTS_BASED and COMBINED)
+        return sorted(scores, key=lambda x: x["score"], reverse=True)

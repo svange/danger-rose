@@ -7,10 +7,10 @@ It handles both direct downloads where possible and provides guidance for manual
 """
 
 import os
-import urllib.request
-import urllib.error
-from pathlib import Path
 import subprocess
+import urllib.error
+import urllib.request
+from pathlib import Path
 
 # Game audio requirements
 MUSIC_FILES = {
@@ -85,7 +85,9 @@ def setup_directories():
 def check_ffmpeg():
     """Check if FFmpeg is available for conversion."""
     try:
-        result = subprocess.run(["ffmpeg", "-version"], capture_output=True, text=True)
+        result = subprocess.run(
+            ["ffmpeg", "-version"], check=False, capture_output=True, text=True
+        )
         return result.returncode == 0
     except FileNotFoundError:
         return False
@@ -126,15 +128,14 @@ def convert_to_ogg(input_path, output_path, quality=4):
             str(output_path),
         ]
 
-        result = subprocess.run(cmd, capture_output=True, text=True)
+        result = subprocess.run(cmd, check=False, capture_output=True, text=True)
 
         if result.returncode == 0:
             file_size = os.path.getsize(output_path)
             print(f"Converted to {output_path.name} ({file_size:,} bytes)")
             return True
-        else:
-            print(f"FFmpeg error: {result.stderr}")
-            return False
+        print(f"FFmpeg error: {result.stderr}")
+        return False
 
     except Exception as e:
         print(f"Conversion error: {e}")
@@ -195,7 +196,7 @@ def check_existing_files():
     base_path, music_path, sfx_path = setup_directories()
 
     print("\nMusic files:")
-    for name in MUSIC_FILES.keys():
+    for name in MUSIC_FILES:
         ogg_file = music_path / f"{name}.ogg"
         if ogg_file.exists():
             size = os.path.getsize(ogg_file)
@@ -204,7 +205,7 @@ def check_existing_files():
             print(f"[MISSING] {name}.ogg")
 
     print("\nSound effect files:")
-    for name in SFX_FILES.keys():
+    for name in SFX_FILES:
         ogg_file = sfx_path / f"{name}.ogg"
         if ogg_file.exists():
             size = os.path.getsize(ogg_file)

@@ -1,10 +1,11 @@
-import pygame
 import time
-from typing import List, Dict, Optional
+
+import pygame
+
 from src.config.constants import (
-    SPRITE_DISPLAY_SIZE,
     ANIMATION_ATTACK_DURATION,
     COLOR_PLACEHOLDER,
+    SPRITE_DISPLAY_SIZE,
 )
 from src.utils.sprite_loader import load_character_individual_files
 
@@ -17,7 +18,7 @@ class AnimatedCharacter:
         character_name: str,
         scene: str = "hub",
         scale: tuple = (SPRITE_DISPLAY_SIZE, SPRITE_DISPLAY_SIZE),
-        sprite_path: Optional[str] = None,  # For backward compatibility
+        sprite_path: str | None = None,  # For backward compatibility
     ):
         self.character_name = character_name
         self.scene = scene
@@ -44,8 +45,8 @@ class AnimatedCharacter:
         }
 
     def _load_character_animations(
-        self, sprite_path: Optional[str] = None
-    ) -> Dict[str, List[pygame.Surface]]:
+        self, sprite_path: str | None = None
+    ) -> dict[str, list[pygame.Surface]]:
         """Load all character animations from individual files or fallback to sprite sheet."""
         try:
             # Try loading from individual files first
@@ -66,7 +67,7 @@ class AnimatedCharacter:
 
     def _load_legacy_sprite_sheet(
         self, sprite_path: str
-    ) -> Dict[str, List[pygame.Surface]]:
+    ) -> dict[str, list[pygame.Surface]]:
         """Legacy method to load from sprite sheets (for backward compatibility)."""
         try:
             from src.utils.sprite_loader import load_character_animations
@@ -76,7 +77,7 @@ class AnimatedCharacter:
             print(f"Error loading legacy sprite sheet {sprite_path}: {e}")
             return self._create_placeholder_animations()
 
-    def _create_placeholder_animations(self) -> Dict[str, List[pygame.Surface]]:
+    def _create_placeholder_animations(self) -> dict[str, list[pygame.Surface]]:
         """Create placeholder animations if loading fails."""
         placeholder = pygame.Surface(self.scale)
         placeholder.fill(COLOR_PLACEHOLDER)  # Magenta placeholder
@@ -106,10 +107,9 @@ class AnimatedCharacter:
             if current_frames:
                 if self.loop_animation:
                     self.current_frame = (self.current_frame + 1) % len(current_frames)
-                else:
-                    # Non-looping animation (e.g., attack, hurt)
-                    if self.current_frame < len(current_frames) - 1:
-                        self.current_frame += 1
+                # Non-looping animation (e.g., attack, hurt)
+                elif self.current_frame < len(current_frames) - 1:
+                    self.current_frame += 1
                     # Stay on last frame if not looping
             self.last_frame_time = current_time
 
@@ -155,7 +155,7 @@ class AnimatedCharacter:
         """Check if character has a specific animation."""
         return animation_name in self.animations
 
-    def get_available_animations(self) -> List[str]:
+    def get_available_animations(self) -> list[str]:
         """Get list of available animation names."""
         return list(self.animations.keys())
 
@@ -183,6 +183,6 @@ class AttackCharacter(AnimatedCharacter):
         self.set_animation("attack", loop=True)
 
     @property
-    def attack_frames(self) -> List[pygame.Surface]:
+    def attack_frames(self) -> list[pygame.Surface]:
         """Backward compatibility property."""
         return self.animations.get("attack", [])

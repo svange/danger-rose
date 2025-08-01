@@ -1,12 +1,14 @@
 """Tests for the ski minigame scene."""
 
-import pytest
-import pygame
 import time
 from unittest.mock import Mock
-from src.scenes.ski import SkiGame, SkiPlayer
-from src.scene_manager import SceneManager
+
+import pygame
+import pytest
+
 from src.config.constants import SCENE_HUB_WORLD
+from src.scene_manager import SceneManager
+from src.scenes.ski import SkiGame, SkiPlayer
 
 
 @pytest.fixture

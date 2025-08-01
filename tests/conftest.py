@@ -1,9 +1,11 @@
-import pytest
-import pygame
-import sys
 import os
+import sys
 from pathlib import Path
 from unittest.mock import patch
+
+import pygame
+import pytest
+
 from tests.mocks.mock_sound_manager import MockSoundManager
 
 # Add src to path so we can import our modules

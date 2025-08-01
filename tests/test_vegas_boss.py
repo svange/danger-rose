@@ -1,8 +1,10 @@
-import pygame
-import pytest
 import math
 from unittest.mock import MagicMock
-from src.entities.vegas_boss import VegasBoss, BossPhase, Projectile
+
+import pygame
+import pytest
+
+from src.entities.vegas_boss import BossPhase, Projectile, VegasBoss
 
 
 class TestVegasBoss:

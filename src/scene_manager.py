@@ -1,28 +1,30 @@
-from src.scenes.title_screen import TitleScreen
-from src.scenes.settings import SettingsScene
-from src.scenes.hub import HubWorld
-from src.scenes.vegas import VegasGame
-from src.scenes.ski import SkiGame
-from src.scenes.pool import PoolGame
-from src.scenes.pause_menu import PauseMenu
-from src.scenes.leaderboard import LeaderboardScene
-from src.scenes.name_entry import NameEntryScene
+import logging
+
+import pygame
+
 from src.config.constants import (
-    SCENE_TITLE,
-    SCENE_SETTINGS,
     SCENE_HUB_WORLD,
-    SCENE_VEGAS_GAME,
-    SCENE_SKI_GAME,
-    SCENE_POOL_GAME,
-    SCENE_PAUSE,
     SCENE_LEADERBOARD,
     SCENE_NAME_ENTRY,
+    SCENE_PAUSE,
+    SCENE_POOL_GAME,
+    SCENE_SETTINGS,
+    SCENE_SKI_GAME,
+    SCENE_TITLE,
+    SCENE_VEGAS_GAME,
 )
 from src.managers.sound_manager import SoundManager
+from src.scenes.hub import HubWorld
+from src.scenes.leaderboard import LeaderboardScene
+from src.scenes.name_entry import NameEntryScene
+from src.scenes.pause_menu import PauseMenu
+from src.scenes.pool import PoolGame
+from src.scenes.settings import SettingsScene
+from src.scenes.ski import SkiGame
+from src.scenes.title_screen import TitleScreen
+from src.scenes.vegas import VegasGame
 from src.utils.asset_paths import get_music_path
 from src.utils.save_manager import SaveManager
-import pygame
-import logging
 
 logger = logging.getLogger(__name__)
 

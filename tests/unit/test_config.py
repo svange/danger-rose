@@ -1,18 +1,20 @@
 """Unit tests for the configuration system."""
 
-import pytest
-from pathlib import Path
 import tempfile
+from pathlib import Path
+
+import pytest
+
 from src.config.constants import (
-    SCREEN_WIDTH,
-    SCREEN_HEIGHT,
-    FPS,
     DEFAULT_MASTER_VOLUME,
     DEFAULT_MUSIC_VOLUME,
     DEFAULT_SFX_VOLUME,
+    FPS,
+    SCREEN_HEIGHT,
+    SCREEN_WIDTH,
 )
+from src.config.env_config import get_env, is_debug, is_development, load_env_config
 from src.config.game_config import GameConfig
-from src.config.env_config import get_env, load_env_config, is_development, is_debug
 
 
 class TestConstants:

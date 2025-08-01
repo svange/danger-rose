@@ -1,8 +1,10 @@
-import pytest
-import pygame
 from unittest.mock import Mock, patch
-from src.scenes.pool import PoolGame, PoolPlayer, WaterBalloon, SplashEffect
+
+import pygame
+import pytest
+
 from src.entities.pool_targets import DuckTarget
+from src.scenes.pool import PoolGame, PoolPlayer, SplashEffect, WaterBalloon
 
 
 class TestPoolPlayer:

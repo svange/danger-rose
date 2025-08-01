@@ -1,11 +1,12 @@
 """Tests for trophy shelf functionality."""
 
-import pytest
-import pygame
 from datetime import datetime
 from unittest.mock import Mock
 
-from src.entities.trophy_shelf import TrophyShelf, TrophyLevel
+import pygame
+import pytest
+
+from src.entities.trophy_shelf import TrophyLevel, TrophyShelf
 from src.utils.high_score_manager import HighScoreManager, ScoreEntry
 from src.utils.save_manager import SaveManager
 

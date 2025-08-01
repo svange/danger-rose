@@ -1,13 +1,13 @@
-import pygame
 import math
 import random
-from typing import List, Tuple
+
+import pygame
 
 
 class TargetDestroyParticle:
     """Individual particle for target destruction effect."""
 
-    def __init__(self, x: float, y: float, color: Tuple[int, int, int]):
+    def __init__(self, x: float, y: float, color: tuple[int, int, int]):
         self.x = x
         self.y = y
         self.color = color
@@ -71,12 +71,12 @@ class TargetDestroyEffect:
         self,
         x: float,
         y: float,
-        color: Tuple[int, int, int],
+        color: tuple[int, int, int],
         target_type: str = "default",
     ):
         self.x = x
         self.y = y
-        self.particles: List[TargetDestroyParticle] = []
+        self.particles: list[TargetDestroyParticle] = []
         self.active = True
 
         # Create particles based on target type
@@ -89,7 +89,7 @@ class TargetDestroyEffect:
         else:
             self._create_default_particles(color)
 
-    def _create_duck_particles(self, color: Tuple[int, int, int]):
+    def _create_duck_particles(self, color: tuple[int, int, int]):
         """Create feather-like particles for duck."""
         # Main explosion
         for _ in range(15):
@@ -102,7 +102,7 @@ class TargetDestroyEffect:
             particle.gravity = 400  # Feathers fall slower
             self.particles.append(particle)
 
-    def _create_beachball_particles(self, color: Tuple[int, int, int]):
+    def _create_beachball_particles(self, color: tuple[int, int, int]):
         """Create colorful particles for beach ball."""
         colors = [(255, 0, 0), (0, 0, 255), (255, 255, 0), (0, 255, 0)]
 
@@ -111,7 +111,7 @@ class TargetDestroyEffect:
             particle = TargetDestroyParticle(self.x, self.y, particle_color)
             self.particles.append(particle)
 
-    def _create_donut_particles(self, color: Tuple[int, int, int]):
+    def _create_donut_particles(self, color: tuple[int, int, int]):
         """Create sprinkle-like particles for donut."""
         # Main donut pieces
         for _ in range(12):
@@ -126,7 +126,7 @@ class TargetDestroyEffect:
             particle.size = random.uniform(2, 4)  # Smaller sprinkles
             self.particles.append(particle)
 
-    def _create_default_particles(self, color: Tuple[int, int, int]):
+    def _create_default_particles(self, color: tuple[int, int, int]):
         """Create generic particles."""
         for _ in range(15):
             particle = TargetDestroyParticle(self.x, self.y, color)

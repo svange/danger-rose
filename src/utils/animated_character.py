@@ -1,7 +1,10 @@
-import pygame
 import time
+
+import pygame
+
+from src.config.constants import ANIMATION_DEFAULT_DURATION, SPRITE_DISPLAY_SIZE
+
 from .sprite_loader import load_character_animations
-from src.config.constants import SPRITE_DISPLAY_SIZE, ANIMATION_DEFAULT_DURATION
 
 
 class AnimatedCharacter:

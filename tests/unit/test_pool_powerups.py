@@ -1,11 +1,12 @@
-import pytest
-import pygame
 import time
 from unittest.mock import Mock, patch
 
-from src.scenes.pool import PoolGame, WaterBalloon
+import pygame
+import pytest
+
 from src.entities.pool_targets import DuckTarget
-from src.entities.powerup import TripleShotPowerUp, RapidFirePowerUp
+from src.entities.powerup import RapidFirePowerUp, TripleShotPowerUp
+from src.scenes.pool import PoolGame, WaterBalloon
 
 
 @pytest.fixture

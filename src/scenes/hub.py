@@ -1,16 +1,18 @@
 """Hub world scene - the main apartment area."""
 
+from datetime import datetime
+from typing import Any
+
 import pygame
-from typing import Optional, Dict, Any
-from src.utils.asset_paths import get_living_room_bg, get_sfx_path
-from src.config.constants import SCREEN_WIDTH, SCREEN_HEIGHT
-from src.entities.player import Player
-from src.entities.door import Door
+
+from src.config.constants import SCREEN_HEIGHT, SCREEN_WIDTH
 from src.entities.couch import Couch
+from src.entities.door import Door
+from src.entities.player import Player
 from src.entities.trophy_shelf import TrophyShelf
 from src.ui.notification import SaveNotification
+from src.utils.asset_paths import get_living_room_bg, get_sfx_path
 from src.utils.high_score_manager import HighScoreManager
-from datetime import datetime
 
 
 class HubWorld:
@@ -78,7 +80,7 @@ class HubWorld:
         # Save notification
         self.save_notification = SaveNotification(self.font, self.small_font)
 
-    def handle_event(self, event) -> Optional[str]:
+    def handle_event(self, event) -> str | None:
         """Handle input events."""
         # Let player handle movement events
         self.player.handle_event(event)
@@ -86,7 +88,7 @@ class HubWorld:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 return "settings"
-            elif event.key == pygame.K_e:
+            if event.key == pygame.K_e:
                 # Check if player is near trophy shelf
                 if self.trophy_shelf.is_highlighted:
                     if self.trophy_shelf.show_popup:
@@ -219,7 +221,7 @@ class HubWorld:
             )
             screen.blit(save_text, save_rect)
 
-    def on_enter(self, previous_scene: Optional[str], data: Dict[str, Any]) -> None:
+    def on_enter(self, previous_scene: str | None, data: dict[str, Any]) -> None:
         """Called when entering the hub world."""
         # Update selected character if coming from character select
         if previous_scene == "character_select" and data.get("selected_character"):
@@ -234,6 +236,6 @@ class HubWorld:
             # Update trophy shelf with new character data
             self.trophy_shelf = TrophyShelf(100, 200, self.high_score_manager)
 
-    def on_exit(self) -> Dict[str, Any]:
+    def on_exit(self) -> dict[str, Any]:
         """Called when leaving the hub world."""
         return {"from_scene": "hub"}

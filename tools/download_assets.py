@@ -4,10 +4,11 @@ Asset Download Tool for Danger Rose
 Downloads high-quality character sprites from various free sources.
 """
 
-import requests
+import shutil
 import zipfile
 from pathlib import Path
-import shutil
+
+import requests
 
 
 class AssetDownloader:

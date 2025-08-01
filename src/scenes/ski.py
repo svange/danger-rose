@@ -1,55 +1,57 @@
-import pygame
-import time
 import random
+import time
 from datetime import datetime
-from src.utils.attack_character import AnimatedCharacter
-from src.scenes.slope_generator import SlopeGenerator
-from src.entities.snowflake import SnowflakeEffect
-from src.entities.dad_ai import DadAI
-from src.utils.high_score_manager import HighScoreManager, ScoreEntry
-from src.utils.asset_paths import get_sfx_path
-from src.ui.drawing_helpers import (
-    draw_lives,
-    draw_text_with_background,
-    draw_instructions,
-)
+
+import pygame
+
 from src.config.constants import (
-    SPRITE_DISPLAY_SIZE,
-    COLOR_WHITE,
     COLOR_BLACK,
+    COLOR_BLUE,
     COLOR_GREEN,
     COLOR_RED,
-    COLOR_BLUE,
-    SCENE_HUB_WORLD,
-    SCENE_LEADERBOARD,
-    PLAYER_SKI_SPEED,
-    PLAYER_SKI_DIAGONAL_SPEED,
-    PLAYER_COLLISION_WIDTH,
+    COLOR_SKY_BLUE,
+    COLOR_SNOW_ALT,
+    COLOR_SNOW_WHITE,
+    COLOR_WHITE,
+    FLASH_INVINCIBILITY_RATE,
+    FONT_HUGE,
+    FONT_LARGE,
+    FONT_SMALL,
+    GAME_DURATION,
+    OVERLAY_GAME_OVER_ALPHA,
     PLAYER_COLLISION_HEIGHT,
     PLAYER_COLLISION_OFFSET,
+    PLAYER_COLLISION_WIDTH,
     PLAYER_INVINCIBILITY_DURATION,
+    PLAYER_SKI_DIAGONAL_SPEED,
+    PLAYER_SKI_SPEED,
+    SCENE_HUB_WORLD,
+    SCENE_LEADERBOARD,
     SKI_CRASH_DURATION,
-    GAME_DURATION,
-    SKI_SCROLL_SPEED,
-    SKI_SNOWFLAKE_POINTS,
-    SKI_MAX_LIVES,
-    FONT_SMALL,
-    FONT_LARGE,
-    FONT_HUGE,
-    COLOR_SKY_BLUE,
-    COLOR_SNOW_WHITE,
-    COLOR_SNOW_ALT,
-    SKI_SNOW_PARTICLE_COUNT,
     SKI_DAD_OFFSET_X,
+    SKI_MAX_LIVES,
     SKI_PLAYER_Y_OFFSET,
-    OVERLAY_GAME_OVER_ALPHA,
-    UI_TIMER_BORDER,
-    UI_SCORE_PADDING,
+    SKI_SCROLL_SPEED,
+    SKI_SNOW_PARTICLE_COUNT,
+    SKI_SNOWFLAKE_POINTS,
+    SPRITE_DISPLAY_SIZE,
+    UI_BIG_TEXT_Y,
     UI_INSTRUCTION_LINE_HEIGHT,
     UI_INSTRUCTION_START_Y,
-    UI_BIG_TEXT_Y,
-    FLASH_INVINCIBILITY_RATE,
+    UI_SCORE_PADDING,
+    UI_TIMER_BORDER,
 )
+from src.entities.dad_ai import DadAI
+from src.entities.snowflake import SnowflakeEffect
+from src.scenes.slope_generator import SlopeGenerator
+from src.ui.drawing_helpers import (
+    draw_instructions,
+    draw_lives,
+    draw_text_with_background,
+)
+from src.utils.asset_paths import get_sfx_path
+from src.utils.attack_character import AnimatedCharacter
+from src.utils.high_score_manager import HighScoreManager, ScoreEntry
 
 
 class SkiPlayer:

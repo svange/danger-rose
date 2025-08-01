@@ -1,9 +1,10 @@
 """Unit tests for the Player entity class."""
 
-import pytest
 import pygame
-from src.entities.player import Player
+import pytest
+
 from src.config.constants import PLAYER_SPEED, SPRITE_DISPLAY_SIZE
+from src.entities.player import Player
 
 
 @pytest.fixture

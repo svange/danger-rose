@@ -1,17 +1,18 @@
-import pygame
-import sys
 import logging
-from src.scene_manager import SceneManager
-from src.config.constants import (
-    SCREEN_WIDTH,
-    SCREEN_HEIGHT,
-    FPS,
-    WINDOW_TITLE,
-    COLOR_BLACK,
-)
-from src.config.game_config import get_config
-from src.config.env_config import is_debug
+import sys
 
+import pygame
+
+from src.config.constants import (
+    COLOR_BLACK,
+    FPS,
+    SCREEN_HEIGHT,
+    SCREEN_WIDTH,
+    WINDOW_TITLE,
+)
+from src.config.env_config import is_debug
+from src.config.game_config import get_config
+from src.scene_manager import SceneManager
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

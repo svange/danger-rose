@@ -34,7 +34,7 @@ Analyze $ARGUMENTS:
 # Simple issue lookup if number provided
 if [[ "$ARGUMENTS" =~ ^#?[0-9]+$ ]]; then
     ISSUE_NUM=${ARGUMENTS#\#}
-    
+
     if [ "$IN_GIT_REPO" = true ] && [ -n "$REPO_URL" ]; then
         echo "📋 Looking up issue #$ISSUE_NUM..."
         # Use mcp__github__get_issue if available
@@ -51,7 +51,7 @@ fi
 # Search for related work
 if contains_keywords "$ARGUMENTS"; then
     echo "🔍 Searching for: $ARGUMENTS"
-    
+
     if [ "$IN_GIT_REPO" = true ] && github_available; then
         # Search GitHub issues
         # Show matching results
@@ -70,7 +70,7 @@ fi
 ```bash
 if [ -z "$ARGUMENTS" ]; then
     echo "🤔 What would you like to work on?"
-    
+
     if [ "$IN_GIT_REPO" = true ] && github_available; then
         echo ""
         echo "=== Recent Issues ==="
@@ -78,12 +78,12 @@ if [ -z "$ARGUMENTS" ]; then
         echo "1. #789 - Add save game feature"
         echo "2. #790 - Fix collision detection"
         echo "3. #791 - New background music"
-        
+
         echo ""
         echo "=== Recent Files Modified ==="
         # Show recently modified files
         git log --name-only --pretty=format: -10 | sort | uniq -c | sort -rn | head -5
-        
+
         echo ""
         echo "=== Or Work On Something New ==="
         echo "Just run: /sv-choose-what-to-work-on describe what you want"

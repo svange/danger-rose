@@ -17,7 +17,7 @@ make profile           # Creates profile.stats
 ## Common FPS Issues
 
 ### Target: 60 FPS
-```python  
+```python
 # Check actual FPS
 clock = pygame.time.Clock()
 dt = clock.tick(60) / 1000.0  # 60 FPS target
@@ -32,7 +32,7 @@ def draw(self, screen):
     for entity in self.entities:
         if entity.needs_redraw:
             dirty_rects.append(entity.rect)
-    
+
     # Only update changed areas
     pygame.display.update(dirty_rects)
 ```
@@ -83,7 +83,7 @@ MAX_OBSTACLES = 50
 if len(self.obstacles) < MAX_OBSTACLES:
     self.generate_obstacle()
 
-# Use sprite groups for batch operations  
+# Use sprite groups for batch operations
 self.obstacles = pygame.sprite.Group()
 self.obstacles.update(dt)  # Batch update
 ```
@@ -113,7 +113,7 @@ if len(self.water_particles) > MAX_PARTICLES:
 - Use fullscreen mode for better performance
 - Disable Windows Game Mode if causing issues
 
-### macOS Performance  
+### macOS Performance
 - Check Retina display scaling
 - May need to reduce sprite sizes
 
@@ -129,7 +129,7 @@ if DEBUG:
     # Show FPS
     fps_text = font.render(f"FPS: {clock.get_fps():.1f}", True, COLOR_WHITE)
     screen.blit(fps_text, (10, 10))
-    
+
     # Show entity count
     count_text = font.render(f"Entities: {len(self.entities)}", True, COLOR_WHITE)
     screen.blit(count_text, (10, 30))

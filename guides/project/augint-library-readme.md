@@ -26,7 +26,7 @@ chmod +x bootstrap-github-auto-merge.sh
 
 2. **Or enable via GitHub Web Interface:**
    - Go to repository Settings → General
-   - Scroll to "Pull Requests" section  
+   - Scroll to "Pull Requests" section
    - Check ☑️ "Allow auto-merge"
    - Save changes
 

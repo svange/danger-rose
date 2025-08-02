@@ -157,7 +157,7 @@ Work however feels natural! No rigid rules here.
 
 #### Easy Three-Step Process:
 1. **Choose Work**: `/sv-choose-what-to-work-on` - Pick what sounds fun
-2. **Start Coding**: `/sv-start-work` - Begin immediately 
+2. **Start Coding**: `/sv-start-work` - Begin immediately
 3. **Ship It**: `/sv-ship` - Share your progress
 
 #### Flexible Work Options:

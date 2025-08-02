@@ -6,7 +6,7 @@
 assets/
 ├── images/
 │   ├── characters/     # Player sprites (256x341px)
-│   ├── backgrounds/    # Scene backgrounds  
+│   ├── backgrounds/    # Scene backgrounds
 │   ├── ui/            # Menu elements
 │   └── effects/       # Particles, explosions
 ├── audio/

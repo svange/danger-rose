@@ -6,20 +6,18 @@ This tool captures and compares screenshots to detect visual regressions
 and common rendering bugs in the game.
 """
 
+import json
 import os
 import sys
-import json
-import hashlib
-from pathlib import Path
-from typing import Dict, List, Tuple, Optional, Set
 from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-import pygame
 import numpy as np
+import pygame
 from PIL import Image, ImageChops, ImageStat
 
 # Set headless mode
@@ -55,8 +53,8 @@ class VisualRegressionTester:
         )
         self.current_test_dir.mkdir(exist_ok=True)
 
-        self.regressions: List[VisualRegression] = []
-        self.test_cases: Dict[str, List[str]] = {}
+        self.regressions: list[VisualRegression] = []
+        self.test_cases: dict[str, list[str]] = {}
 
         # Visual bug detection patterns
         self.bug_patterns = {
@@ -68,7 +66,7 @@ class VisualRegressionTester:
             "animation_glitch": self._detect_animation_glitch,
         }
 
-    def run_visual_tests(self) -> Dict[str, any]:
+    def run_visual_tests(self) -> dict[str, any]:
         """Run all visual regression tests."""
         print("🎨 Starting visual regression tests...")
 
@@ -121,7 +119,7 @@ class VisualRegressionTester:
         # Generate report
         return self._generate_report(results)
 
-    def _test_title_screen(self, screen: pygame.Surface, scene_manager) -> Dict:
+    def _test_title_screen(self, screen: pygame.Surface, scene_manager) -> dict:
         """Test title screen rendering."""
         results = {"screenshots": {}}
 
@@ -153,7 +151,7 @@ class VisualRegressionTester:
 
         return results
 
-    def _test_character_selection(self, screen: pygame.Surface, scene_manager) -> Dict:
+    def _test_character_selection(self, screen: pygame.Surface, scene_manager) -> dict:
         """Test character selection screen."""
         results = {"screenshots": {}}
 
@@ -181,7 +179,7 @@ class VisualRegressionTester:
 
         return results
 
-    def _test_hub_world(self, screen: pygame.Surface, scene_manager) -> Dict:
+    def _test_hub_world(self, screen: pygame.Surface, scene_manager) -> dict:
         """Test hub world rendering."""
         results = {"screenshots": {}}
 
@@ -210,7 +208,7 @@ class VisualRegressionTester:
 
         return results
 
-    def _test_ski_game(self, screen: pygame.Surface, scene_manager) -> Dict:
+    def _test_ski_game(self, screen: pygame.Surface, scene_manager) -> dict:
         """Test ski game rendering."""
         results = {"screenshots": {}}
 
@@ -236,7 +234,7 @@ class VisualRegressionTester:
 
         return results
 
-    def _test_pool_game(self, screen: pygame.Surface, scene_manager) -> Dict:
+    def _test_pool_game(self, screen: pygame.Surface, scene_manager) -> dict:
         """Test pool game rendering."""
         results = {"screenshots": {}}
 
@@ -262,7 +260,7 @@ class VisualRegressionTester:
 
         return results
 
-    def _test_vegas_game(self, screen: pygame.Surface, scene_manager) -> Dict:
+    def _test_vegas_game(self, screen: pygame.Surface, scene_manager) -> dict:
         """Test vegas game rendering."""
         results = {"screenshots": {}}
 
@@ -288,7 +286,7 @@ class VisualRegressionTester:
 
         return results
 
-    def _test_pause_menu(self, screen: pygame.Surface, scene_manager) -> Dict:
+    def _test_pause_menu(self, screen: pygame.Surface, scene_manager) -> dict:
         """Test pause menu rendering."""
         results = {"screenshots": {}}
 
@@ -308,7 +306,7 @@ class VisualRegressionTester:
 
         return results
 
-    def _test_sprite_rendering(self, screen: pygame.Surface, scene_manager) -> Dict:
+    def _test_sprite_rendering(self, screen: pygame.Surface, scene_manager) -> dict:
         """Test sprite rendering quality."""
         results = {"screenshots": {}, "issues": []}
 
@@ -342,7 +340,7 @@ class VisualRegressionTester:
 
         return results
 
-    def _test_ui_elements(self, screen: pygame.Surface, scene_manager) -> Dict:
+    def _test_ui_elements(self, screen: pygame.Surface, scene_manager) -> dict:
         """Test UI element rendering."""
         results = {"screenshots": {}, "alignment_issues": []}
 
@@ -369,7 +367,7 @@ class VisualRegressionTester:
 
         return results
 
-    def _test_animation_states(self, screen: pygame.Surface, scene_manager) -> Dict:
+    def _test_animation_states(self, screen: pygame.Surface, scene_manager) -> dict:
         """Test animation state transitions."""
         results = {"screenshots": {}, "animation_issues": []}
 
@@ -422,7 +420,7 @@ class VisualRegressionTester:
 
     def _compare_with_reference(
         self, current_path: str, test_name: str
-    ) -> Optional[VisualRegression]:
+    ) -> VisualRegression | None:
         """Compare current screenshot with reference."""
         reference_path = self.reference_dir / f"{test_name}.png"
 
@@ -495,7 +493,7 @@ class VisualRegressionTester:
             if bug_info:
                 print(f"⚠️  {bug_type} detected in {screenshot_name}: {bug_info}")
 
-    def _detect_missing_sprite(self, img_array: np.ndarray, name: str) -> Optional[str]:
+    def _detect_missing_sprite(self, img_array: np.ndarray, name: str) -> str | None:
         """Detect missing sprites (large transparent or black areas)."""
         # Check for large black rectangles that might be missing sprites
         height, width = img_array.shape[:2]
@@ -526,7 +524,7 @@ class VisualRegressionTester:
 
         return None
 
-    def _detect_z_order_issue(self, img_array: np.ndarray, name: str) -> Optional[str]:
+    def _detect_z_order_issue(self, img_array: np.ndarray, name: str) -> str | None:
         """Detect z-order rendering issues."""
         # This is simplified - in reality we'd need semantic understanding
         # of what should be in front of what
@@ -539,7 +537,7 @@ class VisualRegressionTester:
 
         return None
 
-    def _detect_clipping_error(self, img_array: np.ndarray, name: str) -> Optional[str]:
+    def _detect_clipping_error(self, img_array: np.ndarray, name: str) -> str | None:
         """Detect sprite clipping errors."""
         # Look for sprites cut off at screen edges
         height, width = img_array.shape[:2]
@@ -563,9 +561,7 @@ class VisualRegressionTester:
 
         return None
 
-    def _detect_color_corruption(
-        self, img_array: np.ndarray, name: str
-    ) -> Optional[str]:
+    def _detect_color_corruption(self, img_array: np.ndarray, name: str) -> str | None:
         """Detect color corruption or palette issues."""
         # Check for unusual color distributions
         unique_colors = len(
@@ -581,9 +577,7 @@ class VisualRegressionTester:
 
         return None
 
-    def _detect_ui_misalignment(
-        self, img_array: np.ndarray, name: str
-    ) -> Optional[str]:
+    def _detect_ui_misalignment(self, img_array: np.ndarray, name: str) -> str | None:
         """Detect UI element misalignment."""
         if "ui_" not in name:
             return None
@@ -597,9 +591,7 @@ class VisualRegressionTester:
 
         return None
 
-    def _detect_animation_glitch(
-        self, img_array: np.ndarray, name: str
-    ) -> Optional[str]:
+    def _detect_animation_glitch(self, img_array: np.ndarray, name: str) -> str | None:
         """Detect animation glitches."""
         if "anim_" not in name:
             return None
@@ -611,7 +603,7 @@ class VisualRegressionTester:
 
     def _check_sprite_quality(
         self, screen: pygame.Surface, character: str, animation: str
-    ) -> List[str]:
+    ) -> list[str]:
         """Check sprite rendering quality."""
         issues = []
 
@@ -666,7 +658,7 @@ class VisualRegressionTester:
             text_rect = text_surface.get_rect(center=button_rect.center)
             screen.blit(text_surface, text_rect)
 
-    def _check_ui_alignment(self, screen: pygame.Surface, ui_type: str) -> List[str]:
+    def _check_ui_alignment(self, screen: pygame.Surface, ui_type: str) -> list[str]:
         """Check UI element alignment."""
         issues = []
 
@@ -675,7 +667,7 @@ class VisualRegressionTester:
 
         return issues
 
-    def _detect_animation_glitches(self, frame_paths: List[str]) -> List[str]:
+    def _detect_animation_glitches(self, frame_paths: list[str]) -> list[str]:
         """Detect glitches in animation sequences."""
         glitches = []
 
@@ -699,7 +691,7 @@ class VisualRegressionTester:
 
         return glitches
 
-    def _generate_report(self, results: Dict[str, any]) -> Dict[str, any]:
+    def _generate_report(self, results: dict[str, any]) -> dict[str, any]:
         """Generate visual test report."""
         report = {
             "timestamp": datetime.now().isoformat(),
@@ -731,7 +723,7 @@ class VisualRegressionTester:
 
         return report
 
-    def _print_summary(self, report: Dict[str, any]) -> None:
+    def _print_summary(self, report: dict[str, any]) -> None:
         """Print test summary."""
         print("\n" + "=" * 60)
         print("🎨 VISUAL REGRESSION TEST REPORT")

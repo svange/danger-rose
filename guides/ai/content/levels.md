@@ -12,23 +12,23 @@ class HubScene(Scene):
         self.boundaries = [
             # Walls (invisible collision rectangles)
             pygame.Rect(0, 0, 800, 50),      # Top wall
-            pygame.Rect(0, 550, 800, 50),    # Bottom wall  
+            pygame.Rect(0, 550, 800, 50),    # Bottom wall
             pygame.Rect(0, 0, 50, 600),      # Left wall
             pygame.Rect(750, 0, 50, 600),    # Right wall
         ]
-        
+
         # Interactive objects
         self.doors = [
             Door(100, 300, "ski", "Ski Adventure!"),
             Door(400, 300, "pool", "Pool Party!"),
             Door(700, 300, "vegas", "Vegas Quest!")
         ]
-        
+
         self.furniture = [
             TrophyShelf(200, 200),
             Couch(400, 400)
         ]
-        
+
         # Player setup
         self.player = Player(400, 300, "danger")  # Center of room
 ```
@@ -41,24 +41,24 @@ class Door:
         self.rect = pygame.Rect(x - 30, y - 40, 60, 80)
         self.destination = destination
         self.label = label
-        
+
         # Visual feedback
         self.hover_color = COLOR_YELLOW
         self.base_color = COLOR_BROWN
         self.is_highlighted = False
-        
+
     def check_player_proximity(self, player) -> bool:
         distance = math.sqrt(
-            (player.x - self.rect.centerx) ** 2 + 
+            (player.x - self.rect.centerx) ** 2 +
             (player.y - self.rect.centery) ** 2
         )
         self.is_highlighted = distance < DOOR_INTERACTION_DISTANCE
         return self.is_highlighted
-    
+
     def draw(self, screen: pygame.Surface):
         color = self.hover_color if self.is_highlighted else self.base_color
         pygame.draw.rect(screen, color, self.rect)
-        
+
         # Draw label when close
         if self.is_highlighted:
             draw_text_with_background(
@@ -99,17 +99,17 @@ class LevelManager:
         self.current_difficulty = "easy"
         self.unlock_requirements = {
             "pool": [],  # Always available
-            "ski": [],   # Always available  
+            "ski": [],   # Always available
             "vegas": ["pool", "ski"]  # Requires completing other games
         }
-    
+
     def is_level_unlocked(self, level_name: str) -> bool:
         requirements = self.unlock_requirements.get(level_name, [])
         return all(req in self.completed_levels for req in requirements)
-    
+
     def complete_level(self, level_name: str, score: int):
         self.completed_levels.add(level_name)
-        
+
         # Save progress
         save_data = {
             "completed_levels": list(self.completed_levels),
@@ -127,16 +127,16 @@ def handle_door_interaction(self, player, doors) -> str | None:
             # Show interaction prompt
             self.show_interaction_prompt = True
             self.current_door = door
-            
+
             # Handle space key press
             keys = pygame.key.get_pressed()
             if keys[pygame.K_SPACE]:
                 # Play door sound
                 SoundManager().play_sound("door_open")
-                
+
                 # Return destination scene
                 return door.destination
-    
+
     self.show_interaction_prompt = False
     return None
 ```
@@ -157,7 +157,7 @@ class MultiRoomLevel(Scene):
             "kitchen": {"left": "living_room", "up": "bedroom"},
             "bedroom": {"down": "kitchen"}
         }
-    
+
     def _create_living_room(self):
         return {
             "boundaries": create_room_layout(800, 600),
@@ -169,7 +169,7 @@ class MultiRoomLevel(Scene):
                 RoomExit(750, 300, "right", "kitchen")
             ]
         }
-    
+
     def change_room(self, direction: str):
         connections = self.room_connections[self.current_room]
         if direction in connections:
@@ -182,17 +182,17 @@ class MultiRoomLevel(Scene):
 ```python
 def draw_navigation_hints(self, screen: pygame.Surface):
     """Draw helpful navigation hints for young players."""
-    
+
     # Arrow indicators for doors
     for door in self.doors:
         if door.is_highlighted:
             # Draw bouncing arrow above door
             arrow_y = door.rect.top - 40 + math.sin(time.time() * 3) * 5
             draw_arrow_indicator(screen, door.rect.centerx, arrow_y)
-    
+
     # Mini-map in corner
     self._draw_mini_map(screen)
-    
+
     # Breadcrumb trail showing where player came from
     if hasattr(self, 'previous_scene'):
         draw_text_with_background(

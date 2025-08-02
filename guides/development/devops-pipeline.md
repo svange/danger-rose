@@ -27,13 +27,13 @@ The Augmenting Integrations DevOps pipeline is designed for **continuous deliver
 
 ### Key Features
 
-✅ **Push-only triggers** - No duplicate runs from PR events  
-✅ **Concurrency control** - Prevents race conditions  
-✅ **Development branch auto-merge** - `feat/*`, `fix/*`, `perf/*`, `docs/*`  
-✅ **Manual review fallback** - Non-development branches require manual merge  
-✅ **Comprehensive security scanning** - 4 security tools with failure enforcement  
-✅ **Semantic versioning** - Automatic version bumps and PyPI publishing  
-✅ **Clean commit history** - Squash merge strategy  
+✅ **Push-only triggers** - No duplicate runs from PR events
+✅ **Concurrency control** - Prevents race conditions
+✅ **Development branch auto-merge** - `feat/*`, `fix/*`, `perf/*`, `docs/*`
+✅ **Manual review fallback** - Non-development branches require manual merge
+✅ **Comprehensive security scanning** - 4 security tools with failure enforcement
+✅ **Semantic versioning** - Automatic version bumps and PyPI publishing
+✅ **Clean commit history** - Squash merge strategy
 
 ## Pipeline Architecture
 
@@ -186,7 +186,7 @@ on:
   push:
     branches:
       - main
-      - dev  
+      - dev
       - feat/*
       - fix/*
       - perf/*
@@ -218,7 +218,7 @@ concurrency:
 ```mermaid
 graph TB
     A[Push Event] --> B[pre-commit-tests]
-    A --> C[security-scan]  
+    A --> C[security-scan]
     A --> D[unit-tests]
 
     B --> E[deploy-infrastructure]
@@ -342,7 +342,7 @@ All development branches must pass these checks before merge:
 ```yaml
 Required Status Checks:
   - "pre-commit-tests / Enforce commit standards"
-  - "security-scan / Security scanning"  
+  - "security-scan / Security scanning"
   - "unit-tests / Run fast unit tests"
 ```
 
@@ -366,13 +366,13 @@ graph LR
 
 **GitHub Repository → Settings → General → Pull Requests:**
 - ✅ Allow auto-merge
-- ✅ Allow squash merging  
+- ✅ Allow squash merging
 - ❌ Allow merge commits (disabled)
 - ❌ Allow rebase merging (disabled)
 
 **GitHub Repository → Settings → Branches → Protection Rule for `main`:**
 - ✅ Require status checks to pass before merging
-- ✅ Require branches to be up to date before merging  
+- ✅ Require branches to be up to date before merging
 - ✅ Required status checks (exact job names)
 - ✅ Dismiss stale PR reviews when new commits are pushed
 
@@ -384,7 +384,7 @@ graph LR
 # 1. Create issue on GitHub
 gh issue create --title "Add user authentication" --body "..."
 
-# 2. Create and switch to feature branch  
+# 2. Create and switch to feature branch
 git checkout main
 git pull origin main
 git checkout -b feat/issue-45-user-auth
@@ -416,7 +416,7 @@ gh pr create --title "feat: add user authentication" \
 gh issue create --title "Fix memory leak in data processor" --body "..."
 
 # 2. Create fix branch
-git checkout main  
+git checkout main
 git pull origin main
 git checkout -b fix/issue-46-memory-leak
 
@@ -427,7 +427,7 @@ git checkout -b fix/issue-46-memory-leak
 
 # 4. Submit fix
 git add .
-git commit -m "fix: resolve memory leak in data processor"  
+git commit -m "fix: resolve memory leak in data processor"
 git push -u origin fix/issue-46-memory-leak
 
 # 5. Create PR
@@ -462,30 +462,30 @@ gh pr create --title "URGENT: Security patch" \
 ### Common Issues
 
 #### Pipeline Never Triggers
-**Symptoms**: No pipeline run after push  
-**Cause**: Branch doesn't match trigger patterns  
+**Symptoms**: No pipeline run after push
+**Cause**: Branch doesn't match trigger patterns
 **Solution**: Ensure branch follows `feat/*`, `fix/*`, `perf/*`, `docs/*` pattern
 
 #### Auto-merge Doesn't Work
-**Symptoms**: PR created but no auto-merge enabled  
-**Cause**: Either branch pattern doesn't match or repository settings  
+**Symptoms**: PR created but no auto-merge enabled
+**Cause**: Either branch pattern doesn't match or repository settings
 **Solution**:
 1. Check branch naming: `feat/issue-123-description`
 2. Verify repository auto-merge setting enabled
 3. Confirm all required status checks pass
 
 #### Security Gate Failures
-**Symptoms**: Pipeline fails on security scan  
-**Cause**: Vulnerability detected or false positive  
+**Symptoms**: Pipeline fails on security scan
+**Cause**: Vulnerability detected or false positive
 **Solution**:
 ```python
 # For false positives, use appropriate override:
 password = get_env('PASSWORD')  # nosec B105: env var is secure source
 ```
 
-#### Coverage Failures  
-**Symptoms**: Unit tests fail with coverage error  
-**Cause**: Test coverage below 90%  
+#### Coverage Failures
+**Symptoms**: Unit tests fail with coverage error
+**Cause**: Test coverage below 90%
 **Solution**: Add tests or exclude non-testable code:
 ```python
 if TYPE_CHECKING:  # pragma: no cover
@@ -493,12 +493,12 @@ if TYPE_CHECKING:  # pragma: no cover
 ```
 
 #### Branch Behind Main
-**Symptoms**: Auto-merge fails with "branch not up to date"  
-**Cause**: Branch diverged from main  
+**Symptoms**: Auto-merge fails with "branch not up to date"
+**Cause**: Branch diverged from main
 **Solution**:
 ```bash
 git fetch origin main
-git rebase origin/main  
+git rebase origin/main
 git push --force-with-lease
 ```
 
@@ -515,12 +515,12 @@ git push --force-with-lease
 
 ### Success Metrics
 
-✅ **No duplicate pipeline runs** - Single run per push  
-✅ **No race conditions** - Concurrency control prevents conflicts  
-✅ **90%+ auto-merge rate** - Development branches merge automatically  
-✅ **< 5 minute feedback** - Fast feedback for feature branches  
-✅ **Zero security vulnerabilities** - All findings block merge  
-✅ **Clean git history** - Squash merge creates linear history  
+✅ **No duplicate pipeline runs** - Single run per push
+✅ **No race conditions** - Concurrency control prevents conflicts
+✅ **90%+ auto-merge rate** - Development branches merge automatically
+✅ **< 5 minute feedback** - Fast feedback for feature branches
+✅ **Zero security vulnerabilities** - All findings block merge
+✅ **Clean git history** - Squash merge creates linear history
 
 ---
 
@@ -530,7 +530,7 @@ The Augmenting Integrations DevOps pipeline balances automation with safety:
 
 - **Development branches** (`feat/*`, `fix/*`, `perf/*`, `docs/*`) get full automation
 - **Non-development branches** get pipeline validation but require manual review
-- **Quality gates** ensure security and reliability without slowing development  
+- **Quality gates** ensure security and reliability without slowing development
 - **Auto-merge** reduces toil while maintaining code quality
 - **Semantic versioning** automates releases and PyPI publishing
 

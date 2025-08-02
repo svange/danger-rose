@@ -54,24 +54,24 @@ class Player:
         # Where the player starts on screen
         self.x = starting_x
         self.y = starting_y
-        
+
         # How fast the player moves (pixels per second)
         self.speed = 300.0
-        
+
         # Which direction is the player facing? (True = right, False = left)
         self.facing_right = True
-        
+
         # Load the character's pictures for animation
         self.sprite = AnimatedCharacter(character_name, "hub", (128, 128))
-    
+
     def move_left(self):
         """Move the player to the left side of screen."""
         self.x -= self.speed * time_passed  # Subtract moves left
         self.facing_right = False  # Now facing left
-        
+
     def move_right(self):
         """Move the player to the right side of screen."""
-        self.x += self.speed * time_passed  # Add moves right  
+        self.x += self.speed * time_passed  # Add moves right
         self.facing_right = True  # Now facing right
 ```
 
@@ -104,10 +104,10 @@ def show_player_got_hurt():
     hurt_overlay.fill(COLOR_RED)
     hurt_overlay.set_alpha(100)  # Make it see-through
     screen.blit(hurt_overlay, (0, 0))
-    
+
     # Play hurt sound
     play_sound("ouch.wav")
-    
+
     # Make player blink for a few seconds so they can't get hurt again
     player.invincible_time = 2.0  # Safe for 2 seconds
 
@@ -118,11 +118,11 @@ def show_victory_celebration():
         sparkle_x = random.randint(0, SCREEN_WIDTH)
         sparkle_y = random.randint(0, SCREEN_HEIGHT)
         create_sparkle(sparkle_x, sparkle_y)
-    
+
     # Victory message
     big_text = font_huge.render("YOU WON!", True, COLOR_GOLD)
     screen.blit(big_text, (SCREEN_WIDTH//2 - 150, SCREEN_HEIGHT//2))
-    
+
     # Happy music
     play_victory_music()
 ```
@@ -138,7 +138,7 @@ def load_player_sprite(character_name):
         player_image = pygame.image.load(sprite_path)
         print(f"Loaded {character_name} successfully!")
         return player_image
-        
+
     except:
         # Oops! The picture file is missing. Let's make a simple colored square.
         print(f"Couldn't find picture for {character_name}, using placeholder")
@@ -152,7 +152,7 @@ def save_high_score(player_name, points):
         # Try to save the score
         save_manager.add_high_score("game", player_name, {"score": points})
         print(f"Saved {player_name}'s score of {points} points!")
-        
+
     except:
         # If saving fails, just tell the player - don't break the game
         print("Couldn't save high score right now, but great job playing!")

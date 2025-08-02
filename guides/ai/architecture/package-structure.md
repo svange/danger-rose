@@ -82,7 +82,7 @@ class HubWorld(Scene):
         self.entities = pygame.sprite.Group()
         self.doors = {}
         self.furniture = {}
-        
+
     def handle_event(self, event) -> str | None
     def update(self, dt: float) -> None
     def draw(self, screen) -> None
@@ -96,7 +96,7 @@ class Entity(pygame.sprite.Sprite):
         super().__init__()
         self.rect = pygame.Rect(x, y, width, height)
         self.velocity = pygame.Vector2(0, 0)
-        
+
     def update(self, dt: float)
     def draw(self, screen)
 ```
@@ -106,7 +106,7 @@ class Entity(pygame.sprite.Sprite):
 # Singleton services:
 class SoundManager:
     _instance = None
-    
+
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
@@ -211,8 +211,8 @@ tests/
 def mock_pygame():
     """Mock pygame for headless testing"""
     # Setup pygame mocks
-    
-@pytest.fixture  
+
+@pytest.fixture
 def sample_scene():
     """Create test scene instance"""
     return HubWorld()

@@ -6,14 +6,13 @@ Comprehensive Automated Testing Suite for Danger Rose
 This script runs all automated tests to detect visual and audio bugs.
 """
 
-import os
-import sys
-import time
 import json
 import subprocess
-from pathlib import Path
+import sys
+import time
 from datetime import datetime
-from typing import Dict, List, Any
+from pathlib import Path
+from typing import Any
 
 # Add tools to path
 sys.path.insert(0, str(Path(__file__).parent))
@@ -31,7 +30,7 @@ class AutomatedTestRunner:
 
         self.test_results = {}
 
-    def run_all_tests(self, quick_mode: bool = False) -> Dict[str, Any]:
+    def run_all_tests(self, quick_mode: bool = False) -> dict[str, Any]:
         """Run all automated tests."""
         print("🤖 DANGER ROSE AUTOMATED TEST SUITE")
         print("=" * 60)
@@ -109,7 +108,7 @@ class AutomatedTestRunner:
 
         return report
 
-    def _run_test(self, test_config: Dict) -> Dict[str, Any]:
+    def _run_test(self, test_config: dict) -> dict[str, Any]:
         """Run a single test."""
         try:
             # Import test module
@@ -158,24 +157,24 @@ class AutomatedTestRunner:
                 "critical": test_config.get("critical", False),
             }
 
-    def _determine_test_status(self, test_name: str, result: Dict) -> str:
+    def _determine_test_status(self, test_name: str, result: dict) -> str:
         """Determine if test passed or failed based on results."""
         if test_name == "Audio Validation":
             if result.get("critical_issues", 0) > 0:
                 return "failed"
-            elif result.get("total_issues", 0) > 5:
+            if result.get("total_issues", 0) > 5:
                 return "warning"
             return "passed"
 
-        elif test_name == "Visual Regression":
+        if test_name == "Visual Regression":
             if result.get("visual_regressions", 0) > 0:
                 return "failed"
             return "passed"
 
-        elif test_name == "Game Integration":
+        if test_name == "Game Integration":
             if result.get("crashes", 0) > 0:
                 return "failed"
-            elif (
+            if (
                 result.get("visual_bugs", 0) > 5
                 or result.get("performance_issues", 0) > 10
             ):
@@ -184,7 +183,7 @@ class AutomatedTestRunner:
 
         return "unknown"
 
-    def _generate_comprehensive_report(self, total_time: float) -> Dict[str, Any]:
+    def _generate_comprehensive_report(self, total_time: float) -> dict[str, Any]:
         """Generate comprehensive test report."""
         # Count results
         passed = sum(
@@ -240,7 +239,7 @@ class AutomatedTestRunner:
 
         return report
 
-    def _generate_recommendations(self) -> List[str]:
+    def _generate_recommendations(self) -> list[str]:
         """Generate recommendations based on test results."""
         recommendations = []
 
@@ -288,7 +287,7 @@ class AutomatedTestRunner:
 
         return recommendations
 
-    def _generate_html_report(self, report: Dict[str, Any]) -> None:
+    def _generate_html_report(self, report: dict[str, Any]) -> None:
         """Generate an HTML report for easy viewing."""
         html_path = self.session_dir / "report.html"
 
@@ -318,7 +317,7 @@ class AutomatedTestRunner:
         <h1>🎮 Danger Rose Automated Test Report</h1>
         <p>Session: {report["session"]} | Duration: {report["duration_seconds"]:.1f}s</p>
     </div>
-    
+
     <div class="summary">
         <div class="stat-card">
             <h3>Tests Run</h3>
@@ -341,17 +340,17 @@ class AutomatedTestRunner:
             <h2>{report["summary"]["total_issues"]}</h2>
         </div>
     </div>
-    
+
     <div class="recommendations">
         <h3>📋 Recommendations</h3>
         <ul>
         {"".join(f"<li>{rec}</li>" for rec in report["recommendations"])}
         </ul>
     </div>
-    
+
     <h2>Test Results</h2>
     {self._generate_test_results_html(report["test_results"])}
-    
+
 </body>
 </html>
         """
@@ -359,7 +358,7 @@ class AutomatedTestRunner:
         with open(html_path, "w") as f:
             f.write(html_content)
 
-    def _generate_test_results_html(self, test_results: Dict) -> str:
+    def _generate_test_results_html(self, test_results: dict) -> str:
         """Generate HTML for test results."""
         html = ""
 
@@ -419,7 +418,7 @@ class AutomatedTestRunner:
 
         return html
 
-    def _print_final_summary(self, report: Dict[str, Any]) -> None:
+    def _print_final_summary(self, report: dict[str, Any]) -> None:
         """Print final test summary."""
         print("\n" + "=" * 60)
         print("🏁 FINAL TEST SUMMARY")
@@ -440,18 +439,17 @@ class AutomatedTestRunner:
             print(f"  {rec}")
 
         print(f"\n📊 Full reports saved to: {self.session_dir}")
-        print(f"🌐 Open report.html in a browser for detailed results")
+        print("🌐 Open report.html in a browser for detailed results")
 
         # Determine exit status
         if summary["failed"] > 0 or summary["crashed"] > 0:
             print("\n❌ TESTS FAILED - Please fix issues before release")
             return 1
-        elif summary["warnings"] > 0:
+        if summary["warnings"] > 0:
             print("\n⚠️  TESTS PASSED WITH WARNINGS - Review before release")
             return 2
-        else:
-            print("\n✅ ALL TESTS PASSED - Game is ready!")
-            return 0
+        print("\n✅ ALL TESTS PASSED - Game is ready!")
+        return 0
 
 
 def main():
@@ -499,7 +497,7 @@ def main():
         report = tester.run_visual_tests()
         return 0 if report["visual_regressions"] == 0 else 1
 
-    elif args.audio_only:
+    if args.audio_only:
         # Run only audio tests
         from audio_validator import AudioValidator
 
@@ -507,16 +505,15 @@ def main():
         report = validator.run_validation()
         return 0 if report["critical_issues"] == 0 else 1
 
-    else:
-        # Run all tests
-        report = runner.run_all_tests(quick_mode=args.quick)
+    # Run all tests
+    report = runner.run_all_tests(quick_mode=args.quick)
 
-        summary = report["summary"]
-        if summary["failed"] > 0 or summary["crashed"] > 0:
-            return 1
-        elif summary["warnings"] > 0:
-            return 2
-        return 0
+    summary = report["summary"]
+    if summary["failed"] > 0 or summary["crashed"] > 0:
+        return 1
+    if summary["warnings"] > 0:
+        return 2
+    return 0
 
 
 if __name__ == "__main__":

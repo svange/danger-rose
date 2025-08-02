@@ -76,7 +76,7 @@ self.sprite.update()  # Must call update() each frame
 # Ensure on_enter is implemented
 def on_enter(self, previous_scene: str, data: dict):
     self.initialized = True  # Add initialization flag
-    
+
 def draw(self, screen):
     if not hasattr(self, 'initialized'):
         return  # Don't draw until initialized
@@ -90,7 +90,7 @@ def on_exit(self) -> dict:
         "character": self.selected_character,
         "score": self.score
     }
-    
+
 def on_enter(self, previous_scene: str, data: dict):
     self.character = data.get("character", "danger")
 ```

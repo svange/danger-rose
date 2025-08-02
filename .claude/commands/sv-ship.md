@@ -87,7 +87,7 @@ CURRENT_BRANCH=$(git branch --show-current)
 # Check if we need to push
 if ! git diff HEAD origin/$CURRENT_BRANCH --quiet 2>/dev/null; then
     echo "📤 Pushing to remote..."
-    
+
     # Try to push
     if ! git push 2>/dev/null; then
         # No upstream? Set it up
@@ -106,7 +106,7 @@ if [[ "$CURRENT_BRANCH" == "main" ]] && push_failed_due_to_divergence; then
     echo "1) Pull and merge changes"
     echo "2) Pull with rebase"
     echo "3) Create a branch for your changes"
-    
+
     # Handle based on choice
     # Option 1: git pull
     # Option 2: git pull --rebase
@@ -121,17 +121,17 @@ fi
 if [[ "$CURRENT_BRANCH" != "main" ]] && github_available; then
     echo ""
     echo "🔀 Create a pull request? (y/n)"
-    
+
     if create_pr; then
         # Simple PR
         gh pr create \
           --title "$COMMIT_MESSAGE" \
           --body "## Changes
-          
+
 $WORK_DESC
 
 Made with ❤️"
-        
+
         echo "✅ Pull request created!"
     fi
 fi
@@ -147,7 +147,7 @@ Commit: $COMMIT_MESSAGE
 
 🎉 Great job! Your changes are saved and shared.
 
-Next: 
+Next:
 - Take a break ☕
 - Or start something new: /sv-choose-what-to-work-on
 ```

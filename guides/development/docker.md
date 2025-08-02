@@ -213,7 +213,7 @@ def test_with_postgres():
     db_url = os.environ.get('DATABASE_URL')
     # Your test code here
 
-@pytest.mark.integration  
+@pytest.mark.integration
 def test_with_redis():
     redis_url = os.environ.get('REDIS_URL')
     # Your test code here

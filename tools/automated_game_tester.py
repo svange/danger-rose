@@ -10,22 +10,21 @@ This tool runs the game in headless mode and automatically detects:
 - UI element positioning issues
 """
 
+import json
 import os
 import sys
 import time
-import json
 import traceback
-from pathlib import Path
-from datetime import datetime
-from typing import Dict, List, Tuple, Optional, Any
-from dataclasses import dataclass, asdict
 from collections import defaultdict
+from dataclasses import asdict, dataclass
+from pathlib import Path
+from typing import Any
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-import pygame
 import numpy as np
+import pygame
 
 # Set headless mode before importing game modules
 os.environ["SDL_VIDEODRIVER"] = "dummy"
@@ -40,9 +39,9 @@ class VisualBug:
     scene: str
     bug_type: str
     description: str
-    location: Optional[Tuple[int, int]] = None
+    location: tuple[int, int] | None = None
     severity: str = "medium"
-    screenshot_path: Optional[str] = None
+    screenshot_path: str | None = None
 
 
 @dataclass
@@ -53,7 +52,7 @@ class AudioBug:
     scene: str
     bug_type: str
     description: str
-    file_path: Optional[str] = None
+    file_path: str | None = None
     severity: str = "medium"
 
 
@@ -89,10 +88,10 @@ class AutomatedGameTester:
         self.output_dir.mkdir(exist_ok=True)
 
         # Test results
-        self.visual_bugs: List[VisualBug] = []
-        self.audio_bugs: List[AudioBug] = []
-        self.performance_issues: List[PerformanceIssue] = []
-        self.crashes: List[CrashReport] = []
+        self.visual_bugs: list[VisualBug] = []
+        self.audio_bugs: list[AudioBug] = []
+        self.performance_issues: list[PerformanceIssue] = []
+        self.crashes: list[CrashReport] = []
 
         # Test state
         self.current_scene = "unknown"
@@ -114,7 +113,7 @@ class AutomatedGameTester:
         self.black_screen_threshold = 0.95  # 95% black pixels = black screen
         self.missing_sprite_threshold = 0.8  # 80% transparent = missing sprite
 
-    def run_automated_test(self, duration_seconds: int = 60) -> Dict[str, Any]:
+    def run_automated_test(self, duration_seconds: int = 60) -> dict[str, Any]:
         """Run automated test for specified duration."""
         print(f"🤖 Starting automated game test for {duration_seconds} seconds...")
 
@@ -318,7 +317,7 @@ class AutomatedGameTester:
 
     def _find_transparent_regions(
         self, screen: pygame.Surface
-    ) -> List[Tuple[int, int]]:
+    ) -> list[tuple[int, int]]:
         """Find large transparent regions that might indicate missing sprites."""
         # This is simplified - in a real implementation we'd use more sophisticated
         # image processing to detect actual missing sprites vs intentional transparency
@@ -470,7 +469,7 @@ class AutomatedGameTester:
         pygame.image.save(screen, str(filepath))
         return str(filepath)
 
-    def _generate_report(self) -> Dict[str, Any]:
+    def _generate_report(self) -> dict[str, Any]:
         """Generate test report."""
         report = {
             "test_duration": time.time() - self.start_time,
@@ -502,7 +501,7 @@ class AutomatedGameTester:
 
         return report
 
-    def _print_summary(self, report: Dict[str, Any]) -> None:
+    def _print_summary(self, report: dict[str, Any]) -> None:
         """Print test summary."""
         print("\n" + "=" * 60)
         print("🤖 AUTOMATED TEST REPORT")
@@ -557,7 +556,7 @@ def main():
     # Return exit code based on critical issues
     if report["crashes"] > 0:
         return 1
-    elif report["visual_bugs"] > 5 or report["performance_issues"] > 10:
+    if report["visual_bugs"] > 5 or report["performance_issues"] > 10:
         return 2
     return 0
 

@@ -37,7 +37,7 @@ poetry run python tools/check_assets.py
 ls -la assets/audio/music/*.ogg
 ls -la assets/audio/sfx/*.ogg
 
-# Check character sprites  
+# Check character sprites
 ls -la assets/images/characters/
 ```
 
@@ -48,7 +48,7 @@ ls -la assets/images/characters/
 # Expected structure:
 assets/images/characters/
 ├── danger.png          # Main sprite sheet
-├── rose.png           
+├── rose.png
 ├── dad_kenney.png
 └── new_sprites/       # Individual animation frames
     ├── danger/
@@ -83,7 +83,7 @@ def validate_sprite_sheet(image_path: str):
 ### Format Compatibility
 ```python
 # Preferred formats:
-# Music: OGG Vorbis (better compression)  
+# Music: OGG Vorbis (better compression)
 # SFX: OGG or WAV (short sounds)
 
 # Check audio format
@@ -123,7 +123,7 @@ BACKGROUNDS = {
 # Ski game objects
 ski_objects = [
     "assets/images/tilesets/ski/tree.png",
-    "assets/images/tilesets/ski/rock.png", 
+    "assets/images/tilesets/ski/rock.png",
     "assets/images/tilesets/ski/snowball.png"
 ]
 

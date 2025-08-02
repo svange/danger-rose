@@ -27,7 +27,7 @@ make clean               # Clean build artifacts
 ```bash
 # Direct scene access
 make run-ski             # Start at ski minigame
-make run-pool            # Start at pool minigame  
+make run-pool            # Start at pool minigame
 make run-vegas           # Start at Vegas minigame
 make run-hub             # Start at hub world
 

@@ -26,7 +26,7 @@ poetry run pytest -k "test_collision"
 pytest -m unit
 
 # Integration tests (multi-component)
-pytest -m integration  
+pytest -m integration
 
 # Visual tests (requires display)
 pytest -m visual
@@ -44,7 +44,7 @@ def test_player_movement():
     player = Player(x=100, y=100)
     player.velocity_x = 5
     player.update(1.0)  # 1 second delta
-    
+
     assert player.x == 105
     assert player.y == 100
 ```
@@ -55,10 +55,10 @@ def test_player_wall_collision():
     """Test player stops at walls"""
     player = Player(x=50, y=50)
     wall = pygame.Rect(100, 0, 20, 200)
-    
+
     player.move_right(dt=1.0)
     player.check_collision(wall)
-    
+
     assert player.x < 100  # Stopped before wall
 ```
 
@@ -68,11 +68,11 @@ def test_door_interaction():
     """Test door takes player to new scene"""
     scene = HubWorld()
     door = scene.doors["ski"]
-    
+
     next_scene = scene.handle_event(
         create_key_event(pygame.K_SPACE)
     )
-    
+
     assert next_scene == "ski_game"
 ```
 
@@ -86,7 +86,7 @@ def mock_display(monkeypatch):
     mock_screen = MagicMock()
     mock_screen.get_size.return_value = (1920, 1080)
     monkeypatch.setattr(
-        "pygame.display.set_mode", 
+        "pygame.display.set_mode",
         lambda *args: mock_screen
     )
     return mock_screen
@@ -98,7 +98,7 @@ def mock_display(monkeypatch):
 def mock_audio(monkeypatch):
     """Disable audio for tests"""
     monkeypatch.setattr(
-        "pygame.mixer.init", 
+        "pygame.mixer.init",
         lambda: None
     )
 ```

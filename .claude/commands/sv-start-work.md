@@ -41,13 +41,13 @@ if [ -n "$(git status --porcelain 2>/dev/null)" ]; then
     echo "1) Save them with a WIP commit"
     echo "2) Stash them"
     echo "3) Keep working with these changes"
-    
+
     # Example for option 1:
     # git add -A && git commit -m "WIP: $WORK_DESC"
-    
+
     # Example for option 2:
     # git stash push -m "WIP: Before starting $WORK_DESC"
-    
+
     # Option 3: Just continue
 fi
 ```
@@ -66,7 +66,7 @@ if [[ "$CURRENT_BRANCH" == "main" ]] || [[ "$CURRENT_BRANCH" == "master" ]]; the
     echo "Options:"
     echo "1) Continue on $CURRENT_BRANCH"
     echo "2) Create a feature branch"
-    
+
     # If creating branch, keep it simple
     if create_branch; then
         # Simple branch name - no conventions required

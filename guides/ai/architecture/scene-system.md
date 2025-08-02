@@ -14,21 +14,21 @@ class Scene(ABC):
     def handle_event(self, event) -> str | None:
         """Process input, return next scene name or None"""
         pass
-    
-    @abstractmethod  
+
+    @abstractmethod
     def update(self, dt: float) -> None:
         """Update game logic with delta time"""
         pass
-    
+
     @abstractmethod
     def draw(self, screen) -> None:
         """Render scene to screen"""
         pass
-    
+
     def on_enter(self, previous_scene: str, data: dict) -> None:
         """Initialize scene with transition data"""
         pass
-        
+
     def on_exit(self) -> dict:
         """Cleanup and return data for next scene"""
         return {}
@@ -49,7 +49,7 @@ class SceneManager:
         }
         self.current_scene = "title"
         self.scene_data = {}
-        
+
     def transition_to(self, scene_name: str, data: dict = None):
         """Handle scene transition with data passing"""
         if scene_name in self.scenes:
@@ -57,10 +57,10 @@ class SceneManager:
             self.scene_data.update(exit_data)
             if data:
                 self.scene_data.update(data)
-                
+
             self.current_scene = scene_name
             self.scenes[scene_name].on_enter(
-                previous_scene, 
+                previous_scene,
                 self.scene_data
             )
 ```
@@ -89,7 +89,7 @@ class SkiGame(Scene):
     def on_enter(self, previous_scene: str, data: dict):
         self.character = data.get("selected_character", "danger")
         self.high_scores = data.get("high_scores", {})
-        
+
     def on_exit(self) -> dict:
         return {
             "last_score": self.score,
@@ -106,14 +106,14 @@ class MenuScene(Scene):
     def __init__(self):
         self.selected_option = 0
         self.options = ["Start", "Settings", "Quit"]
-        
+
     def handle_event(self, event) -> str | None:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_UP:
                 self.selected_option = max(0, self.selected_option - 1)
             elif event.key == pygame.K_DOWN:
                 self.selected_option = min(
-                    len(self.options) - 1, 
+                    len(self.options) - 1,
                     self.selected_option + 1
                 )
             elif event.key == pygame.K_RETURN:
@@ -128,7 +128,7 @@ class GameScene(Scene):
         self.entities = pygame.sprite.Group()
         self.player = None
         self.paused = False
-        
+
     def handle_event(self, event) -> str | None:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
@@ -136,7 +136,7 @@ class GameScene(Scene):
             elif event.key == pygame.K_q and self.paused:
                 return "hub"  # Quit to hub
         return None
-        
+
     def update(self, dt: float):
         if not self.paused:
             self.entities.update(dt)
@@ -149,7 +149,7 @@ class SceneManager:
     def __init__(self):
         self.paused = False
         self.pause_overlay = PauseOverlay()
-        
+
     def handle_event(self, event):
         if self.paused:
             action = self.pause_overlay.handle_event(event)

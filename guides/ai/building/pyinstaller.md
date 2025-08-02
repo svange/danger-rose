@@ -20,7 +20,7 @@ poetry run pyinstaller danger-rose.spec --noconfirm
 - Includes DangerRose.exe + assets folder
 
 ### One-File Version
-```bash  
+```bash
 poetry run pyinstaller danger-rose-onefile.spec --noconfirm
 ```
 - Single executable file
@@ -44,7 +44,7 @@ Required for Pygame to work properly:
 ```python
 hiddenimports=[
     'pygame',
-    'pygame_ce', 
+    'pygame_ce',
     'pygame.locals'
 ]
 ```

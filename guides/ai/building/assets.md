@@ -80,5 +80,5 @@ Game continues with placeholders:
 
 Current asset sizes:
 - Music: ~20MB total
-- Images: ~10MB total  
+- Images: ~10MB total
 - Total build: ~80-120MB depending on platform

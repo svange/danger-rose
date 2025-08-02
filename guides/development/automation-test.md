@@ -34,8 +34,8 @@ We've built a complete serverless API template with:
 
 ---
 
-**Priority**: High (testing critical automation)  
-**Type**: Patch release (safe, no breaking changes)  
+**Priority**: High (testing critical automation)
+**Type**: Patch release (safe, no breaking changes)
 **Timeline**: When convenient for you
 
 Thank you for helping test our enterprise DevOps automation! 🚀

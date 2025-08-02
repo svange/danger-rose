@@ -10,7 +10,7 @@ DEBUG_SHOW_FPS=true make run          # Show FPS counter
 DEBUG_SHOW_HITBOXES=true make run     # Show collision boxes
 DEBUG_SHOW_GRID=true make run         # Show grid overlay
 
-# Scene debugging  
+# Scene debugging
 START_SCENE=ski make run              # Skip to specific scene
 SKIP_TITLE=true make run              # Skip title screen
 
@@ -45,24 +45,24 @@ def draw_debug_info(screen, player, entities):
     """Draw debug overlays for development."""
     if not DEBUG_MODE:
         return
-        
+
     # Player info
     debug_font = pygame.font.Font(None, 24)
-    
+
     # Position and velocity
     pos_text = f"Pos: ({player.x:.1f}, {player.y:.1f})"
     vel_text = f"Vel: ({player.vx:.1f}, {player.vy:.1f})"
-    
+
     screen.blit(debug_font.render(pos_text, True, COLOR_WHITE), (10, 10))
     screen.blit(debug_font.render(vel_text, True, COLOR_WHITE), (10, 35))
-    
+
     # Animation info
     anim_info = player.sprite.get_animation_info()
     screen.blit(debug_font.render(anim_info, True, COLOR_WHITE), (10, 60))
-    
+
     # Collision boxes
     pygame.draw.rect(screen, COLOR_RED, player.rect, 2)
-    
+
     # Entity hitboxes
     for entity in entities:
         pygame.draw.rect(screen, COLOR_YELLOW, entity.rect, 1)
@@ -83,9 +83,9 @@ def check_character_sprites():
     characters = ["danger", "rose", "dad"]
     scenes = ["hub", "ski", "pool", "vegas"]
     animations = ["idle", "walk", "jump", "attack", "hurt", "victory"]
-    
+
     missing_files = []
-    
+
     for character in characters:
         for scene in scenes:
             for animation in animations:
@@ -93,7 +93,7 @@ def check_character_sprites():
                     path = f"assets/images/characters/new_sprites/{character}/{scene}/{animation}_{frame:02d}.png"
                     if not os.path.exists(path):
                         missing_files.append(path)
-    
+
     if missing_files:
         print("Missing sprite files:")
         for file in missing_files[:10]:  # Show first 10
@@ -106,11 +106,11 @@ def load_with_debug(path):
     """Load image with debug logging."""
     if DEBUG_MODE:
         print(f"Loading asset: {path}")
-        
+
     if not os.path.exists(path):
         print(f"WARNING: Missing asset {path}")
         return create_placeholder()
-        
+
     return pygame.image.load(path)
 ```
 
@@ -125,33 +125,33 @@ class PerformanceMonitor:
         self.frame_times = []
         self.update_times = []
         self.draw_times = []
-        
+
     def start_frame(self):
         self.frame_start = time.perf_counter()
-        
+
     def start_update(self):
         self.update_start = time.perf_counter()
-        
+
     def end_update(self):
         self.update_times.append(time.perf_counter() - self.update_start)
-        
+
     def start_draw(self):
         self.draw_start = time.perf_counter()
-        
+
     def end_draw(self):
         self.draw_times.append(time.perf_counter() - self.draw_start)
-        
+
     def end_frame(self):
         self.frame_times.append(time.perf_counter() - self.frame_start)
-        
+
     def get_stats(self):
         if not self.frame_times:
             return "No performance data"
-            
+
         avg_frame = sum(self.frame_times) / len(self.frame_times) * 1000
         avg_update = sum(self.update_times) / len(self.update_times) * 1000
         avg_draw = sum(self.draw_times) / len(self.draw_times) * 1000
-        
+
         return f"Frame: {avg_frame:.2f}ms, Update: {avg_update:.2f}ms, Draw: {avg_draw:.2f}ms"
 
 # Usage in main game loop
@@ -159,19 +159,19 @@ perf = PerformanceMonitor()
 
 while running:
     perf.start_frame()
-    
+
     # Handle events...
-    
+
     perf.start_update()
     scene.update(dt)
     perf.end_update()
-    
+
     perf.start_draw()
     scene.draw(screen)
     perf.end_draw()
-    
+
     perf.end_frame()
-    
+
     # Print stats every 60 frames
     if frame_count % 60 == 0:
         print(perf.get_stats())
@@ -190,15 +190,15 @@ class DebugConsole:
             "spawn_powerup": self.spawn_powerup,
             "teleport": self.teleport_player,
         }
-    
+
     def process_command(self, command_line):
         parts = command_line.split()
         if not parts:
             return
-            
+
         command = parts[0]
         args = parts[1:]
-        
+
         if command in self.commands:
             try:
                 self.commands[command](*args)
@@ -206,15 +206,15 @@ class DebugConsole:
                 print(f"Debug command error: {e}")
         else:
             print(f"Unknown command: {command}")
-    
+
     def give_lives(self, count="1"):
         self.scene.player.lives += int(count)
         print(f"Gave {count} lives. Total: {self.scene.player.lives}")
-        
+
     def set_score(self, score="0"):
         self.scene.score = int(score)
         print(f"Set score to {score}")
-        
+
     def teleport_player(self, x="0", y="0"):
         self.scene.player.x = float(x)
         self.scene.player.y = float(y)
@@ -236,12 +236,12 @@ def debug_save_data():
     """Print save data in readable format."""
     save_manager = SaveManager()
     data = save_manager.load()
-    
+
     print("=== SAVE DATA DEBUG ===")
     print(f"Version: {data.get('version')}")
     print(f"Character: {data.get('player', {}).get('selected_character')}")
     print(f"Settings: {data.get('settings', {})}")
-    
+
     high_scores = data.get('high_scores', {})
     for game, characters in high_scores.items():
         print(f"\n{game.upper()} High Scores:")

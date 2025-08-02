@@ -42,7 +42,7 @@ if character.has_animation("attack"):
 # Animation speeds (seconds per frame)
 animation_speeds = {
     "idle": 0.2,      # Slow idle cycle
-    "walk": 0.1,      # Medium walk cycle  
+    "walk": 0.1,      # Medium walk cycle
     "jump": 0.15,     # Smooth jump
     "attack": 0.05,   # Fast attack
     "hurt": 0.2,      # Brief hurt flash
@@ -53,7 +53,7 @@ animation_speeds = {
 def update(self):
     current_time = time.time()
     speed = self.animation_speeds.get(self.current_animation, 0.1)
-    
+
     if current_time - self.last_frame_time >= speed:
         if self.loop_animation:
             self.current_frame = (self.current_frame + 1) % len(frames)
@@ -72,7 +72,7 @@ animations = load_character_individual_files(
     scale=(128, 128)
 )
 
-# 2. Fallback to sprite sheets  
+# 2. Fallback to sprite sheets
 # assets/images/characters/danger.png
 animations = load_character_animations(sprite_path, scale)
 
@@ -91,22 +91,22 @@ class Player:
             "hub",
             scale=(SPRITE_DISPLAY_SIZE, SPRITE_DISPLAY_SIZE)
         )
-    
+
     def update(self, dt, boundaries):
         # Update animation based on movement
         if self.is_moving():
             self.sprite.set_animation("walk", loop=True)
         else:
             self.sprite.set_animation("idle", loop=True)
-            
+
         self.sprite.update()
-    
+
     def draw(self, screen):
         sprite = self.sprite.get_current_sprite()
-        
+
         # Handle sprite flipping for direction
         if not self.facing_right:
             sprite = pygame.transform.flip(sprite, True, False)
-            
+
         screen.blit(sprite, (self.x, self.y))
 ```

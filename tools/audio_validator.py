@@ -10,22 +10,20 @@ This tool validates audio assets and detects common audio bugs:
 - Music transition problems
 """
 
+import json
 import os
 import sys
-import json
 import wave
-import struct
-from pathlib import Path
-from typing import Dict, List, Tuple, Optional, Set
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from datetime import datetime
+from pathlib import Path
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 import pygame
-from mutagen.oggvorbis import OggVorbis
 from mutagen.mp3 import MP3
+from mutagen.oggvorbis import OggVorbis
 
 # Set dummy audio driver for headless testing
 os.environ["SDL_AUDIODRIVER"] = "dummy"
@@ -39,7 +37,7 @@ class AudioIssue:
     issue_type: str
     description: str
     severity: str = "medium"
-    details: Optional[Dict] = None
+    details: dict | None = None
 
 
 @dataclass
@@ -50,7 +48,7 @@ class AudioPlaybackTest:
     expected_audio: str
     actual_playing: bool
     volume_level: float
-    issues: List[str]
+    issues: list[str]
 
 
 class AudioValidator:
@@ -63,8 +61,8 @@ class AudioValidator:
         self.results_dir = Path("audio_test_results")
         self.results_dir.mkdir(exist_ok=True)
 
-        self.issues: List[AudioIssue] = []
-        self.playback_tests: List[AudioPlaybackTest] = []
+        self.issues: list[AudioIssue] = []
+        self.playback_tests: list[AudioPlaybackTest] = []
 
         # Expected audio files by category
         self.expected_audio = {
@@ -105,7 +103,7 @@ class AudioValidator:
             "noise_floor": -60,  # dB
         }
 
-    def run_validation(self) -> Dict[str, any]:
+    def run_validation(self) -> dict[str, any]:
         """Run complete audio validation suite."""
         print("🔊 Starting audio validation...")
 
@@ -125,7 +123,7 @@ class AudioValidator:
         # Generate report
         return self._generate_report(test_results)
 
-    def _validate_audio_files(self) -> Dict[str, any]:
+    def _validate_audio_files(self) -> dict[str, any]:
         """Validate that all expected audio files exist and are valid."""
         print("\n📁 Validating audio files...")
 
@@ -193,7 +191,7 @@ class AudioValidator:
 
         return results
 
-    def _check_audio_quality(self) -> Dict[str, any]:
+    def _check_audio_quality(self) -> dict[str, any]:
         """Check audio quality metrics."""
         print("\n🎵 Checking audio quality...")
 
@@ -277,7 +275,7 @@ class AudioValidator:
 
         return results
 
-    def _test_audio_playback(self) -> Dict[str, any]:
+    def _test_audio_playback(self) -> dict[str, any]:
         """Test audio playback functionality."""
         print("\n▶️  Testing audio playback...")
 
@@ -371,7 +369,7 @@ class AudioValidator:
 
         return results
 
-    def _test_audio_integration(self) -> Dict[str, any]:
+    def _test_audio_integration(self) -> dict[str, any]:
         """Test audio integration with game systems."""
         print("\n🎮 Testing audio integration...")
 
@@ -447,10 +445,10 @@ class AudioValidator:
             if file_path.suffix.lower() == ".ogg":
                 audio = OggVorbis(str(file_path))
                 return audio.info.length > 0
-            elif file_path.suffix.lower() == ".mp3":
+            if file_path.suffix.lower() == ".mp3":
                 audio = MP3(str(file_path))
                 return audio.info.length > 0
-            elif file_path.suffix.lower() == ".wav":
+            if file_path.suffix.lower() == ".wav":
                 with wave.open(str(file_path), "rb") as wav:
                     return wav.getnframes() > 0
         except Exception as e:
@@ -465,16 +463,16 @@ class AudioValidator:
             return False
         return True
 
-    def _get_audio_duration(self, file_path: Path) -> Optional[float]:
+    def _get_audio_duration(self, file_path: Path) -> float | None:
         """Get audio file duration in seconds."""
         try:
             if file_path.suffix.lower() == ".ogg":
                 audio = OggVorbis(str(file_path))
                 return audio.info.length
-            elif file_path.suffix.lower() == ".mp3":
+            if file_path.suffix.lower() == ".mp3":
                 audio = MP3(str(file_path))
                 return audio.info.length
-            elif file_path.suffix.lower() == ".wav":
+            if file_path.suffix.lower() == ".wav":
                 with wave.open(str(file_path), "rb") as wav:
                     frames = wav.getnframes()
                     rate = wav.getframerate()
@@ -482,13 +480,13 @@ class AudioValidator:
         except Exception:
             return None
 
-    def _get_bitrate(self, file_path: Path) -> Optional[int]:
+    def _get_bitrate(self, file_path: Path) -> int | None:
         """Get audio file bitrate."""
         try:
             if file_path.suffix.lower() == ".ogg":
                 audio = OggVorbis(str(file_path))
                 return audio.info.bitrate
-            elif file_path.suffix.lower() == ".mp3":
+            if file_path.suffix.lower() == ".mp3":
                 audio = MP3(str(file_path))
                 return audio.info.bitrate
         except Exception:
@@ -505,7 +503,7 @@ class AudioValidator:
         except Exception:
             return False
 
-    def _get_average_volume(self, file_path: Path) -> Optional[float]:
+    def _get_average_volume(self, file_path: Path) -> float | None:
         """Get average volume level (0.0 to 1.0)."""
         # Simplified - returns a mock value
         # Real implementation would analyze audio samples
@@ -517,14 +515,14 @@ class AudioValidator:
         # Real implementation would analyze audio samples
         return 0.05
 
-    def _get_expected_specs(self, filename: str) -> Optional[Dict]:
+    def _get_expected_specs(self, filename: str) -> dict | None:
         """Get expected specifications for an audio file."""
         for category, files in self.expected_audio.items():
             if filename in files:
                 return files[filename]
         return None
 
-    def _generate_report(self, test_results: Dict[str, any]) -> Dict[str, any]:
+    def _generate_report(self, test_results: dict[str, any]) -> dict[str, any]:
         """Generate audio validation report."""
         report = {
             "timestamp": datetime.now().isoformat(),
@@ -548,14 +546,14 @@ class AudioValidator:
 
         return report
 
-    def _categorize_issues(self) -> Dict[str, int]:
+    def _categorize_issues(self) -> dict[str, int]:
         """Categorize issues by type."""
         categories = {}
         for issue in self.issues:
             categories[issue.issue_type] = categories.get(issue.issue_type, 0) + 1
         return categories
 
-    def _print_summary(self, report: Dict[str, any]) -> None:
+    def _print_summary(self, report: dict[str, any]) -> None:
         """Print validation summary."""
         print("\n" + "=" * 60)
         print("🔊 AUDIO VALIDATION REPORT")
@@ -603,7 +601,7 @@ def main():
     # Return exit code based on critical issues
     if report["critical_issues"] > 0:
         return 1
-    elif report["total_issues"] > 10:
+    if report["total_issues"] > 10:
         return 2
     return 0
 

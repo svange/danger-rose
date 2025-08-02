@@ -223,10 +223,10 @@ class HubWorld:
 
     def on_enter(self, previous_scene: str | None, data: dict[str, Any]) -> None:
         """Called when entering the hub world."""
-        # Update selected character if coming from character select
-        if previous_scene == "character_select" and data.get("selected_character"):
-            self.selected_character = data["selected_character"]
-            self.scene_manager.game_data["selected_character"] = self.selected_character
+        # Update selected character from scene manager (handles both fresh selections and saves)
+        current_character = self.scene_manager.game_data.get("selected_character")
+        if current_character and current_character != self.selected_character:
+            self.selected_character = current_character
 
             # Recreate player with new character
             self.player = Player(

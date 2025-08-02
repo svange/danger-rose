@@ -103,9 +103,12 @@ class SceneManager:
 
             # Handle scene transitions
             if result == "start_game":
-                self.game_data["selected_character"] = (
-                    self.current_scene.selected_character
-                )
+                # Always prioritize newly selected character over saved data
+                new_character = self.current_scene.selected_character
+                if new_character:
+                    self.game_data["selected_character"] = new_character
+                    # Update save data immediately to persist the selection
+                    self.save_manager.set_selected_character(new_character)
                 # Transition to hub world
                 self.switch_scene(SCENE_HUB_WORLD)
             elif result == "vegas":

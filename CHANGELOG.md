@@ -1,3 +1,18 @@
+# [1.11.0](https://github.com/svange/danger-rose/compare/v1.10.0...v1.11.0) (2025-08-02)
+
+
+### Bug Fixes
+
+* apply pre-commit formatting fixes for CI ([9d01860](https://github.com/svange/danger-rose/commit/9d01860bf3f1a9a1cc5b9d92a3af7250ec742ba1))
+* ensure newline at end of file in BRANCH_CLEANUP.md ([90219d4](https://github.com/svange/danger-rose/commit/90219d4e6a8cc14b30c1799fd24ce0d8f6effaa8))
+* resolve CI failures - ruff linting errors and character selection bug ([f686592](https://github.com/svange/danger-rose/commit/f686592f94e46250daf2c14ac151cb8a388e7cfd)), closes [#100](https://github.com/svange/danger-rose/issues/100)
+* use GH_TOKEN for semantic-release to bypass repository rulesets ([#72](https://github.com/svange/danger-rose/issues/72)) ([b732166](https://github.com/svange/danger-rose/commit/b732166bc3e279b653afecd15a18a056dcf64cde))
+
+
+### Features
+
+* implement comprehensive automated testing suite for Danger Rose ([fcb3ed0](https://github.com/svange/danger-rose/commit/fcb3ed0d6167a6327ccfe64a33eca5fe1d6680fd))
+
 # [1.10.0](https://github.com/svange/danger-rose/compare/v1.9.0...v1.10.0) (2025-08-01)
 
 

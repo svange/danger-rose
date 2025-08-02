@@ -6,6 +6,9 @@ This file provides comprehensive guidance to Claude Code (claude.ai/code) for de
 
 **Danger Rose** is a family-friendly Pygame project designed for collaborative development between parents and kids. Players control family members (Danger, Rose, and Dad) through a cozy apartment hub world and three exciting minigames.
 
+## 📚 Additional Context
+For detailed technical guides and patterns, see [LINKS.md](./LINKS.md) which provides AI-optimized documentation navigation. Load only the specific guides you need for your current task.
+
 ### Current Status
 - ✅ Title screen with character selection
 - ✅ Animation system for sprites
@@ -148,12 +151,35 @@ def test_player_collision():
 
 ## 🛠️ Development Workflow
 
-### Starting a New Feature
-1. **Pick an Issue**: Check GitHub issues by priority
-2. **Create Branch**: `git checkout -b feat/issue-N-description`
-3. **Use AI Agents**: `/sprite-expert` for sprites, `/game-mechanics` for gameplay
-4. **Test First**: Write tests before implementation
-5. **Check Quality**: `make check` before committing
+### Simple & Fun Workflow for Game Development
+
+Work however feels natural! No rigid rules here.
+
+#### Easy Three-Step Process:
+1. **Choose Work**: `/sv-choose-what-to-work-on` - Pick what sounds fun
+2. **Start Coding**: `/sv-start-work` - Begin immediately 
+3. **Ship It**: `/sv-ship` - Share your progress
+
+#### Flexible Work Options:
+- Work on an issue: `/sv-choose-what-to-work-on 24`
+- Fix something: `/sv-choose-what-to-work-on fix the jumping bug`
+- Add new feature: `/sv-choose-what-to-work-on add particle effects`
+- Just explore: `/sv-choose-what-to-work-on experiment with physics`
+
+#### Branch Freedom:
+- Work on main? That's fine for quick fixes!
+- Want a branch? Create one with any name you like
+- No naming conventions required
+- Focus on making the game fun!
+
+#### Commit Casually:
+Write messages that make sense to you:
+- "Add cool explosion effect"
+- "Fix that annoying jump bug"
+- "Make boss harder"
+- "Save progress on new level"
+
+No format requirements - just describe what you did!
 
 ### Common Tasks
 
@@ -221,13 +247,19 @@ make profile
 3. **Pause Menu** (#24): In-game menu system
 4. **High Scores** (#25): Leaderboard tracking
 
-## 📋 Issue Guidelines
+## 📋 Working with Issues (Optional!)
 
-### Working on Issues
-1. **Assign Yourself**: Comment on the issue
-2. **Ask Questions**: Clarify requirements
-3. **Update Progress**: Regular status updates
-4. **Link PR**: Reference issue in PR
+### Issues are Just Ideas
+- See something cool to work on? Go for it!
+- Don't need to follow issues - work on what excites you
+- Comment if you want, or just surprise everyone
+- No formal process required
+
+### Or Work Without Issues
+- Have a cool idea? Just start coding!
+- Found a bug while playing? Fix it!
+- Want to experiment? Do it!
+- Issues are optional, fun is mandatory!
 
 ### Creating New Issues
 - Use templates in `.github/ISSUE_TEMPLATE/`

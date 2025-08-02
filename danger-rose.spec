@@ -19,7 +19,7 @@ a = Analysis(
     ],
     hiddenimports=[
         'pygame',
-        'pygame_ce',
+        'pygame_ce',2
         'pygame.locals',
     ],
     hookspath=[],

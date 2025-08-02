@@ -27,7 +27,9 @@ help: ## Show this help message
 	@echo "  make test         Run unit tests"
 	@echo "  make test-game    Run game tests only"
 	@echo "  make test-all     Run all tests including integration"
-	@echo "  make test-visual  Run visual debug tools"
+	@echo "  make test-visual  Run visual regression tests"
+	@echo "  make test-audio   Run audio validation tests"
+	@echo "  make test-auto    Run automated bug detection"
 	@echo "  make coverage     Run tests with coverage report"
 	@echo "  make check        Run all checks (lint + test)"
 	@echo ""
@@ -186,10 +188,22 @@ audio-check: ## Check current audio file quality
 	@ls -lh assets/audio/sfx/*.ogg 2>/dev/null || echo "No SFX files found"
 
 .PHONY: test-visual
-test-visual: ## Run visual debug tools
-	@echo "👁️ Running visual tests..."
-	poetry run python tools/visual/test_sprite_cutting.py
-	@echo "Check test-artifacts/ directory for results"
+test-visual: ## Run visual regression tests
+	@echo "👁️ Running visual regression tests..."
+	poetry run python tools/visual_regression_tester.py
+	@echo "Check visual_test_results/ for reports"
+
+.PHONY: test-audio
+test-audio: ## Run audio validation tests
+	@echo "🔊 Running audio validation..."
+	poetry run python tools/audio_validator.py
+	@echo "Check audio_test_results/ for reports"
+
+.PHONY: test-auto
+test-auto: ## Run automated bug detection (quick 30s test)
+	@echo "🤖 Running automated bug detection..."
+	poetry run python tools/automated_game_tester.py
+	@echo "Check test_results/ for bug reports"
 
 .PHONY: sprites
 sprites: ## Generate sprite test output

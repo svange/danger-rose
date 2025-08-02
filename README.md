@@ -5,9 +5,29 @@
 
   **A cozy family game with endless minigame adventures**
 
+  <!-- Build & Release -->
+  [![CI/CD](https://github.com/svange/danger-rose/workflows/CI/CD%20Pipeline/badge.svg)](https://github.com/svange/danger-rose/actions)
+  [![Release](https://img.shields.io/github/v/release/svange/danger-rose?include_prereleases)](https://github.com/svange/danger-rose/releases)
+  [![Downloads](https://img.shields.io/github/downloads/svange/danger-rose/total)](https://github.com/svange/danger-rose/releases)
+  
+  <!-- Code Quality -->
   [![Python](https://img.shields.io/badge/Python-3.12%2B-blue.svg)](https://www.python.org/downloads/)
-  [![Pygame](https://img.shields.io/badge/Pygame--CE-2.4%2B-green.svg)](https://pyga.me/)
-  [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+  [![Code style: Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+  [![Coverage](https://img.shields.io/badge/coverage-55%25-yellow.svg)](https://github.com/svange/danger-rose)
+  
+  <!-- Tech Stack -->
+  [![Pygame-CE](https://img.shields.io/badge/Pygame--CE-2.5.5-green.svg)](https://pyga.me/)
+  [![Poetry](https://img.shields.io/endpoint?url=https://python-poetry.org/badge/v0.json)](https://python-poetry.org/)
+  [![PyInstaller](https://img.shields.io/badge/PyInstaller-6.0-orange.svg)](https://www.pyinstaller.org/)
+  
+  <!-- Project Info -->
+  [![License](https://img.shields.io/github/license/svange/danger-rose)](LICENSE)
+  [![Issues](https://img.shields.io/github/issues/svange/danger-rose)](https://github.com/svange/danger-rose/issues)
+  [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](guides/setup/contributing.md)
+  
+  <!-- Activity -->
+  [![Last Commit](https://img.shields.io/github/last-commit/svange/danger-rose)](https://github.com/svange/danger-rose/commits/main)
+  [![Contributors](https://img.shields.io/github/contributors/svange/danger-rose)](https://github.com/svange/danger-rose/graphs/contributors)
 </div>
 
 ## 🏠 About
@@ -81,6 +101,30 @@ make claude       # Start Claude Code for AI pair programming
 ```
 
 See our [development guides](./guides/) for more details.
+
+## 🛠️ Tech Stack
+
+<div align="center">
+
+| Category | Technology | Version |
+|----------|------------|---------|
+| **Language** | ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white) | 3.12+ |
+| **Game Engine** | ![Pygame](https://img.shields.io/badge/Pygame--CE-00AA00?style=for-the-badge&logo=python&logoColor=white) | 2.5.5 |
+| **Package Manager** | ![Poetry](https://img.shields.io/badge/Poetry-60A5FA?style=for-the-badge&logo=poetry&logoColor=white) | Latest |
+| **Linting** | ![Ruff](https://img.shields.io/badge/Ruff-FCC21B?style=for-the-badge&logo=ruff&logoColor=black) | Latest |
+| **Testing** | ![Pytest](https://img.shields.io/badge/Pytest-0A9EDC?style=for-the-badge&logo=pytest&logoColor=white) | Latest |
+| **CI/CD** | ![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=github-actions&logoColor=white) | - |
+| **Distribution** | ![PyInstaller](https://img.shields.io/badge/PyInstaller-FF6600?style=for-the-badge&logo=python&logoColor=white) | 6.0 |
+
+</div>
+
+### Key Features
+- 🎮 **Cross-platform** - Runs on Windows, macOS, and Linux
+- 🚀 **Fast Development** - Hot reload and debug mode
+- 🧪 **Well Tested** - Comprehensive test suite with mocks
+- 📦 **Easy Distribution** - Single executable files
+- 🤖 **AI-Friendly** - Extensive documentation for Claude Code
+- 🎨 **Asset Pipeline** - Automatic placeholder generation
 
 ## 🤝 Contributing
 
